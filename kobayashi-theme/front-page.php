@@ -17,16 +17,20 @@ get_header();
 			</div>
 		</div>
 		<div class="hero-visual" aria-hidden="true">
-			<svg viewBox="0 0 400 360" xmlns="http://www.w3.org/2000/svg">
+			<?php /* 波アニメーション＋クリックでポイント追加は assets/main.js（#heroNet）が制御 */ ?>
+			<svg id="heroNet" viewBox="0 0 400 360" xmlns="http://www.w3.org/2000/svg">
 				<defs><linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#C22740"/><stop offset="1" stop-color="#84192A"/></linearGradient></defs>
-				<g fill="none" stroke="#84192A" stroke-opacity=".14" stroke-width="1.2">
+				<g id="heroWaves" fill="none" stroke="#84192A" stroke-opacity=".14" stroke-width="1.2">
 					<path d="M0 60 C 120 20, 280 100, 400 60"/><path d="M0 120 C 120 80, 280 160, 400 120"/><path d="M0 180 C 120 140, 280 220, 400 180"/><path d="M0 240 C 120 200, 280 280, 400 240"/><path d="M0 300 C 120 260, 280 340, 400 300"/>
 					<path d="M60 0 C 20 120, 100 240, 60 360"/><path d="M140 0 C 100 120, 180 240, 140 360"/><path d="M220 0 C 180 120, 260 240, 220 360"/><path d="M300 0 C 260 120, 340 240, 300 360"/>
 				</g>
-				<g>
-					<circle cx="140" cy="118" r="7" fill="url(#lg1)"/><circle cx="300" cy="180" r="10" fill="#C22740"/><circle cx="220" cy="240" r="5" fill="#84192A"/><circle cx="80" cy="260" r="6" fill="#C22740" fill-opacity=".55"/><circle cx="330" cy="80" r="4" fill="#84192A" fill-opacity=".5"/>
+				<g id="heroLinks">
 					<path d="M140 118 L300 180 L220 240 L80 260" stroke="#C22740" stroke-width="1.6" stroke-opacity=".5" fill="none"/>
 				</g>
+				<g id="heroDots">
+					<circle cx="140" cy="118" r="7" fill="url(#lg1)"/><circle cx="300" cy="180" r="10" fill="#C22740"/><circle cx="220" cy="240" r="5" fill="#84192A"/><circle cx="80" cy="260" r="6" fill="#C22740" fill-opacity=".55"/><circle cx="330" cy="80" r="4" fill="#84192A" fill-opacity=".5"/>
+				</g>
+				<circle id="heroCursor" r="6" fill="#C22740" fill-opacity=".3" style="display:none"/>
 			</svg>
 		</div>
 	</div>
