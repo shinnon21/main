@@ -7,14 +7,6 @@
 </head>
 <body <?php body_class(); ?>>
 
-<div class="utility">
-	<div class="container">
-		<span class="date en" id="today"></span>
-		<a href="<?php echo esc_url( home_url( '/searches/' ) ); ?>">条件から探す</a>
-		<a href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">お問い合わせ</a>
-	</div>
-</div>
-
 <header class="site">
 	<div class="container">
 		<a class="logo" href="<?php echo esc_url( home_url( '/' ) ); ?>">
