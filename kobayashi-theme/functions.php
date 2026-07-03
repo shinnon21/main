@@ -9,6 +9,9 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 /* ---------- ACFフィールドグループ（コード登録・導入手順§4） ---------- */
 require_once get_template_directory() . '/inc/acf-fields.php';
 
+/* ---------- SEO（description/OGPフォールバック＋JSON-LD） ---------- */
+require_once get_template_directory() . '/inc/seo.php';
+
 /* ---------- テーマ基本設定 ---------- */
 add_action( 'after_setup_theme', function () {
 	add_theme_support( 'title-tag' );
@@ -177,6 +180,9 @@ function kb_breadcrumbs() {
 		echo $sep . '<span>' . esc_html( get_the_title() ) . '</span>';
 	} elseif ( is_post_type_archive() ) {
 		echo $sep . '<span>' . esc_html( post_type_archive_title( '', false ) ) . '</span>';
+	} elseif ( is_tax( 'works_type' ) ) {
+		echo $sep . '<a href="' . esc_url( get_post_type_archive_link( 'works' ) ) . '">実績</a>';
+		echo $sep . '<span>' . esc_html( single_term_title( '', false ) ) . '</span>';
 	} elseif ( is_tax() || is_tag() || is_category() ) {
 		echo $sep . '<span>' . esc_html( single_term_title( '', false ) ) . '</span>';
 	} elseif ( is_page() ) {
@@ -208,13 +214,20 @@ function kb_type_badge() {
 	}
 }
 
-/* ---------- スキルタグチップ ---------- */
-function kb_skill_chips( $limit = 3 ) {
+/* ---------- スキルタグチップ ----------
+   カード全体が <a> のコンテキストでは $linked = false を指定すること。
+   <a> の入れ子はHTMLパーサーが外側のリンクを分割し、カードの
+   .thumb / .body がグリッドの別セルに割れてレイアウトが崩壊する */
+function kb_skill_chips( $limit = 3, $linked = true ) {
 	$terms = get_the_terms( get_the_ID(), 'skill' );
 	if ( ! $terms || is_wp_error( $terms ) ) { return; }
 	echo '<div class="tags">';
 	foreach ( array_slice( $terms, 0, $limit ) as $t ) {
-		echo '<a class="chip" href="' . esc_url( get_term_link( $t ) ) . '"># ' . esc_html( $t->name ) . '</a>';
+		if ( $linked ) {
+			echo '<a class="chip" href="' . esc_url( get_term_link( $t ) ) . '"># ' . esc_html( $t->name ) . '</a>';
+		} else {
+			echo '<span class="chip"># ' . esc_html( $t->name ) . '</span>';
+		}
 	}
 	echo '</div>';
 }

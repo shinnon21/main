@@ -29,7 +29,7 @@ while ( have_posts() ) : the_post();
 			<table class="spec">
 				<?php if ( $client ) : ?><tr><th>クライアント</th><td><?php echo esc_html( $client ); ?></td></tr><?php endif; ?>
 				<?php if ( $inds && ! is_wp_error( $inds ) ) : ?><tr><th>業界</th><td><?php echo esc_html( implode( '／', wp_list_pluck( $inds, 'name' ) ) ); ?></td></tr><?php endif; ?>
-				<tr><th>期間</th><td><?php kb_works_period(); ?></td></tr>
+				<?php if ( kb_field( 'period_start' ) ) : ?><tr><th>期間</th><td><?php kb_works_period(); ?></td></tr><?php endif; ?>
 				<?php if ( $role ) : ?><tr><th>役割</th><td><?php echo esc_html( $role ); ?></td></tr><?php endif; ?>
 				<?php if ( $scope ) : ?><tr><th>担当範囲</th><td><?php echo esc_html( is_array( $scope ) ? implode( '／', $scope ) : $scope ); ?></td></tr><?php endif; ?>
 				<?php if ( $tech ) : ?><tr><th>使用技術</th><td><?php echo esc_html( $tech ); ?></td></tr><?php endif; ?>

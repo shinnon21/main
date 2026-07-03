@@ -71,7 +71,7 @@ if ( $featured->have_posts() ) : ?>
 						<div class="meta"><?php kb_type_badge(); ?><?php kb_works_period(); ?></div>
 						<h3><?php the_title(); ?></h3>
 						<?php if ( has_excerpt() ) : ?><p class="desc"><?php echo esc_html( get_the_excerpt() ); ?></p><?php endif; ?>
-						<?php kb_skill_chips( 3 ); ?>
+						<?php kb_skill_chips( 3, false ); ?>
 					</div>
 				</a>
 				<div class="f-side">

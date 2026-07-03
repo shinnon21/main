@@ -19,7 +19,9 @@ $did    = isset( $_GET['kw'] ) || isset( $_GET['types'] ) || isset( $_GET['skill
 $all_skills = get_terms( array( 'taxonomy' => 'skill', 'hide_empty' => true ) );
 if ( is_wp_error( $all_skills ) ) { $all_skills = array(); }
 $months = array();
-for ( $i = 0; $i < 48; $i++ ) { $months[] = gmdate( 'Y-m', strtotime( "-{$i} month" ) ); }
+/* 月初を起点に遡る（31日など月末に実行すると相対指定が翌月へ繰り上がり月が重複・欠落するため） */
+$base = gmdate( 'Y-m-01' );
+for ( $i = 0; $i < 48; $i++ ) { $months[] = gmdate( 'Y-m', strtotime( "{$base} -{$i} month" ) ); }
 ?>
 <div class="sec">
 	<div class="container">
