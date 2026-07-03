@@ -1,0 +1,43 @@
+name: Deploy theme to production
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "kobayashi-theme/**"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H 35.189.147.122 >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Rsync theme to VM
+        run: |
+          rsync -az --delete \
+            -e "ssh -i ~/.ssh/deploy_key" \
+            kobayashi-theme/ deployer@35.189.147.122:/home/deployer/theme-incoming/
+
+      - name: Apply theme (restricted sudo)
+        run: |
+          ssh -i ~/.ssh/deploy_key deployer@35.189.147.122 \
+            "sudo /usr/local/bin/kb-deploy-theme.sh"
+
+      - name: Smoke test
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 https://shinnosuke-kobayashi.jp/)
+          echo "front page: $code"
+          [ "$code" = "200" ] || exit 1
