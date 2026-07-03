@@ -14,7 +14,7 @@
 
 | パス | 内容 |
 |---|---|
-| `kobayashi-theme/` | WordPressオリジナルテーマ v1.2（**主要成果物・ブランド反映済み**。works_type 404修正＋ACFコード登録 `inc/acf-fields.php` 追加） |
+| `kobayashi-theme/` | WordPressオリジナルテーマ v1.3（**主要成果物・ブランド反映済み**。works_type 404修正＋ACFコード登録 `inc/acf-fields.php`＋SEO出力 `inc/seo.php`。v1.3でカード内のアンカー入れ子によるレイアウト崩壊を修正） |
 | `kobayashi-theme.zip` | 上記のインストール用zip（35ファイル） |
 | `サイト設計書_小林慎之助.md` | 要件・IA・画面設計・コンテンツモデル・機能要件（正本） |
 | `WordPress導入手順.md` | セットアップ〜GCP公開手順 |
@@ -23,7 +23,7 @@
 | `brand-assets/` | ブランドガイド原本（ロゴSVG/PNG・カラーCSS） |
 | `小林慎之助_ポートフォリオ.md` | 実績・経歴の元データ（入稿コンテンツのソース） |
 | `Shinnosuke_Face.png` | プロフィール顔写真（シードがprofileページのアイキャッチに自動設定） |
-| `deploy/` | GCPデプロイ一式（`gcp-deploy.sh`→`gcp-ssl.sh`の2段階。`seed-content.php`は入稿シード・ローカルE2E検証済み） |
+| `deploy/` | GCPデプロイ一式（`gcp-deploy.sh`→`gcp-ssl.sh`の2段階。`seed-content.php`は入稿シード・ローカルE2E検証済み。`seed-pages.php`はAbout/プライバシーポリシー本文の投入用＝**本番で `wp eval-file deploy/seed-pages.php` の実行が必要**） |
 
 ## デザイントークン（ブランドガイド準拠・変更禁止）
 
@@ -53,8 +53,11 @@
 3. ~~コンテンツ入稿~~ ✅ 完了（ローカル）: 実績7件・DL資料下書きを入稿済み。プロフィールはテンプレート直書き。**本番環境には別途同じ入稿が必要**（職務経歴書PDFは未支給のままDL資料は下書き）
 4. ~~実績のアイキャッチ画像~~ → **ユーザーが実装後にWP管理画面から差し込む方針に決定**（グラデーション代替が有効なため未設定でも成立）
 5. ~~GCPデプロイ~~ ✅ 完了（2026-07-04）: https://shinnosuke-kobayashi.jp/ 公開・全ページ検証済み。デプロイ中に発見・修正した2件（wp-cliが.htaccessを書けない→明示生成、443ファイアウォールのタグtypo）はスクリプトに反映済み
-6. 運用設定（残り）: SEO SIMPLE PACKでOGP設定、GA4/GTM設置、SiteGuardログインURL変更、BackWPupスケジュール、GCEスナップショット週次、実績アイキャッチ画像の差し込み（ユーザーがWP管理画面から）
-7. Phase 2候補: 登壇イベントCPT有効化、スキル辞典、構造化データ強化（Person/Article JSON-LD）
+6. ~~カードレイアウト崩壊（余白がおかしい）の修正~~ ✅ 完了（2026-07-03, v1.3）: カード`<a>`内に `kb_skill_chips()` が `<a class="chip">` を出力しアンカーが入れ子 → HTMLパーサーが外側リンクを分割し `.thumb`/`.body` がグリッドの別セルに割れていた。カード内チップを `<span>` 化（`kb_skill_chips( n, false )`）して解消。デザインカンプも `<span class="chip">` が正
+7. ~~OGP・構造化データ~~ ✅ 完了（v1.3）: `inc/seo.php` で meta description／OGP／Twitterカードをフォールバック出力（SEO SIMPLE PACK等の有効時は自動で出力停止）＋ Person／Article JSON-LD
+8. **本番作業（残り）**: `wp eval-file deploy/seed-pages.php` でAbout・プライバシーポリシー本文を投入（フッター・CF7同意文からリンクされているが本文が空のまま）
+9. 運用設定（残り）: GA4/GTM設置、SiteGuardログインURL変更、BackWPupスケジュール、GCEスナップショット週次、実績アイキャッチ画像の差し込み（ユーザーがWP管理画面から）
+10. Phase 2候補: 登壇イベントCPT有効化、スキル辞典
 
 ## リポジトリ・CI/CD（2026-07-04〜）
 

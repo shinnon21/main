@@ -7,6 +7,6 @@
 			<span class="badge accent" style="font-size:10px"><?php echo esc_html( get_post_type_object( get_post_type() )->labels->singular_name ); ?></span>
 		</div>
 		<h3><?php the_title(); ?></h3>
-		<?php kb_skill_chips( 3 ); ?>
+		<?php kb_skill_chips( 3, false ); ?>
 	</div>
 </a>
