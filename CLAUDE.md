@@ -14,7 +14,7 @@
 
 | パス | 内容 |
 |---|---|
-| `kobayashi-theme/` | WordPressオリジナルテーマ v1.3（**主要成果物・ブランド反映済み**。works_type 404修正＋ACFコード登録 `inc/acf-fields.php`＋SEO出力 `inc/seo.php`。v1.3でカード内のアンカー入れ子によるレイアウト崩壊を修正） |
+| `kobayashi-theme/` | WordPressオリジナルテーマ v1.5（**主要成果物・ブランド反映済み**。works_type 404修正＋ACFコード登録 `inc/acf-fields.php`＋SEO出力 `inc/seo.php`。v1.3: カード内アンカー入れ子によるレイアウト崩壊修正／v1.4: ユーティリティバー削除・ヒーロー波アニメ＋クリックでポイント／v1.5: アバター顔写真化 `kb_avatar()`・格子拡大・CF7スタイリング `page-contact.php`・ロゴ44px＋文字サイズ一括アップ） |
 | `kobayashi-theme.zip` | 上記のインストール用zip（35ファイル） |
 | `サイト設計書_小林慎之助.md` | 要件・IA・画面設計・コンテンツモデル・機能要件（正本） |
 | `WordPress導入手順.md` | セットアップ〜GCP公開手順 |
@@ -22,8 +22,9 @@
 | `ワイヤーフレーム_小林慎之助.html` | 全7画面のワイヤー（タブ切替） |
 | `brand-assets/` | ブランドガイド原本（ロゴSVG/PNG・カラーCSS） |
 | `小林慎之助_ポートフォリオ.md` | 実績・経歴の元データ（入稿コンテンツのソース） |
-| `Shinnosuke_Face.png` | プロフィール顔写真（シードがprofileページのアイキャッチに自動設定） |
-| `deploy/` | GCPデプロイ一式（`gcp-deploy.sh`→`gcp-ssl.sh`の2段階。`seed-content.php`は入稿シード・ローカルE2E検証済み。`seed-pages.php`はAbout/プライバシーポリシー本文の投入用＝**本番で `wp eval-file deploy/seed-pages.php` の実行が必要**） |
+| `Shinnosuke_Face.png` | プロフィール顔写真（シードがprofileページのアイキャッチに自動設定。`kb_avatar()` がトップ/著者欄でも流用） |
+| `Cloudflare導入手順.md` | Cloudflare導入によるセキュリティ強化手順（DNS切替・SSL Full(strict)・WAF・レート制限・mod_remoteip・オリジン遮断。**未実施**＝ユーザーのCloudflare/レジストラ操作が必要） |
+| `deploy/` | GCPデプロイ一式（`gcp-deploy.sh`→`gcp-ssl.sh`の2段階。`seed-content.php`は入稿シード・ローカルE2E検証済み。`seed-pages.php`はAbout/プライバシーポリシー本文の投入用＝本番実行済み 2026-07-03） |
 
 ## デザイントークン（ブランドガイド準拠・変更禁止）
 
@@ -55,9 +56,10 @@
 5. ~~GCPデプロイ~~ ✅ 完了（2026-07-04）: https://shinnosuke-kobayashi.jp/ 公開・全ページ検証済み。デプロイ中に発見・修正した2件（wp-cliが.htaccessを書けない→明示生成、443ファイアウォールのタグtypo）はスクリプトに反映済み
 6. ~~カードレイアウト崩壊（余白がおかしい）の修正~~ ✅ 完了（2026-07-03, v1.3）: カード`<a>`内に `kb_skill_chips()` が `<a class="chip">` を出力しアンカーが入れ子 → HTMLパーサーが外側リンクを分割し `.thumb`/`.body` がグリッドの別セルに割れていた。カード内チップを `<span>` 化（`kb_skill_chips( n, false )`）して解消。デザインカンプも `<span class="chip">` が正
 7. ~~OGP・構造化データ~~ ✅ 完了（v1.3）: `inc/seo.php` で meta description／OGP／Twitterカードをフォールバック出力（SEO SIMPLE PACK等の有効時は自動で出力停止）＋ Person／Article JSON-LD
-8. **本番作業（残り）**: `wp eval-file deploy/seed-pages.php` でAbout・プライバシーポリシー本文を投入（フッター・CF7同意文からリンクされているが本文が空のまま）
+8. ~~About・プライバシーポリシー本文の投入~~ ✅ 完了（2026-07-03）: 本番VMで `wp eval-file seed-pages.php` 実行済み（raw.githubusercontent.comから取得して実行する手順で対応）
 9. 運用設定（残り）: GA4/GTM設置、SiteGuardログインURL変更、BackWPupスケジュール、GCEスナップショット週次、実績アイキャッチ画像の差し込み（ユーザーがWP管理画面から）
-10. Phase 2候補: 登壇イベントCPT有効化、スキル辞典
+10. Cloudflare導入（`Cloudflare導入手順.md` 作成済み・実施待ち）: DNS切替とダッシュボード設定はユーザー操作。VM側の mod_remoteip／オリジン遮断コマンドは手順書§5参照
+11. Phase 2候補: 登壇イベントCPT有効化、スキル辞典
 
 ## リポジトリ・CI/CD（2026-07-04〜）
 

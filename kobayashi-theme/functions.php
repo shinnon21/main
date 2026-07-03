@@ -27,7 +27,7 @@ add_action( 'after_setup_theme', function () {
 add_action( 'wp_enqueue_scripts', function () {
 	wp_enqueue_style( 'kb-fonts', 'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap', array(), null );
 	wp_enqueue_style( 'kb-style', get_stylesheet_uri(), array( 'kb-fonts' ), wp_get_theme()->get( 'Version' ) );
-	wp_enqueue_script( 'kb-main', get_template_directory_uri() . '/assets/main.js', array(), '1.0.0', true );
+	wp_enqueue_script( 'kb-main', get_template_directory_uri() . '/assets/main.js', array(), wp_get_theme()->get( 'Version' ), true );
 } );
 
 /* ---------- ファビコン（Shinnosuke.svg 由来の最適化PNG） ---------- */
@@ -204,6 +204,19 @@ function kb_thumb( $class = 'thumb' ) {
 		the_post_thumbnail( 'medium_large' );
 	}
 	echo '<span class="ph-label">' . esc_html( $label ) . '</span></div>';
+}
+
+/* ---------- プロフィール写真アバター ----------
+   profileページのアイキャッチを全箇所で流用（未設定時はイニシャル代替） */
+function kb_avatar() {
+	$profile = get_page_by_path( 'profile' );
+	echo '<div class="avatar">';
+	if ( $profile && has_post_thumbnail( $profile->ID ) ) {
+		echo get_the_post_thumbnail( $profile->ID, 'medium', array( 'alt' => get_bloginfo( 'name' ) ) );
+	} else {
+		echo '<span class="init">SK</span>';
+	}
+	echo '</div>';
 }
 
 /* ---------- 実績種別バッジ ---------- */

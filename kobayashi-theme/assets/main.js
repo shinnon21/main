@@ -48,28 +48,39 @@
     var MAX_ADDED = 24;
     var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    /* --- 波アニメーション（横5本・縦4本の制御点をsin波で揺らす） --- */
-    var paths = waves.querySelectorAll('path');
+    /* --- 波アニメーション ---
+       格子の位置定義。本数を変える場合は front-page.php の静的パス
+       （no-JSフォールバック）も合わせて更新すること */
+    var H_YS = [30, 90, 150, 210, 270, 330];
+    var V_XS = [20, 92, 164, 236, 308, 380];
     if (!reduced) {
+      /* 格子パスをJSで再構築し、制御点をsin波で揺らす */
+      waves.textContent = '';
+      var mkPath = function () {
+        var p = document.createElementNS(NS, 'path');
+        waves.appendChild(p);
+        return p;
+      };
+      var hPaths = H_YS.map(mkPath);
+      var vPaths = V_XS.map(mkPath);
       var t0 = null;
       var wave = function (ts) {
         if (t0 === null) { t0 = ts; }
         var t = (ts - t0) / 1000;
-        var i, y, x, a, b, e1, e2;
-        for (i = 0; i < 5; i++) {
-          y = 60 * (i + 1);
-          a = Math.sin(t * 1.0 + i * 0.9) * 13;
-          b = Math.sin(t * 1.0 + i * 0.9 + 2.4) * 13;
-          e1 = Math.sin(t * 0.8 + i) * 3;
-          e2 = Math.sin(t * 0.8 + i + 2) * 3;
-          paths[i].setAttribute('d', 'M0 ' + (y + e1) + ' C 120 ' + (y - 40 + a) + ', 280 ' + (y + 40 + b) + ', 400 ' + (y + e2));
-        }
-        for (i = 0; i < 4; i++) {
-          x = 60 + 80 * i;
-          a = Math.sin(t * 0.85 + i * 1.1 + 1) * 13;
-          b = Math.sin(t * 0.85 + i * 1.1 + 3.4) * 13;
-          paths[5 + i].setAttribute('d', 'M' + x + ' 0 C ' + (x - 40 + a) + ' 120, ' + (x + 40 + b) + ' 240, ' + x + ' 360');
-        }
+        hPaths.forEach(function (p, i) {
+          var y = H_YS[i];
+          var a = Math.sin(t * 1.0 + i * 0.9) * 13;
+          var b = Math.sin(t * 1.0 + i * 0.9 + 2.4) * 13;
+          var e1 = Math.sin(t * 0.8 + i) * 3;
+          var e2 = Math.sin(t * 0.8 + i + 2) * 3;
+          p.setAttribute('d', 'M0 ' + (y + e1) + ' C 120 ' + (y - 40 + a) + ', 280 ' + (y + 40 + b) + ', 400 ' + (y + e2));
+        });
+        vPaths.forEach(function (p, i) {
+          var x = V_XS[i];
+          var a = Math.sin(t * 0.85 + i * 1.1 + 1) * 13;
+          var b = Math.sin(t * 0.85 + i * 1.1 + 3.4) * 13;
+          p.setAttribute('d', 'M' + x + ' 0 C ' + (x - 40 + a) + ' 120, ' + (x + 40 + b) + ' 240, ' + x + ' 360');
+        });
         requestAnimationFrame(wave);
       };
       requestAnimationFrame(wave);

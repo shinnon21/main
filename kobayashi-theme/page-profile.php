@@ -10,9 +10,7 @@ get_template_part( 'parts/page-hero', null, array( 'label' => 'profile', 'title'
 	<div class="container" style="max-width:900px">
 
 		<div class="prof" style="margin-bottom:32px">
-			<div class="avatar">
-				<?php if ( has_post_thumbnail() ) { the_post_thumbnail( 'medium' ); } else { echo '<span class="init">SK</span>'; } ?>
-			</div>
+			<?php kb_avatar(); ?>
 			<div>
 				<p class="kana">こばやし しんのすけ</p>
 				<h2>小林 慎之助</h2>
@@ -79,12 +77,12 @@ get_template_part( 'parts/page-hero', null, array( 'label' => 'profile', 'title'
 		<div class="profile-sec" id="research">
 			<h2><span class="lbl">research</span>研究テーマ</h2>
 			<p style="font-weight:700;margin-bottom:10px">下水サーベイランスを起点とした医薬品サプライチェーンの予兆・予動最適化システム</p>
-			<p style="font-size:13.5px;color:#4a4a4a">下水サーベイランス（WBE）による感染流行の先行予測を医薬品サプライチェーンの在庫・物流の意思決定へ統合し、「事後対応」から「予兆・予動管理」への転換を目指す研究。有馬澄佳研究室にて、オペレーションズ・リサーチと公衆衛生データを架橋する社会実装志向のテーマに取り組んでいます。</p>
+			<p style="font-size:14px;color:#4a4a4a">下水サーベイランス（WBE）による感染流行の先行予測を医薬品サプライチェーンの在庫・物流の意思決定へ統合し、「事後対応」から「予兆・予動管理」への転換を目指す研究。有馬澄佳研究室にて、オペレーションズ・リサーチと公衆衛生データを架橋する社会実装志向のテーマに取り組んでいます。</p>
 		</div>
 
 		<div class="profile-sec">
 			<h2><span class="lbl">activity</span>登壇・対外活動</h2>
-			<ul style="list-style:disc;margin-left:20px;font-size:14px">
+			<ul style="list-style:disc;margin-left:20px;font-size:15px">
 				<li style="margin-bottom:8px">静岡県議会議員向け AI勉強会（主催・講師）— 政治現場での生成AI活用を講義</li>
 				<li style="margin-bottom:8px">「戦略的大学生活のススメ vol.49」ピッチ登壇（2025.04／Tsukuba Place Lab）</li>
 				<li>JSIP公式メディア インターン体験インタビュー掲載</li>

@@ -21,8 +21,9 @@ get_header();
 			<svg id="heroNet" viewBox="0 0 400 360" xmlns="http://www.w3.org/2000/svg">
 				<defs><linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#C22740"/><stop offset="1" stop-color="#84192A"/></linearGradient></defs>
 				<g id="heroWaves" fill="none" stroke="#84192A" stroke-opacity=".14" stroke-width="1.2">
-					<path d="M0 60 C 120 20, 280 100, 400 60"/><path d="M0 120 C 120 80, 280 160, 400 120"/><path d="M0 180 C 120 140, 280 220, 400 180"/><path d="M0 240 C 120 200, 280 280, 400 240"/><path d="M0 300 C 120 260, 280 340, 400 300"/>
-					<path d="M60 0 C 20 120, 100 240, 60 360"/><path d="M140 0 C 100 120, 180 240, 140 360"/><path d="M220 0 C 180 120, 260 240, 220 360"/><path d="M300 0 C 260 120, 340 240, 300 360"/>
+					<?php /* no-JS時のフォールバック格子。位置は main.js の H_YS / V_XS と揃える */ ?>
+					<path d="M0 30 C 120 -10, 280 70, 400 30"/><path d="M0 90 C 120 50, 280 130, 400 90"/><path d="M0 150 C 120 110, 280 190, 400 150"/><path d="M0 210 C 120 170, 280 250, 400 210"/><path d="M0 270 C 120 230, 280 310, 400 270"/><path d="M0 330 C 120 290, 280 370, 400 330"/>
+					<path d="M20 0 C -20 120, 60 240, 20 360"/><path d="M92 0 C 52 120, 132 240, 92 360"/><path d="M164 0 C 124 120, 204 240, 164 360"/><path d="M236 0 C 196 120, 276 240, 236 360"/><path d="M308 0 C 268 120, 348 240, 308 360"/><path d="M380 0 C 340 120, 420 240, 380 360"/>
 				</g>
 				<g id="heroLinks">
 					<path d="M140 118 L300 180 L220 240 L80 260" stroke="#C22740" stroke-width="1.6" stroke-opacity=".5" fill="none"/>
@@ -152,7 +153,7 @@ if ( $news->have_posts() ) : ?>
 <section class="sec" style="padding-top:0">
 	<div class="container">
 		<div class="prof">
-			<div class="avatar"><span class="init">SK</span></div>
+			<?php kb_avatar(); ?>
 			<div>
 				<p class="kana">こばやし しんのすけ</p>
 				<h2>小林 慎之助</h2>

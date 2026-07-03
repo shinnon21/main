@@ -30,7 +30,7 @@ while ( have_posts() ) : the_post();
 			</div>
 
 			<div class="author-box">
-				<div class="avatar"><span class="init">SK</span></div>
+				<?php kb_avatar(); ?>
 				<div>
 					<div class="n">小林 慎之助</div>
 					<div class="r">Weeave株式会社 共同創業者・代表取締役 CEO ／ 筑波大学 経営工学主専攻</div>
