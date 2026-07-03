@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小林慎之助｜政治・行政DXと社会実装のポートフォリオ</title>
+<meta name="description" content="Weeave株式会社 代表取締役・小林慎之助のポートフォリオサイト。政治・行政のDX支援、データ分析、東南アジア事業開発、医薬品サプライチェーン研究などの実績と知見を掲載しています。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   Design Tokens — サイト名「小林慎之助」独自トンマナ v1.0
+   base: 温かみのある紙色 / ink: 濃紺 / accent: コバルトブルー
+============================================================ */
+:root{
+  --bg:#FDF9F9;        /* 背景（紙） */
+  --white:#ffffff;
+  --ink:#1A1A1A;          /* 濃紺ブラック（テキスト・フッター） */
+  --deep:#84192A;         /* 見出し・帯 */
+  --crimson:#C22740;         /* アクセント（CTA・リンク） */
+  --crimson-dark:#A61F35;
+  --tint-light:#FBECEE;    /* 淡ブルー面 */
+  --tint:#F6D8DD;         /* タグ・サブ面 */
+  --gray:#5C5C5C;
+  --line:#E6DCDE;
+  --radius:10px;
+  --shadow:0 8px 24px rgba(26,26,26,.08);
+  --font-jp:"Noto Sans JP",sans-serif;
+  --font-en:"Inter",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-jp);background:var(--bg);color:var(--ink);font-size:15px;line-height:1.8;-webkit-font-smoothing:antialiased}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+ul{list-style:none}
+.container{max-width:1120px;margin:0 auto;padding:0 24px}
+.en{font-family:var(--font-en);letter-spacing:.02em}
+
+/* ===== section head ===== */
+.sec{padding:72px 0}
+.sec-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:32px;gap:16px}
+.sec-head .l .lbl{font-family:var(--font-en);font-size:12px;font-weight:800;color:var(--crimson);text-transform:lowercase;letter-spacing:.18em}
+.sec-head .l h2{font-size:26px;font-weight:900;letter-spacing:.02em;margin-top:2px}
+.more{font-size:13px;font-weight:700;color:var(--crimson);white-space:nowrap;border-bottom:1px solid transparent;transition:.2s}
+.more:hover{border-color:var(--crimson)}
+
+/* ===== buttons / chips ===== */
+.btn{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:14px;padding:13px 28px;border-radius:999px;transition:.25s;border:1.5px solid var(--ink)}
+.btn.primary{background:var(--crimson);border-color:var(--crimson);color:#fff}
+.btn.primary:hover{background:var(--crimson-dark);border-color:var(--crimson-dark);transform:translateY(-2px)}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn.ghost:hover{background:var(--ink);color:#fff}
+.btn.white{background:#fff;border-color:#fff;color:var(--ink)}
+.btn.white:hover{transform:translateY(-2px)}
+.chip{display:inline-block;font-size:12px;font-weight:500;background:var(--tint);color:#84192A;border-radius:999px;padding:3px 12px;margin:2px 4px 2px 0;transition:.2s}
+.chip:hover{background:var(--tint-light);color:var(--crimson)}
+.badge{display:inline-block;font-size:11px;font-weight:700;color:#fff;background:var(--deep);border-radius:4px;padding:2px 10px;letter-spacing:.05em}
+.badge.accent{background:var(--crimson)}
+
+/* ===== header ===== */
+.utility{background:var(--ink);color:#fff;font-size:12px}
+.utility .container{display:flex;align-items:center;justify-content:flex-end;gap:22px;height:36px}
+.utility a{opacity:.85;transition:.2s}
+.utility a:hover{opacity:1;color:#F6D8DD}
+.utility .date{opacity:.5;margin-right:auto;font-family:var(--font-en)}
+header.site{position:sticky;top:0;z-index:100;background:rgba(246,244,239,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+header.site .container{display:flex;align-items:center;justify-content:space-between;height:72px;gap:24px}
+.logo{line-height:1.2}
+.logo .jp{font-size:21px;font-weight:900;letter-spacing:.06em;color:var(--crimson)}
+.logo .sub{font-family:var(--font-en);font-size:9.5px;font-weight:600;color:var(--gray);letter-spacing:.22em;text-transform:uppercase}
+nav.gnav ul{display:flex;gap:28px}
+nav.gnav a{display:block;text-align:center;font-size:13.5px;font-weight:700;padding:6px 2px;position:relative}
+nav.gnav a small{display:block;font-family:var(--font-en);font-size:9px;font-weight:600;color:var(--crimson);letter-spacing:.15em;text-transform:lowercase}
+nav.gnav a::after{content:"";position:absolute;left:0;bottom:-2px;width:0;height:2px;background:var(--crimson);transition:.25s}
+nav.gnav a:hover::after{width:100%}
+.h-right{display:flex;align-items:center;gap:14px}
+.search{display:flex;align-items:center;background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 14px;gap:8px;width:190px}
+.search input{border:none;outline:none;background:none;font-family:var(--font-jp);font-size:12.5px;width:100%}
+.search svg{flex:none}
+.menu-btn{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:6px}
+.menu-btn span{width:24px;height:2px;background:var(--ink);transition:.3s}
+
+/* ===== hero ===== */
+.hero{position:relative;overflow:hidden;padding:96px 0 88px}
+.hero .container{position:relative;z-index:2;display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center}
+.hero .lbl{font-family:var(--font-en);font-size:13px;font-weight:800;color:var(--crimson);letter-spacing:.2em;margin-bottom:18px}
+.hero h1{font-size:clamp(34px,4.6vw,52px);font-weight:900;line-height:1.35;letter-spacing:.03em}
+.hero h1 .u{background:linear-gradient(transparent 68%,var(--tint-light) 68%)}
+.hero .lead{margin-top:22px;font-size:15.5px;color:#4a4a4a;max-width:520px}
+.hero .cta{margin-top:34px;display:flex;gap:14px;flex-wrap:wrap}
+/* 織り（Weave）モチーフ：独自SVGパターン */
+.hero-visual{position:relative;aspect-ratio:1/0.9}
+.hero-visual svg{width:100%;height:100%}
+.hero-bg{position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:
+    radial-gradient(600px 380px at 88% 8%, rgba(194,39,64,.06), transparent 60%),
+    radial-gradient(500px 320px at 4% 96%, rgba(132,25,42,.05), transparent 60%);
+}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.hero-visual{animation:floaty 7s ease-in-out infinite}
+
+/* ===== ticker ===== */
+.ticker{background:var(--deep);color:#fff;overflow:hidden;padding:13px 0}
+.ticker .lane{display:flex;gap:12px;width:max-content;animation:scroll 36s linear infinite}
+.ticker:hover .lane{animation-play-state:paused}
+.ticker a{font-size:12.5px;font-weight:500;color:#F6D8DD;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:4px 16px;white-space:nowrap;transition:.2s}
+.ticker a:hover{background:var(--crimson);color:#fff;border-color:var(--crimson)}
+@keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ===== cards ===== */
+.thumb{position:relative;border-radius:var(--radius) var(--radius) 0 0;overflow:hidden;aspect-ratio:16/9;display:flex;align-items:flex-end;padding:14px;color:#fff}
+.thumb .ph-label{font-family:var(--font-en);font-size:11px;font-weight:700;letter-spacing:.14em;opacity:.85;text-transform:uppercase}
+.g1{background:linear-gradient(135deg,#84192A,#C22740)}
+.g2{background:linear-gradient(135deg,#1A1A1A,#5C5C5C)}
+.g3{background:linear-gradient(135deg,#6E2436,#A8506B)}
+.g4{background:linear-gradient(135deg,#4A3535,#8C6A5D)}
+.g5{background:linear-gradient(135deg,#2E2430,#5E4B66)}
+.g6{background:linear-gradient(135deg,#C22740,#E06A7E)}
+.card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;transition:.3s;display:flex;flex-direction:column}
+.card:hover{transform:translateY(-5px);box-shadow:0 14px 32px rgba(26,26,26,.14)}
+.card .body{padding:18px 20px 20px;display:flex;flex-direction:column;gap:8px;flex:1}
+.card .meta{font-size:11.5px;color:var(--gray);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.card h3{font-size:15.5px;font-weight:700;line-height:1.55}
+.card .tags{margin-top:auto;padding-top:4px}
+
+/* ===== featured works ===== */
+.featured{display:grid;grid-template-columns:1.5fr 1fr;gap:24px}
+.featured .main .thumb{aspect-ratio:16/9.6;border-radius:var(--radius) var(--radius) 0 0}
+.featured .main h3{font-size:20px}
+.f-side{display:flex;flex-direction:column;gap:14px}
+.f-side .card{flex-direction:row;align-items:stretch}
+.f-side .thumb{flex:0 0 128px;aspect-ratio:auto;border-radius:var(--radius) 0 0 var(--radius);padding:10px}
+.f-side .body{padding:14px 16px}
+.f-side h3{font-size:13.5px}
+
+/* ===== works grid ===== */
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.center-btn{text-align:center;margin-top:40px}
+
+/* ===== column + ranking ===== */
+.col-wrap{display:grid;grid-template-columns:1fr 320px;gap:40px;align-items:start}
+.article{display:flex;gap:18px;padding:20px 0;border-bottom:1px solid var(--line);transition:.2s}
+.article:first-child{padding-top:0}
+.article:hover h3{color:var(--crimson)}
+.article .a-thumb{flex:0 0 168px;aspect-ratio:16/10;border-radius:8px;overflow:hidden;display:flex;align-items:flex-end;padding:10px;color:#fff}
+.article .a-thumb .ph-label{font-family:var(--font-en);font-size:10px;font-weight:700;letter-spacing:.12em;opacity:.85;text-transform:uppercase}
+.article .a-body{display:flex;flex-direction:column;gap:6px}
+.article .meta{font-size:11.5px;color:var(--gray);display:flex;gap:12px;flex-wrap:wrap}
+.article h3{font-size:15.5px;font-weight:700;line-height:1.6;transition:.2s}
+.side-box{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:24px}
+.side-box .sb-head{display:flex;align-items:baseline;gap:10px;margin-bottom:14px}
+.side-box .sb-head .lbl{font-family:var(--font-en);font-size:11px;font-weight:800;color:var(--crimson);letter-spacing:.15em}
+.side-box .sb-head h3{font-size:15px;font-weight:900}
+.rank-item{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--line);font-size:13px;font-weight:500;line-height:1.55}
+.rank-item:last-child{border-bottom:none}
+.rank-item:hover{color:var(--crimson)}
+.rank-item .no{flex:0 0 24px;height:24px;border-radius:6px;background:var(--deep);color:#fff;font-family:var(--font-en);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:2px}
+.rank-item:nth-child(2) .no{background:var(--crimson)}
+
+/* ===== news ===== */
+.news-list{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:8px 32px}
+.news-item{display:flex;gap:20px;align-items:center;padding:18px 0;border-bottom:1px solid var(--line);font-size:14px}
+.news-item:last-child{border-bottom:none}
+.news-item .d{font-family:var(--font-en);font-size:12.5px;color:var(--gray);flex:0 0 84px}
+.news-item:hover .t{color:var(--crimson)}
+
+/* ===== DL CTA ===== */
+.dl{background:var(--deep);color:#fff;border-radius:16px;padding:44px 48px;display:flex;align-items:center;gap:40px;position:relative;overflow:hidden}
+.dl::after{content:"document";position:absolute;right:24px;bottom:-14px;font-family:var(--font-en);font-size:88px;font-weight:800;color:rgba(255,255,255,.05);letter-spacing:.05em}
+.dl .doc{flex:0 0 120px;aspect-ratio:3/4;background:#fff;border-radius:6px;box-shadow:0 10px 24px rgba(0,0,0,.3);display:flex;flex-direction:column;gap:6px;padding:14px;transform:rotate(-4deg)}
+.dl .doc i{display:block;height:7px;background:#e5e7eb;border-radius:3px}
+.dl .doc i:first-child{width:60%;background:var(--crimson);height:9px}
+.dl h2{font-size:22px;font-weight:900;margin-bottom:8px}
+.dl p{font-size:13.5px;opacity:.8;max-width:520px}
+.dl .btn{margin-left:auto;flex:none}
+
+/* ===== profile digest ===== */
+.prof{display:grid;grid-template-columns:220px 1fr;gap:48px;align-items:center;background:#fff;border-radius:16px;box-shadow:var(--shadow);padding:48px}
+.avatar{width:200px;height:200px;border-radius:50%;background:linear-gradient(135deg,var(--deep),var(--crimson));display:flex;align-items:center;justify-content:center;color:#fff;position:relative}
+.avatar .init{font-family:var(--font-en);font-size:52px;font-weight:800;letter-spacing:.02em;opacity:.9}
+.avatar::after{content:"";position:absolute;inset:-8px;border:1.5px dashed rgba(194,39,64,.4);border-radius:50%}
+.prof .kana{font-size:12px;color:var(--gray)}
+.prof h2{font-size:28px;font-weight:900;letter-spacing:.04em}
+.prof .role{font-size:13.5px;font-weight:700;color:var(--crimson);margin:6px 0 14px}
+.prof p{font-size:14px;color:#4a4a4a}
+.prof .p-cta{margin-top:22px;display:flex;gap:12px;flex-wrap:wrap}
+
+/* ===== contact CTA ===== */
+.contact{background:linear-gradient(135deg,var(--crimson),var(--crimson-dark));color:#fff;text-align:center;padding:72px 24px;border-radius:16px}
+.contact .lbl{font-family:var(--font-en);font-size:12px;font-weight:800;letter-spacing:.2em;opacity:.75}
+.contact h2{font-size:26px;font-weight:900;margin:10px 0 14px}
+.contact p{font-size:13.5px;opacity:.85;margin-bottom:28px}
+
+/* ===== footer ===== */
+footer{background:var(--ink);color:#fff;margin-top:88px}
+footer .top{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:40px;padding:64px 0 48px}
+footer .f-logo .jp{font-size:20px;font-weight:900;letter-spacing:.06em}
+footer .f-logo .sub{font-family:var(--font-en);font-size:9.5px;font-weight:600;color:#a09a9b;letter-spacing:.22em;text-transform:uppercase;display:block;margin-top:2px}
+footer .f-logo p{font-size:12.5px;color:#a09a9b;margin-top:16px;max-width:300px}
+footer h4{font-family:var(--font-en);font-size:11px;font-weight:800;color:#a09a9b;letter-spacing:.18em;margin-bottom:16px;text-transform:uppercase}
+footer .links li{margin-bottom:10px}
+footer .links a{font-size:13px;color:#d9d4d5;transition:.2s}
+footer .links a:hover{color:#fff}
+footer .bottom{border-top:1px solid rgba(255,255,255,.1);padding:20px 0;display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:#a09a9b;flex-wrap:wrap;gap:10px}
+footer .bottom .en{letter-spacing:.05em}
+
+/* ===== responsive ===== */
+@media (max-width:960px){
+  nav.gnav{display:none;position:absolute;top:72px;left:0;right:0;background:#fff;border-bottom:1px solid var(--line);box-shadow:var(--shadow)}
+  nav.gnav.open{display:block}
+  nav.gnav ul{flex-direction:column;gap:0;padding:12px 24px}
+  nav.gnav a{display:flex;gap:10px;align-items:baseline;padding:14px 4px;border-bottom:1px solid var(--line);text-align:left}
+  .menu-btn{display:flex}
+  .search{display:none}
+  .hero .container{grid-template-columns:1fr}
+  .hero-visual{max-width:340px;margin:0 auto}
+  .featured{grid-template-columns:1fr}
+  .grid3{grid-template-columns:repeat(2,1fr)}
+  .col-wrap{grid-template-columns:1fr}
+  .dl{flex-direction:column;text-align:center}
+  .dl .btn{margin:8px auto 0}
+  .prof{grid-template-columns:1fr;text-align:center;padding:36px 24px}
+  .avatar{margin:0 auto}
+  .prof .p-cta{justify-content:center}
+  footer .top{grid-template-columns:1fr}
+}
+@media (max-width:600px){
+  .grid3{grid-template-columns:1fr}
+  .sec{padding:52px 0}
+  .utility a{display:none}
+  .utility a:last-child{display:block}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ utility bar ============ -->
+<div class="utility">
+  <div class="container">
+    <span class="date en" id="today">2026.07.03</span>
+    <a href="#documents">資料ダウンロード</a>
+    <a href="#search">条件から探す</a>
+    <a href="#contact">お問い合わせ</a>
+  </div>
+</div>
+
+<!-- ============ header ============ -->
+<header class="site">
+  <div class="container">
+    <a class="logo" href="#">
+      <span class="jp">小林慎之助</span>
+      <span class="sub">Shinnosuke Kobayashi — Portfolio</span>
+    </a>
+    <nav class="gnav" id="gnav">
+      <ul>
+        <li><a href="#works">実績<small>works</small></a></li>
+        <li><a href="#column">コラム<small>column</small></a></li>
+        <li><a href="#news">お知らせ<small>news</small></a></li>
+        <li><a href="#profile">プロフィール<small>profile</small></a></li>
+        <li><a href="#about">About<small>about</small></a></li>
+      </ul>
+    </nav>
+    <div class="h-right">
+      <div class="search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5C5C5C" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" placeholder="フリーワードで検索">
+      </div>
+      <button class="menu-btn" id="menuBtn" aria-label="メニュー"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<!-- ============ 1. hero ============ -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="container">
+    <div>
+      <p class="lbl">POLITICS × TECHNOLOGY × SOCIAL DESIGN</p>
+      <h1>構想を、<br><span class="u">社会に実装する。</span></h1>
+      <p class="lead">政治・行政のDX支援から、医薬品サプライチェーンの研究まで。「日本の技術を社会に届けるコーディネーター」を志す、小林慎之助のポートフォリオサイトです。</p>
+      <div class="cta">
+        <a class="btn primary" href="#works">実績を見る →</a>
+        <a class="btn ghost" href="#profile">プロフィール</a>
+      </div>
+    </div>
+    <div class="hero-visual" aria-hidden="true">
+      <!-- 織り（weave）＝つなぐ、をモチーフにした独自ジェネラティブ風パターン -->
+      <svg viewBox="0 0 400 360" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#C22740"/><stop offset="1" stop-color="#84192A"/>
+          </linearGradient>
+        </defs>
+        <g fill="none" stroke="#84192A" stroke-opacity=".14" stroke-width="1.2">
+          <path d="M0 60 C 120 20, 280 100, 400 60"/>
+          <path d="M0 120 C 120 80, 280 160, 400 120"/>
+          <path d="M0 180 C 120 140, 280 220, 400 180"/>
+          <path d="M0 240 C 120 200, 280 280, 400 240"/>
+          <path d="M0 300 C 120 260, 280 340, 400 300"/>
+          <path d="M60 0 C 20 120, 100 240, 60 360"/>
+          <path d="M140 0 C 100 120, 180 240, 140 360"/>
+          <path d="M220 0 C 180 120, 260 240, 220 360"/>
+          <path d="M300 0 C 260 120, 340 240, 300 360"/>
+        </g>
+        <g>
+          <circle cx="140" cy="118" r="7" fill="url(#lg1)"/>
+          <circle cx="300" cy="180" r="10" fill="#C22740"/>
+          <circle cx="220" cy="240" r="5" fill="#84192A"/>
+          <circle cx="80" cy="260" r="6" fill="#C22740" fill-opacity=".55"/>
+          <circle cx="330" cy="80" r="4" fill="#84192A" fill-opacity=".5"/>
+          <path d="M140 118 L300 180 L220 240 L80 260" stroke="#C22740" stroke-width="1.6" stroke-opacity=".5" fill="none"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2. keyword ticker ============ -->
+<div class="ticker" id="search">
+  <div class="lane" id="tickerLane">
+    <a href="#"># 政治DX</a><a href="#"># 行政デジタル化</a><a href="#"># データ分析</a><a href="#"># 事業開発</a><a href="#"># 東南アジア</a><a href="#"># コミュニティ構築</a><a href="#"># 経営工学</a><a href="#"># サプライチェーン</a><a href="#"># 生成AI活用</a><a href="#"># 選挙シミュレーション</a><a href="#"># マーケティング</a><a href="#"># スタートアップ</a>
+  </div>
+</div>
+
+<!-- ============ 3. featured works ============ -->
+<section class="sec" id="works">
+  <div class="container">
+    <div class="sec-head">
+      <div class="l"><p class="lbl">featured works</p><h2>注目の実績</h2></div>
+      <a class="more" href="#">実績一覧を見る →</a>
+    </div>
+    <div class="featured">
+      <a class="card main" href="#">
+        <div class="thumb g1"><span class="ph-label">Weeave Inc.</span></div>
+        <div class="body">
+          <div class="meta"><span class="badge accent">起業・経営</span><span>2025.09 – 現在</span></div>
+          <h3>Weeave株式会社の共同創業 — 政治・行政DXで「分断された社会をつなぐ」</h3>
+          <p style="font-size:13px;color:#5C5C5C">筑波大学認定スタートアップとして共同創業し、代表取締役に就任。政治DX・広報戦略支援、地域ニーズの可視化、システム開発・社会実装の3本柱で事業を展開。</p>
+          <div class="tags"><span class="chip"># 政治DX</span><span class="chip"># 事業開発</span><span class="chip"># スタートアップ</span></div>
+        </div>
+      </a>
+      <div class="f-side">
+        <a class="card" href="#">
+          <div class="thumb g2"><span class="ph-label">Election DX</span></div>
+          <div class="body"><div class="meta"><span class="badge">DX支援</span></div><h3>衆議院議員事務所のDX — 独自の選挙シミュレーションモデルを開発</h3></div>
+        </a>
+        <a class="card" href="#">
+          <div class="thumb g3"><span class="ph-label">JSIP Singapore</span></div>
+          <div class="body"><div class="meta"><span class="badge">国際事業開発</span></div><h3>日本企業の東南アジア進出支援 — 3ヶ月で約100名の事業担当者と接点構築</h3></div>
+        </a>
+        <a class="card" href="#">
+          <div class="thumb g4"><span class="ph-label">RULEMAKERS DAO</span></div>
+          <div class="body"><div class="meta"><span class="badge">マーケティング</span></div><h3>「RIFT」ブランド確立 — マルチチャネル戦略でイノベーター獲得を推進</h3></div>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4. new works ============ -->
+<section class="sec" style="padding-top:0">
+  <div class="container">
+    <div class="sec-head">
+      <div class="l"><p class="lbl">works</p><h2>新着実績</h2></div>
+      <a class="more" href="#">すべて見る →</a>
+    </div>
+    <div class="grid3">
+      <a class="card" href="#">
+        <div class="thumb g5"><span class="ph-label">AI Seminar</span></div>
+        <div class="body">
+          <div class="meta"><span class="badge">登壇・講師</span><span>2026</span></div>
+          <h3>静岡県議会議員向けAI勉強会を主催 — 政治現場での生成AI活用を講義</h3>
+          <div class="tags"><span class="chip"># 生成AI活用</span><span class="chip"># 政治DX</span></div>
+        </div>
+      </a>
+      <a class="card" href="#">
+        <div class="thumb g6"><span class="ph-label">AIESEC</span></div>
+        <div class="body">
+          <div class="meta"><span class="badge">渉外・BD</span><span>2024.04 – 2025.03</span></div>
+          <h3>AIESECで渉外統括 — ディープテック×学生のイベントを企画しスポンサー獲得</h3>
+          <div class="tags"><span class="chip"># 事業開発</span><span class="chip"># コミュニティ構築</span></div>
+        </div>
+      </a>
+      <a class="card" href="#">
+        <div class="thumb g2"><span class="ph-label">Geears</span></div>
+        <div class="body">
+          <div class="meta"><span class="badge">マーケティング</span><span>2024.01 – 2024.12</span></div>
+          <h3>コンサルティングファームGeearsで政治ブランディング等の戦略立案を主導</h3>
+          <div class="tags"><span class="chip"># データ分析</span><span class="chip"># マーケティング</span></div>
+        </div>
+      </a>
+    </div>
+    <div class="center-btn"><a class="btn ghost" href="#">実績一覧を見る →</a></div>
+  </div>
+</section>
+
+<!-- ============ 5. column + ranking ============ -->
+<section class="sec" id="column" style="background:#fff">
+  <div class="container col-wrap">
+    <div>
+      <div class="sec-head">
+        <div class="l"><p class="lbl">column</p><h2>新着コラム</h2></div>
+        <a class="more" href="#">コラム一覧へ →</a>
+      </div>
+      <a class="article" href="#">
+        <div class="a-thumb g3"><span class="ph-label">Research</span></div>
+        <div class="a-body">
+          <div class="meta"><span>公開日 2026.06.20</span><span class="badge accent" style="font-size:10px">コラム</span></div>
+          <h3>下水サーベイランス×医薬品サプライチェーン — 「事後対応」から「予兆・予動管理」へ、研究テーマを紹介します</h3>
+          <div class="tags"><span class="chip"># サプライチェーン</span><span class="chip"># 経営工学</span></div>
+        </div>
+      </a>
+      <a class="article" href="#">
+        <div class="a-thumb g1"><span class="ph-label">Startup</span></div>
+        <div class="a-body">
+          <div class="meta"><span>公開日 2026.05.30</span><span class="badge accent" style="font-size:10px">コラム</span></div>
+          <h3>インターンの直談判から代表取締役へ — Weeave創業までの2年間でやったこと</h3>
+          <div class="tags"><span class="chip"># スタートアップ</span><span class="chip"># キャリア</span></div>
+        </div>
+      </a>
+      <a class="article" href="#">
+        <div class="a-thumb g5"><span class="ph-label">Singapore</span></div>
+        <div class="a-body">
+          <div class="meta"><span>更新日 2026.04.10</span><span>公開日 2025.04.02</span><span class="badge accent" style="font-size:10px">コラム</span></div>
+          <h3>「ビジネスは人と人との間にある」— シンガポール・JSIPで得た原体験</h3>
+          <div class="tags"><span class="chip"># 東南アジア</span><span class="chip"># コミュニティ構築</span></div>
+        </div>
+      </a>
+      <a class="article" href="#">
+        <div class="a-thumb g4"><span class="ph-label">Politics</span></div>
+        <div class="a-body">
+          <div class="meta"><span>公開日 2026.03.15</span><span class="badge accent" style="font-size:10px">コラム</span></div>
+          <h3>議員事務所のDXは何から始めるべきか — 現場で見た3つのボトルネック</h3>
+          <div class="tags"><span class="chip"># 政治DX</span><span class="chip"># 行政デジタル化</span></div>
+        </div>
+      </a>
+    </div>
+    <aside>
+      <div class="side-box">
+        <div class="sb-head"><span class="lbl">ranking</span><h3>人気コンテンツ</h3></div>
+        <a class="rank-item" href="#"><span class="no">1</span>Weeave株式会社の共同創業 — 政治・行政DX</a>
+        <a class="rank-item" href="#"><span class="no">2</span>独自の選挙シミュレーションモデル開発の裏側</a>
+        <a class="rank-item" href="#"><span class="no">3</span>シンガポール・JSIPで得た原体験</a>
+        <a class="rank-item" href="#"><span class="no">4</span>静岡県議会議員向けAI勉強会レポート</a>
+        <a class="rank-item" href="#"><span class="no">5</span>下水サーベイランス研究テーマ紹介</a>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ============ 6. news ============ -->
+<section class="sec" id="news">
+  <div class="container">
+    <div class="sec-head">
+      <div class="l"><p class="lbl">news</p><h2>お知らせ</h2></div>
+      <a class="more" href="#">一覧へ →</a>
+    </div>
+    <div class="news-list">
+      <a class="news-item" href="#"><span class="d">2026.07.03</span><span class="badge">サイト</span><span class="t">ポートフォリオサイト「小林慎之助」を公開しました</span></a>
+      <a class="news-item" href="#"><span class="d">2026.06.01</span><span class="badge">研究</span><span class="t">有馬澄佳研究室にて卒業研究（医薬品サプライチェーン最適化）に着手しました</span></a>
+      <a class="news-item" href="#"><span class="d">2026.04.15</span><span class="badge">登壇</span><span class="t">静岡県議会議員向けAI勉強会を主催・講師を務めました</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 7. document DL ============ -->
+<section class="sec" id="documents" style="padding-top:0">
+  <div class="container">
+    <div class="dl">
+      <div class="doc"><i></i><i></i><i></i><i></i><i style="width:70%"></i></div>
+      <div>
+        <h2>職務経歴書・実績資料のダウンロード</h2>
+        <p>これまでの経歴・実績・研究テーマをまとめたPDF資料をご用意しています。採用ご担当者様・協業をご検討の方はご活用ください。</p>
+      </div>
+      <a class="btn white" href="#">資料ダウンロード →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 8. profile digest ============ -->
+<section class="sec" id="profile" style="padding-top:0">
+  <div class="container">
+    <div class="prof">
+      <div class="avatar"><span class="init">SK</span></div>
+      <div>
+        <p class="kana">こばやし しんのすけ</p>
+        <h2>小林 慎之助</h2>
+        <p class="role">Weeave株式会社 共同創業者・代表取締役 CEO ／ 筑波大学 理工学群 社会工学類 経営工学主専攻</p>
+        <p>筑波大学で経営工学を学びながら、政治・行政・企業のDXと社会課題の解決に取り組む学生起業家。データドリブンな戦略立案とコミュニティ構築を強みに、「構想で終わらせず、現場で使われる仕組みとして社会に実装する」ことにこだわり続けています。</p>
+        <div class="p-cta">
+          <a class="btn primary" href="#">プロフィール詳細 →</a>
+          <a class="btn ghost" href="#">研究テーマを見る</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 9. contact CTA ============ -->
+<section class="sec" id="contact" style="padding-top:0">
+  <div class="container">
+    <div class="contact">
+      <p class="lbl">contact</p>
+      <h2>お仕事のご相談・採用に関するご連絡</h2>
+      <p>DX支援・データ分析・事業開発のご相談、採用・協業のお声がけはお問い合わせフォームからお願いします。</p>
+      <a class="btn white" href="#">お問い合わせ →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ footer ============ -->
+<footer id="about">
+  <div class="container">
+    <div class="top">
+      <div class="f-logo">
+        <span class="jp">小林慎之助</span>
+        <span class="sub">shinnosuke-kobayashi.jp</span>
+        <p>政治・行政のDXから医薬品サプライチェーン研究まで。日本の技術を社会に届けるコーディネーターを志す、小林慎之助のポートフォリオサイトです。</p>
+      </div>
+      <div>
+        <h4>sitemap</h4>
+        <ul class="links">
+          <li><a href="#works">実績</a></li>
+          <li><a href="#column">コラム</a></li>
+          <li><a href="#news">お知らせ</a></li>
+          <li><a href="#profile">プロフィール</a></li>
+          <li><a href="#search">条件から探す</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>links</h4>
+        <ul class="links">
+          <li><a href="#documents">資料ダウンロード</a></li>
+          <li><a href="#contact">お問い合わせ</a></li>
+          <li><a href="#">About（このサイトについて）</a></li>
+          <li><a href="#">プライバシーポリシー</a></li>
+          <li><a href="https://www.weeave.co.jp/" target="_blank" rel="noopener">Weeave株式会社 ↗</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="bottom">
+      <span class="en">© 2026 Shinnosuke Kobayashi</span>
+      <span class="en">LinkedIn ／ Facebook ／ note</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// 日付表示（ヘッダー装飾）
+(function(){
+  var d=new Date();
+  var z=function(n){return ('0'+n).slice(-2)};
+  document.getElementById('today').textContent=d.getFullYear()+'.'+z(d.getMonth()+1)+'.'+z(d.getDate());
+})();
+// キーワードティッカー：無限ループ用に複製
+(function(){
+  var lane=document.getElementById('tickerLane');
+  lane.innerHTML+=lane.innerHTML;
+})();
+// モバイルメニュー
+document.getElementById('menuBtn').addEventListener('click',function(){
+  document.getElementById('gnav').classList.toggle('open');
+});
+</script>
+</body>
+</html>

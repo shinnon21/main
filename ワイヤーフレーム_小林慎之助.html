@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ワイヤーフレーム｜小林慎之助</title>
+<style>
+  :root{
+    --line:#9aa0a6; --line2:#c7cbd1; --bg:#f2f3f5; --box:#fafbfc;
+    --ink:#202124; --sub:#5f6368; --accent:#3b3f46;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;background:var(--bg);color:var(--ink);font-size:13px;line-height:1.6}
+  /* ===== toolbar ===== */
+  .toolbar{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid var(--line2);padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .toolbar .ttl{font-weight:700;margin-right:8px}
+  .toolbar .ver{color:var(--sub);font-size:11px;margin-right:auto}
+  .tab{border:1px solid var(--line);background:#fff;border-radius:20px;padding:6px 14px;cursor:pointer;font-size:12px}
+  .tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  /* ===== screens ===== */
+  .screen{display:none;padding:24px 16px 80px}
+  .screen.active{display:block}
+  .frame{max-width:1000px;margin:0 auto;background:#fff;border:1px solid var(--line);box-shadow:0 2px 8px rgba(0,0,0,.06)}
+  .screen-head{max-width:1000px;margin:0 auto 12px;display:flex;align-items:baseline;gap:10px}
+  .screen-head h2{font-size:16px}
+  .screen-head .url{color:var(--sub);font-size:12px;font-family:monospace}
+  /* ===== wire blocks ===== */
+  .blk{border:1px dashed var(--line);background:var(--box);margin:10px;padding:14px;position:relative}
+  .blk.plain{background:#fff}
+  .lab{position:absolute;top:-1px;left:-1px;background:var(--accent);color:#fff;font-size:10px;padding:2px 8px;letter-spacing:.05em}
+  .blk .in{margin-top:14px}
+  .ph{border:1px solid var(--line2);background:repeating-linear-gradient(45deg,#eceef0,#eceef0 6px,#f6f7f8 6px,#f6f7f8 12px);display:flex;align-items:center;justify-content:center;color:var(--sub);font-size:11px;min-height:40px}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .row>*{flex:1;min-width:0}
+  .col-side{flex:0 0 260px}
+  .btn{display:inline-block;border:1px solid var(--ink);padding:8px 22px;border-radius:3px;font-size:12px;background:#fff}
+  .btn.fill{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .chip{display:inline-block;border:1px solid var(--line);border-radius:14px;padding:2px 10px;font-size:11px;color:var(--sub);margin:2px}
+  .card{border:1px solid var(--line2);background:#fff;padding:8px}
+  .card .thumb{height:80px}
+  .card .t{font-size:12px;font-weight:600;margin:6px 0 2px}
+  .card .m{font-size:10px;color:var(--sub)}
+  .list-item{display:flex;gap:10px;border-bottom:1px solid var(--line2);padding:8px 0}
+  .list-item .thumb{flex:0 0 110px;height:64px}
+  .rank{display:flex;gap:8px;border-bottom:1px solid var(--line2);padding:6px 0;font-size:11px}
+  .rank .no{flex:0 0 20px;height:20px;border:1px solid var(--ink);display:flex;align-items:center;justify-content:center;font-weight:700}
+  .note{max-width:1000px;margin:14px auto 0;background:#fffbe8;border:1px solid #e6d98a;padding:12px 16px;font-size:12px}
+  .note b{display:block;margin-bottom:4px}
+  .note ol{margin-left:18px}
+  table.wire{width:100%;border-collapse:collapse;font-size:11px;background:#fff}
+  table.wire th,table.wire td{border:1px solid var(--line2);padding:6px 8px;text-align:left}
+  table.wire th{background:#f0f1f3;width:130px;font-weight:600}
+  .center{text-align:center}
+  .sub{color:var(--sub);font-size:11px}
+  .pager{display:flex;gap:6px;justify-content:center}
+  .pager span{border:1px solid var(--line2);width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:11px;background:#fff}
+  .pager span.cur{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .check{font-size:11px;color:var(--sub);display:inline-block;margin:2px 8px 2px 0}
+  .check::before{content:"☐ "}
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <span class="ttl">WF｜小林慎之助（shinnosuke-kobayashi.jp）</span>
+  <span class="ver">v1.1（2026-07-03）設計書別紙・PC想定1000px／グレースケール＝実装時に独自トンマナ適用</span>
+  <button class="tab active" data-s="s1">① トップ</button>
+  <button class="tab" data-s="s2">② 実績一覧</button>
+  <button class="tab" data-s="s3">③ 実績詳細</button>
+  <button class="tab" data-s="s4">④ コラム一覧</button>
+  <button class="tab" data-s="s5">⑤ 条件検索</button>
+  <button class="tab" data-s="s6">⑥ プロフィール</button>
+  <button class="tab" data-s="s7">⑦ お問い合わせ</button>
+</div>
+
+<!-- ========== ① TOP ========== -->
+<section class="screen active" id="s1">
+  <div class="screen-head"><h2>① トップ</h2><span class="url">/</span></div>
+  <div class="frame">
+
+    <div class="blk"><span class="lab">HEADER（全ページ共通）</span>
+      <div class="in row">
+        <div class="ph" style="flex:0 0 170px;height:44px">ロゴ</div>
+        <div class="ph" style="flex:0 0 90px;height:44px">日付表示</div>
+        <div style="flex:1">
+          <div class="row">
+            <div class="ph" style="height:20px">資料DL</div>
+            <div class="ph" style="height:20px">条件から探す</div>
+            <div class="ph" style="height:20px">お問い合わせ</div>
+          </div>
+          <div class="ph" style="height:20px;margin-top:4px">フリーワード検索窓 🔍</div>
+        </div>
+        <div class="ph" style="flex:0 0 120px;height:44px">SNS ／ ☰メニュー</div>
+      </div>
+      <div class="in row">
+        <div class="ph" style="height:26px">GNAV：実績</div>
+        <div class="ph" style="height:26px">コラム</div>
+        <div class="ph" style="height:26px">お知らせ</div>
+        <div class="ph" style="height:26px">プロフィール</div>
+        <div class="ph" style="height:26px">About</div>
+      </div>
+    </div>
+
+    <div class="blk"><span class="lab">1. ヒーロー</span>
+      <div class="in">
+        <div class="ph" style="height:180px">キービジュアル（静止画＋軽量アニメ／動画不使用）<br>キャッチコピー＋サイト名</div>
+      </div>
+    </div>
+
+    <div class="blk"><span class="lab">2. キーワードティッカー</span>
+      <div class="in">
+        <span class="chip"># WordPress</span><span class="chip"># UIデザイン</span><span class="chip"># 採用サイト</span><span class="chip"># Next.js</span><span class="chip"># SEO</span><span class="chip"># ディレクション</span><span class="chip">→ 横スクロール／クリックで条件検索へ</span>
+      </div>
+    </div>
+
+    <div class="blk"><span class="lab">3. 注目実績（is_featured）</span>
+      <div class="in row">
+        <div class="card" style="flex:2"><div class="ph thumb" style="height:150px">大サムネ</div><div class="t">実績タイトル（ピックアップ1件）</div><div class="m">種別バッジ／期間／#タグ</div></div>
+        <div style="flex:1">
+          <div class="card" style="margin-bottom:8px"><div class="t">小カード実績A</div><div class="m">種別／期間</div></div>
+          <div class="card" style="margin-bottom:8px"><div class="t">小カード実績B</div><div class="m">種別／期間</div></div>
+          <div class="card"><div class="t">小カード実績C</div><div class="m">種別／期間</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="blk"><span class="lab">4. 新着実績</span>
+      <div class="in row">
+        <div class="card"><div class="ph thumb"></div><div class="t">実績1</div><div class="m">公開日／#タグ</div></div>
+        <div class="card"><div class="ph thumb"></div><div class="t">実績2</div><div class="m">公開日／#タグ</div></div>
+        <div class="card"><div class="ph thumb"></div><div class="t">実績3</div><div class="m">公開日／#タグ</div></div>
+      </div>
+      <div class="in row">
+        <div class="card"><div class="ph thumb"></div><div class="t">実績4</div><div class="m">公開日／#タグ</div></div>
+        <div class="card"><div class="ph thumb"></div><div class="t">実績5</div><div class="m">公開日／#タグ</div></div>
+        <div class="card"><div class="ph thumb"></div><div class="t">実績6</div><div class="m">公開日／#タグ</div></div>
+      </div>
+      <div class="in center"><span class="btn">実績一覧を見る →</span></div>
+    </div>
+
+    <div class="blk"><span class="lab">5. 新着コラム ＋ ランキング</span>
+      <div class="in row">
+        <div style="flex:2">
+          <div class="list-item"><div class="ph thumb"></div><div><div class="t">コラム記事タイトル1</div><div class="m">公開日 YYYY.MM.DD／#タグ</div></div></div>
+          <div class="list-item"><div class="ph thumb"></div><div><div class="t">コラム記事タイトル2</div><div class="m">更新日・公開日 2軸表示／#タグ</div></div></div>
+          <div class="list-item"><div class="ph thumb"></div><div><div class="t">コラム記事タイトル3</div><div class="m">公開日／#タグ</div></div></div>
+          <div class="center" style="margin-top:8px"><span class="btn">コラム一覧を見る →</span></div>
+        </div>
+        <div class="col-side">
+          <div class="card">
+            <div class="t">人気ランキング（PV／WPP）</div>
+            <div class="rank"><span class="no">1</span>実績orコラム タイトル</div>
+            <div class="rank"><span class="no">2</span>タイトル</div>
+            <div class="rank"><span class="no">3</span>タイトル</div>
+            <div class="rank"><span class="no">4</span>タイトル</div>
+            <div class="rank"><span class="no">5</span>タイトル</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="blk"><span class="lab">6. お知らせ（最新3件）</span>
+      <div class="in">
+        <div class="rank"><span class="sub">2026.07.01</span>お知らせテキストリンク1</div>
+        <div class="rank"><span class="sub">2026.06.15</span>お知らせテキストリンク2</div>
+        <div class="rank"><span class="sub">2026.06.01</span>お知らせテキストリンク3</div>
+      </div>
+    </div>
+
+    <div class="blk"><span class="lab">7. 資料DL CTA</span>
+      <div class="in row">
+        <div class="ph" style="flex:0 0 140px;height:70px">資料サムネ</div>
+        <div><div class="t">職務経歴書・実績資料のダウンロード誘導コピー</div><span class="btn fill">資料ダウンロード →</span></div>
+      </div>
+    </div>
+
+    <div class="blk"><span class="lab">8. プロフィールダイジェスト</span>
+      <div class="in row">
+        <div class="ph" style="flex:0 0 90px;height:90px;border-radius:50%">顔写真</div>
+        <div><div class="t">小林 慎之助</div><div class="sub">肩書／3行紹介テキスト</div><span class="btn" style="margin-top:6px">プロフィール詳細 →</span></div>
+      </div>
+    </div>
+
+    <div class="blk"><span class="lab">9. お問い合わせCTA（全幅）</span>
+      <div class="in center"><div class="t">お仕事のご相談・採用に関するご連絡はこちら</div><span class="btn fill">お問い合わせ →</span></div>
+    </div>
+
+    <div class="blk"><span class="lab">FOOTER（全ページ共通）</span>
+      <div class="in row">
+        <div><div class="ph" style="height:36px;width:150px">ロゴ</div><div class="sub" style="margin-top:4px">サイト説明1行／©表記</div></div>
+        <div class="sub">サイトマップ：実績／コラム／お知らせ／プロフィール／条件から探す／資料DL／About／お問い合わせ／プライバシーポリシー</div>
+        <div class="ph" style="flex:0 0 110px;height:36px">SNSアイコン</div>
+      </div>
+    </div>
+
+  </div>
+  <div class="note"><b>仕様メモ（トップ）</b>
+    <ol>
+      <li>ブロック順は設計書 §5.3 に対応。ヒーローは LCP 対策で動画不使用。</li>
+      <li>ティッカー・ランキング・注目実績はすべて実績詳細への回遊装置として機能させる。</li>
+      <li>SP時：ヘッダーはロゴ＋検索＋ハンバーガーに集約、カードは1〜2列に落とす。</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ========== ② WORKS LIST ========== -->
+<section class="screen" id="s2">
+  <div class="screen-head"><h2>② 実績一覧</h2><span class="url">/works/</span></div>
+  <div class="frame">
+    <div class="blk plain"><span class="lab">共通ヘッダー</span><div class="in ph" style="height:34px">HEADER（①参照）</div></div>
+
+    <div class="blk"><span class="lab">サブページMV＋パンくず</span>
+      <div class="in">
+        <div class="ph" style="height:70px">英字ラベル「works」＋ H1「実績」＋装飾ビジュアル</div>
+        <div class="sub" style="margin-top:6px">top &gt; 実績</div>
+      </div>
+    </div>
+
+    <div class="blk"><span class="lab">おすすめ実績（ピックアップ）</span>
+      <div class="in row">
+        <div class="card"><div class="ph thumb"></div><div class="t">おすすめ実績A</div><div class="m">種別／#タグ</div></div>
+        <div class="card"><div class="ph thumb"></div><div class="t">おすすめ実績B</div><div class="m">種別／#タグ</div></div>
+      </div>
+    </div>
+
+    <div class="blk"><span class="lab">キーワード絞り込み</span>
+      <div class="in">
+        <span class="check">すべて</span><span class="check">#WordPress</span><span class="check">#UIデザイン</span><span class="check">#採用サイト</span><span class="check">#Next.js</span><span class="check">#SEO</span><span class="check">#LP</span>
+        <div style="margin-top:8px"><span class="btn fill">条件から実績を探す</span>　<span class="btn">条件をリセット</span></div>
+      </div>
+    </div>
+
+    <div class="blk"><span class="lab">実績グリッド＋サイド</span>
+      <div class="in row">
+        <div style="flex:2.4">
+          <div class="row">
+            <div class="card"><div class="ph thumb"></div><div class="t">実績タイトル1</div><div class="m">種別バッジ／期間／#タグ</div></div>
+            <div class="card"><div class="ph thumb"></div><div class="t">実績タイトル2</div><div class="m">種別バッジ／期間／#タグ</div></div>
+          </div>
+          <div class="row" style="margin-top:10px">
+            <div class="card"><div class="ph thumb"></div><div class="t">実績タイトル3</div><div class="m">種別バッジ／期間／#タグ</div></div>
+            <div class="card"><div class="ph thumb"></div><div class="t">実績タイトル4</div><div class="m">種別バッジ／期間／#タグ</div></div>
+          </div>
+          <div class="pager" style="margin-top:14px"><span class="cur">1</span><span>2</span><span>3</span><span>…</span><span>»</span></div>
+        </div>
+        <div class="col-side">
+          <div class="card" style="margin-bottom:10px">
+            <div class="t">人気実績ランキング</div>
+            <div class="rank"><span class="no">1</span>タイトル</div>
+            <div class="rank"><span class="no">2</span>タイトル</div>
+            <div class="rank"><span class="no">3</span>タイトル</div>
+            <div class="rank"><span class="no">4</span>タイトル</div>
+            <div class="rank"><span class="no">5</span>タイトル</div>
+          </div>
+          <div class="card"><div class="t">タグクラウド</div><span class="chip">#WordPress</span><span class="chip">#UI</span><span class="chip">#SEO</span><span class="chip">#LP</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="blk plain"><span class="lab">共通フッター</span><div class="in ph" style="height:34px">FOOTER（①参照）</div></div>
+  </div>
+  <div class="note"><b>仕様メモ（実績一覧）</b>
+    <ol>
+      <li>絞り込みは skill タグの複数選択（OR）。適用時は /searches/?type=works&amp;skill=… へ遷移し条件検索と共通ロジックを使う。</li>
+      <li>カードは PC 2〜3列、SP 1列。バッジは works_type ターム。</li>
+      <li>0件時は「該当なし＋人気実績」を代替表示（設計書 §5.12）。</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ========== ③ WORKS DETAIL ========== -->
+<section class="screen" id="s3">
+  <div class="screen-head"><h2>③ 実績詳細</h2><span class="url">/works/{slug}/</span></div>
+  <div class="frame">
+    <div class="blk plain"><span class="lab">共通ヘッダー</span><div class="in ph" style="height:34px">HEADER</div></div>
+
+    <div class="blk"><span class="lab">タイトル＋メタ</span>
+      <div class="in">
+        <div class="sub">top &gt; 実績 &gt; 本ページ</div>
+        <div style="font-size:18px;font-weight:700;margin:6px 0">実績タイトル（案件名）</div>
+        <div class="sub">公開日 YYYY.MM.DD ／ 更新日 YYYY.MM.DD ／ <span class="chip">種別バッジ</span> <span class="chip">#タグ</span><span class="chip">#タグ</span></div>
+      </div>
+    </div>
+
+    <div class="blk"><span class="lab">メインビジュアル</span><div class="in ph" style="height:170px">サイトスクリーンショット等</div></div>
+
+    <div class="blk"><span class="lab">概要テーブル（ACF）</span>
+      <div class="in">
+        <table class="wire">
+          <tr><th>クライアント</th><td>クライアント名（許諾済み表記／非公開時は「非公開（業界名）」）</td></tr>
+          <tr><th>業界</th><td>industry ターム</td></tr>
+          <tr><th>期間</th><td>YYYY.MM 〜 YYYY.MM</td></tr>
+          <tr><th>役割</th><td>role（例：デザイン＋実装）</td></tr>
+          <tr><th>担当範囲</th><td>scope（要件定義／設計／デザイン／実装／運用）</td></tr>
+          <tr><th>使用技術</th><td>tech_stack</td></tr>
+          <tr><th>URL</th><td>site_url（任意・外部リンク）</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="blk"><span class="lab">本文</span>
+      <div class="in">
+        <div class="ph" style="height:40px">h2：背景・課題</div>
+        <div class="ph" style="height:40px;margin-top:6px">h2：アプローチ（工夫・プロセス）</div>
+        <div class="ph" style="height:40px;margin-top:6px">h2：成果</div>
+        <div class="row" style="margin-top:8px">
+          <div class="card center"><div class="t">KPI 1</div><div class="sub">数値成果（kpi_results）</div></div>
+          <div class="card center"><div class="t">KPI 2</div><div class="sub">数値成果</div></div>
+          <div class="card center"><div class="t">KPI 3</div><div class="sub">数値成果</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="blk"><span class="lab">ギャラリー</span>
+      <div class="in row"><div class="ph" style="height:70px"></div><div class="ph" style="height:70px"></div><div class="ph" style="height:70px"></div></div>
+    </div>
+
+    <div class="blk"><span class="lab">シェア＋CTA</span>
+      <div class="in center">
+        <span class="chip">X</span><span class="chip">Facebook</span><span class="chip">はてな</span><span class="chip">URLコピー</span>
+        <div style="margin-top:10px"><span class="btn fill">この実績について問い合わせる</span>　<span class="btn">職務経歴書DL</span></div>
+      </div>
+    </div>
+
+    <div class="blk"><span class="lab">関連実績（同タクソノミー3件）</span>
+      <div class="in row">
+        <div class="card"><div class="ph thumb"></div><div class="t">関連実績1</div></div>
+        <div class="card"><div class="ph thumb"></div><div class="t">関連実績2</div></div>
+        <div class="card"><div class="ph thumb"></div><div class="t">関連実績3</div></div>
+      </div>
+    </div>
+
+    <div class="blk plain"><span class="lab">共通フッター</span><div class="in ph" style="height:34px">FOOTER</div></div>
+  </div>
+  <div class="note"><b>仕様メモ（実績詳細）</b>
+    <ol>
+      <li>本文は「背景・課題→アプローチ→成果」の型で統一。数値成果はカードで強調。</li>
+      <li>構造化データ Article＋BreadcrumbList を出力。OGP は メインビジュアルを使用。</li>
+      <li>CTA はページ下部固定ではなく本文末尾配置（読了後の自然な導線）。</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ========== ④ COLUMN LIST ========== -->
+<section class="screen" id="s4">
+  <div class="screen-head"><h2>④ コラム一覧</h2><span class="url">/column/</span></div>
+  <div class="frame">
+    <div class="blk plain"><span class="lab">共通ヘッダー</span><div class="in ph" style="height:34px">HEADER</div></div>
+    <div class="blk"><span class="lab">サブページMV＋パンくず</span><div class="in ph" style="height:60px">英字ラベル「column」＋ H1「コラム」／ top &gt; コラム</div></div>
+
+    <div class="blk"><span class="lab">おすすめ記事</span>
+      <div class="in row">
+        <div class="card"><div class="ph thumb"></div><div class="t">おすすめ記事A</div><div class="m">#タグ</div></div>
+        <div class="card"><div class="ph thumb"></div><div class="t">おすすめ記事B</div><div class="m">#タグ</div></div>
+        <div class="card"><div class="ph thumb"></div><div class="t">おすすめ記事C</div><div class="m">#タグ</div></div>
+      </div>
+    </div>
+
+    <div class="blk"><span class="lab">キーワード絞り込み</span>
+      <div class="in"><span class="check">すべて</span><span class="check">#WordPress</span><span class="check">#SEO</span><span class="check">#制作記録</span><span class="check">#キャリア</span>　<span class="btn">絞り込む</span></div>
+    </div>
+
+    <div class="blk"><span class="lab">新着記事＋サイド</span>
+      <div class="in row">
+        <div style="flex:2.4">
+          <div class="list-item"><div class="ph thumb"></div><div><div class="t">記事タイトル1</div><div class="m">公開日 YYYY.MM.DD／#タグ</div></div></div>
+          <div class="list-item"><div class="ph thumb"></div><div><div class="t">記事タイトル2</div><div class="m">更新日 YYYY.MM.DD・公開日 YYYY.MM.DD／#タグ</div></div></div>
+          <div class="list-item"><div class="ph thumb"></div><div><div class="t">記事タイトル3</div><div class="m">公開日／#タグ</div></div></div>
+          <div class="list-item"><div class="ph thumb"></div><div><div class="t">記事タイトル4</div><div class="m">公開日／#タグ</div></div></div>
+          <div class="pager" style="margin-top:14px"><span class="cur">1</span><span>2</span><span>3</span><span>…</span><span>»</span></div>
+        </div>
+        <div class="col-side">
+          <div class="card">
+            <div class="t">人気記事ランキング</div>
+            <div class="rank"><span class="no">1</span>タイトル</div>
+            <div class="rank"><span class="no">2</span>タイトル</div>
+            <div class="rank"><span class="no">3</span>タイトル</div>
+            <div class="rank"><span class="no">4</span>タイトル</div>
+            <div class="rank"><span class="no">5</span>タイトル</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="blk plain"><span class="lab">共通フッター</span><div class="in ph" style="height:34px">FOOTER</div></div>
+  </div>
+  <div class="note"><b>仕様メモ（コラム）</b>
+    <ol>
+      <li>公開日・更新日の2軸表示。更新があるものだけ更新日を先頭に出す。</li>
+      <li>詳細ページは タイトル→目次（h2自動生成）→本文→執筆者ボックス→関連記事→CTA の順（設計書 §5.6）。</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ========== ⑤ SEARCH ========== -->
+<section class="screen" id="s5">
+  <div class="screen-head"><h2>⑤ 条件から探す</h2><span class="url">/searches/</span></div>
+  <div class="frame">
+    <div class="blk plain"><span class="lab">共通ヘッダー</span><div class="in ph" style="height:34px">HEADER</div></div>
+    <div class="blk"><span class="lab">サブページMV＋パンくず</span><div class="in ph" style="height:60px">英字ラベル「search」＋ H1「条件から探す」</div></div>
+
+    <div class="blk"><span class="lab">検索条件フォーム</span>
+      <div class="in">
+        <table class="wire">
+          <tr><th>フリーワード</th><td><div class="ph" style="height:26px;max-width:380px">テキスト入力</div></td></tr>
+          <tr><th>期間</th><td><span class="chip">年月を選択 ▼</span> 〜 <span class="chip">年月を選択 ▼</span></td></tr>
+          <tr><th>種別</th><td><span class="check">実績</span><span class="check">コラム</span><span class="check">お知らせ</span></td></tr>
+          <tr><th>キーワード</th><td>
+            <span class="check">#WordPress</span><span class="check">#UIデザイン</span><span class="check">#採用サイト</span><span class="check">#Next.js</span><span class="check">#SEO</span><span class="check">#LP</span><span class="check">#制作記録</span><span class="check">#キャリア</span>
+            <div class="sub" style="margin-top:4px">［すべて表示する ▼］初期は主要タグのみ表示</div>
+          </td></tr>
+        </table>
+        <div class="center" style="margin-top:10px"><span class="btn fill">この条件で探す</span>　<span class="btn">条件をリセット</span></div>
+      </div>
+    </div>
+
+    <div class="blk"><span class="lab">検索結果</span>
+      <div class="in">
+        <div style="margin-bottom:8px"><span class="chip">公開順</span><span class="chip" style="background:#e8eaed">更新順</span><span class="sub">　全 NN 件</span></div>
+        <div class="list-item"><div class="ph thumb"></div><div><span class="chip">実績</span><div class="t">結果タイトル1</div><div class="m">公開日／#タグ</div></div></div>
+        <div class="list-item"><div class="ph thumb"></div><div><span class="chip">コラム</span><div class="t">結果タイトル2</div><div class="m">更新日・公開日／#タグ</div></div></div>
+        <div class="list-item"><div class="ph thumb"></div><div><span class="chip">実績</span><div class="t">結果タイトル3</div><div class="m">公開日／#タグ</div></div></div>
+        <div class="pager" style="margin-top:14px"><span class="cur">1</span><span>2</span><span>3</span><span>…</span><span>»</span></div>
+      </div>
+    </div>
+
+    <div class="blk plain"><span class="lab">共通フッター</span><div class="in ph" style="height:34px">FOOTER</div></div>
+  </div>
+  <div class="note"><b>仕様メモ（条件検索）</b>
+    <ol>
+      <li>条件は GET クエリで保持（URL共有・戻る対応）。種別×期間×タグ×ワードの AND、タグ内は OR。</li>
+      <li>ヘッダー検索窓・ティッカー・一覧の絞り込みはすべて本ページのロジックに集約する。</li>
+      <li>0件時は「条件に一致なし」＋人気コンテンツ表示。</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ========== ⑥ PROFILE ========== -->
+<section class="screen" id="s6">
+  <div class="screen-head"><h2>⑥ プロフィール</h2><span class="url">/profile/</span></div>
+  <div class="frame">
+    <div class="blk plain"><span class="lab">共通ヘッダー</span><div class="in ph" style="height:34px">HEADER</div></div>
+    <div class="blk"><span class="lab">サブページMV＋パンくず</span><div class="in ph" style="height:60px">英字ラベル「profile」＋ H1「プロフィール」</div></div>
+
+    <div class="blk"><span class="lab">基本情報</span>
+      <div class="in row">
+        <div class="ph" style="flex:0 0 120px;height:120px;border-radius:50%">顔写真</div>
+        <div>
+          <div class="sub">こばやし しんのすけ</div>
+          <div style="font-size:18px;font-weight:700">小林 慎之助</div>
+          <div class="sub">肩書（例：Webデザイナー／ディレクター）</div>
+          <div class="ph" style="height:44px;margin-top:8px;max-width:520px">自己紹介文（3〜5行）</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="blk"><span class="lab">経歴タイムライン</span>
+      <div class="in">
+        <div class="rank"><span class="sub" style="flex:0 0 90px">YYYY.MM</span>経歴エントリ（所属・役割・実績サマリ）</div>
+        <div class="rank"><span class="sub" style="flex:0 0 90px">YYYY.MM</span>経歴エントリ</div>
+        <div class="rank"><span class="sub" style="flex:0 0 90px">YYYY.MM</span>経歴エントリ</div>
+      </div>
+    </div>
+
+    <div class="blk"><span class="lab">スキル</span>
+      <div class="in row">
+        <div class="card"><div class="t">デザイン</div><span class="chip">Figma ●●●○</span><span class="chip">Photoshop ●●○○</span></div>
+        <div class="card"><div class="t">実装</div><span class="chip">WordPress ●●●●</span><span class="chip">Next.js ●●○○</span></div>
+        <div class="card"><div class="t">その他</div><span class="chip">SEO</span><span class="chip">ディレクション</span></div>
+      </div>
+    </div>
+
+    <div class="blk"><span class="lab">資格・受賞／対応可能領域</span>
+      <div class="in row">
+        <div class="ph" style="height:50px">資格・受賞リスト</div>
+        <div class="ph" style="height:50px">対応可能領域（依頼メニュー：サイト制作／改善／顧問 等）</div>
+      </div>
+    </div>
+
+    <div class="blk"><span class="lab">SNS＋CTA</span>
+      <div class="in center"><div class="ph" style="height:30px;max-width:220px;margin:0 auto">SNSアイコン群</div><div style="margin-top:10px"><span class="btn fill">お問い合わせ →</span>　<span class="btn">職務経歴書DL</span></div></div>
+    </div>
+
+    <div class="blk plain"><span class="lab">共通フッター</span><div class="in ph" style="height:34px">FOOTER</div></div>
+  </div>
+  <div class="note"><b>仕様メモ（プロフィール）</b>
+    <ol>
+      <li>参考サイトの「執筆者一覧」を1名構成に再設計。構造化データ Person を出力。</li>
+      <li>スキル習熟度の見せ方（●表記／バー／年数）はデザインフェーズで確定。</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ========== ⑦ CONTACT ========== -->
+<section class="screen" id="s7">
+  <div class="screen-head"><h2>⑦ お問い合わせ</h2><span class="url">/contact/</span></div>
+  <div class="frame">
+    <div class="blk plain"><span class="lab">共通ヘッダー</span><div class="in ph" style="height:34px">HEADER</div></div>
+    <div class="blk"><span class="lab">サブページMV＋パンくず</span><div class="in ph" style="height:60px">英字ラベル「contact」＋ H1「お問い合わせ」</div></div>
+
+    <div class="blk"><span class="lab">フォーム（Contact Form 7）</span>
+      <div class="in">
+        <table class="wire">
+          <tr><th>氏名 *</th><td><div class="ph" style="height:26px;max-width:320px"></div></td></tr>
+          <tr><th>会社名</th><td><div class="ph" style="height:26px;max-width:320px"></div></td></tr>
+          <tr><th>メール *</th><td><div class="ph" style="height:26px;max-width:320px"></div></td></tr>
+          <tr><th>種別 *</th><td><span class="check">採用について</span><span class="check">案件のご相談</span><span class="check">その他</span></td></tr>
+          <tr><th>本文 *</th><td><div class="ph" style="height:70px"></div></td></tr>
+          <tr><th>同意 *</th><td><span class="check">プライバシーポリシーに同意する（/privacy/ へリンク）</span></td></tr>
+        </table>
+        <div class="center" style="margin-top:12px"><span class="btn fill">送信する</span></div>
+        <div class="sub center" style="margin-top:6px">reCAPTCHA v3／インラインバリデーション／送信後 /contact/thanks/ へ</div>
+      </div>
+    </div>
+
+    <div class="blk"><span class="lab">代替導線</span>
+      <div class="in center sub">フォーム以外の連絡先：SNS DM ／ メールアドレス（画像 or 難読化表記）</div>
+    </div>
+
+    <div class="blk plain"><span class="lab">共通フッター</span><div class="in ph" style="height:34px">FOOTER</div></div>
+  </div>
+  <div class="note"><b>仕様メモ（お問い合わせ）</b>
+    <ol>
+      <li>thanks ページ到達を GA4 コンバージョンとして計測（F-13）。</li>
+      <li>種別の選択値は通知メール件名に反映し、採用系と案件系を振り分けやすくする。</li>
+    </ol>
+  </div>
+</section>
+
+<script>
+  var tabs=document.querySelectorAll('.tab');
+  tabs.forEach(function(t){
+    t.addEventListener('click',function(){
+      tabs.forEach(function(x){x.classList.remove('active')});
+      document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
+      t.classList.add('active');
+      document.getElementById(t.dataset.s).classList.add('active');
+      window.scrollTo(0,0);
+    });
+  });
+</script>
+</body>
+</html>
