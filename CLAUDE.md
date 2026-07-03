@@ -56,6 +56,12 @@
 6. 運用設定（残り）: SEO SIMPLE PACKでOGP設定、GA4/GTM設置、SiteGuardログインURL変更、BackWPupスケジュール、GCEスナップショット週次、実績アイキャッチ画像の差し込み（ユーザーがWP管理画面から）
 7. Phase 2候補: 登壇イベントCPT有効化、スキル辞典、構造化データ強化（Person/Article JSON-LD）
 
+## リポジトリ・CI/CD（2026-07-04〜）
+
+- **GitHub**: git@github.com:shinnon21/main.git（公開。旧Next.jsアプリはクリア済み。個人文書は.gitignoreで除外）
+- **自動デプロイ**: mainへのpushで `.github/workflows/deploy.yml` が `kobayashi-theme/` をVMへrsync反映（テーマ変更時のみ発火・手動実行も可）。VM側は制限付きsudoの `deployer` ユーザー＋`/usr/local/bin/kb-deploy-theme.sh`。秘密鍵はGitHub Secret `DEPLOY_SSH_KEY`
+- **注意**: DBコンテンツ（記事・設定）はgit管理外。テーマ以外のファイル変更は自動デプロイされない
+
 ## 制約・注意
 
 - **参考サイト（amita-oshiete.jp）のロゴ・文章・画像・テーマコードの流用は禁止**（情報設計の踏襲のみ可）。現テーマは全コード・コピー・素材ともオリジナル
