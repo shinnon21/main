@@ -27,6 +27,14 @@ add_action( 'wp_enqueue_scripts', function () {
 	wp_enqueue_script( 'kb-main', get_template_directory_uri() . '/assets/main.js', array(), '1.0.0', true );
 } );
 
+/* ---------- ファビコン（Shinnosuke.svg 由来の最適化PNG） ---------- */
+add_action( 'wp_head', function () {
+	$img = get_template_directory_uri() . '/assets/img';
+	echo '<link rel="icon" type="image/png" sizes="32x32" href="' . esc_url( $img . '/favicon-32.png' ) . '">' . "\n";
+	echo '<link rel="icon" type="image/png" sizes="192x192" href="' . esc_url( $img . '/favicon-192.png' ) . '">' . "\n";
+	echo '<link rel="apple-touch-icon" href="' . esc_url( $img . '/apple-touch-icon.png' ) . '">' . "\n";
+}, 5 );
+
 /* ---------- カスタム投稿タイプ（設計書 §6.1） ---------- */
 add_action( 'init', function () {
 
