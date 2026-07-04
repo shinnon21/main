@@ -155,9 +155,9 @@ if ( $news->have_posts() ) : ?>
 		<div class="prof">
 			<?php kb_avatar(); ?>
 			<div>
-				<p class="kana">こばやし しんのすけ</p>
-				<h2>小林 慎之助</h2>
-				<p class="role">Weeave株式会社 共同創業者・代表取締役 CEO ／ 筑波大学 理工学群 社会工学類 経営工学主専攻</p>
+				<p class="kana"><?php echo esc_html( kb_profile_field( 'profile_kana' ) ); ?></p>
+				<h2><?php echo esc_html( kb_profile_field( 'profile_name' ) ); ?></h2>
+				<p class="role"><?php echo esc_html( kb_profile_field( 'profile_role' ) ); ?></p>
 				<p>筑波大学で経営工学を学びながら、政治・行政・企業のDXと社会課題の解決に取り組む学生起業家。データドリブンな戦略立案とコミュニティ構築を強みに、「構想で終わらせず、現場で使われる仕組みとして社会に実装する」ことにこだわり続けています。</p>
 				<div class="p-cta">
 					<a class="btn primary" href="<?php echo esc_url( home_url( '/profile/' ) ); ?>">プロフィール詳細 →</a>

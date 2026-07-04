@@ -157,6 +157,58 @@ function kb_field( $key, $id = null ) {
 	return get_post_meta( $id, $key, true );
 }
 
+/* ---------- プロフィール編集フィールド ----------
+   固定ページ「プロフィール」の入力欄（inc/acf-fields.php で登録）から
+   取得し、未入力の項目は下記の初期値で表示する。編集画面にも同じ
+   初期値がプリセットされるため、保存前後で見た目は変わらない */
+function kb_profile_defaults() {
+	return array(
+		'profile_kana' => 'こばやし しんのすけ',
+		'profile_name' => '小林 慎之助',
+		'profile_role' => 'Weeave株式会社 共同創業者・代表取締役 CEO ／ 筑波大学 理工学群 社会工学類 経営工学主専攻',
+		'profile_bio'  => '筑波大学で経営工学を学びながら、政治・行政・企業のDXと社会課題の解決に取り組む学生起業家。データドリブンな戦略立案と、人と人をつなぐコミュニティ構築を強みに、「構想で終わらせず、現場で使われる仕組みとして社会に実装する」ことに一貫してこだわっています。長期的には「日本の技術を社会に届けるコーディネーター」として、ディープテックの社会実装をビジネス・資本構造の側から支えることを目指しています。',
+		'profile_career' => implode( "\n", array(
+			'2025.09 – | Weeave株式会社 共同創業・代表取締役 CEO | 政治・行政・企業のDXを推進する筑波大学認定スタートアップを共同創業。政治DX・広報戦略支援、地域ニーズの可視化、システム開発・社会実装の3本柱で事業を展開。',
+			'2025.01 – 2025.12 | JSIP（Japan Southeast Asia Innovation Platform）Community Accelerator | シンガポール拠点で日本企業の東南アジア進出を支援。約3ヶ月で100名近い新規事業担当者と接点を構築。',
+			'2025.04 – 2025.09 | 衆議院議員事務所 Digital Transformation Manager | 政治・立法活動のDXを担当。独自の選挙シミュレーションモデルを開発し、データドリブンな戦略立案を支援。',
+			'2024.11 – 2025.06 | RULEMAKERS DAO Team Manager | 「RIFT」ブランド確立のためのマルチチャネル・マーケティング戦略を立案・実行。',
+			'2024.04 – 2025.03 | AIESEC Business Development Manager | 渉外統括として企業パートナーとの関係構築、ディープテック×学生のイベント企画を推進。',
+			'2024.01 – 2024.12 | 株式会社Geears Growth Marketing Intern | 大学1年次に直談判で参画。政治ブランディング等の戦略立案を主導し、のちのWeeave共同創業の起点に。',
+			'2023.04 – | 筑波大学 理工学群 社会工学類 入学（経営工学主専攻） | 2027年3月卒業見込み。2027年4月より同大学院サービス工学学位プログラムに進学予定（有馬澄佳研究室）。',
+		) ),
+		'profile_skills' => implode( "\n", array(
+			'事業開発・DX | 事業開発・新規事業創出、DX推進（政治・行政・企業）、クロスボーダー事業開発',
+			'データ・分析 | データ分析、選挙シミュレーション、経営工学／OR',
+			'マーケティング・コミュニティ | マーケティング・広報、ブランディング、コミュニティ構築、イベント企画',
+			'言語 | 日本語（母語）、英語（ビジネスレベル）',
+		) ),
+		'profile_research_title' => '下水サーベイランスを起点とした医薬品サプライチェーンの予兆・予動最適化システム',
+		'profile_research_body'  => '下水サーベイランス（WBE）による感染流行の先行予測を医薬品サプライチェーンの在庫・物流の意思決定へ統合し、「事後対応」から「予兆・予動管理」への転換を目指す研究。有馬澄佳研究室にて、オペレーションズ・リサーチと公衆衛生データを架橋する社会実装志向のテーマに取り組んでいます。',
+		'profile_activities' => implode( "\n", array(
+			'静岡県議会議員向け AI勉強会（主催・講師）— 政治現場での生成AI活用を講義',
+			'「戦略的大学生活のススメ vol.49」ピッチ登壇（2025.04／Tsukuba Place Lab）',
+			'JSIP公式メディア インターン体験インタビュー掲載',
+		) ),
+	);
+}
+function kb_profile_field( $key ) {
+	static $page_id = null;
+	if ( $page_id === null ) {
+		$p = get_page_by_path( 'profile' );
+		$page_id = $p ? $p->ID : 0;
+	}
+	$v = $page_id ? kb_field( $key, $page_id ) : '';
+	if ( is_string( $v ) && trim( $v ) !== '' ) {
+		return trim( $v );
+	}
+	$d = kb_profile_defaults();
+	return isset( $d[ $key ] ) ? $d[ $key ] : '';
+}
+/* 「1行1項目」形式のフィールドを行配列で返す */
+function kb_profile_lines( $key ) {
+	return array_values( array_filter( array_map( 'trim', preg_split( '/\r\n|\r|\n/', kb_profile_field( $key ) ) ), 'strlen' ) );
+}
+
 /* ---------- 公開日・更新日の2軸表示（設計書 §6.4） ---------- */
 function kb_dates() {
 	$pub = get_the_date( 'Y.m.d' );

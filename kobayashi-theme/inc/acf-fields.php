@@ -130,6 +130,101 @@ add_action( 'acf/init', function () {
 		'position' => 'normal',
 	) );
 
+	/* ---------- プロフィール編集（page-profile.phpテンプレートのページ） ----------
+	   無印ACFで動くよう「1行1項目＋パイプ区切り」のテキスト欄で構成。
+	   default_value は現在の掲載内容（functions.php の kb_profile_defaults）。
+	   未保存でもテンプレート側が同じ初期値にフォールバックする */
+	$pd  = function_exists( 'kb_profile_defaults' ) ? kb_profile_defaults() : array();
+	$pdv = function ( $k ) use ( $pd ) { return isset( $pd[ $k ] ) ? $pd[ $k ] : ''; };
+	acf_add_local_field_group( array(
+		'key'      => 'group_kb_profile',
+		'title'    => 'プロフィール編集',
+		'fields'   => array(
+			array(
+				'key'           => 'field_kb_pf_kana',
+				'name'          => 'profile_kana',
+				'label'         => 'ふりがな',
+				'type'          => 'text',
+				'default_value' => $pdv( 'profile_kana' ),
+				'wrapper'       => array( 'width' => '34' ),
+			),
+			array(
+				'key'           => 'field_kb_pf_name',
+				'name'          => 'profile_name',
+				'label'         => '名前',
+				'type'          => 'text',
+				'default_value' => $pdv( 'profile_name' ),
+				'wrapper'       => array( 'width' => '66' ),
+			),
+			array(
+				'key'           => 'field_kb_pf_role',
+				'name'          => 'profile_role',
+				'label'         => '肩書き',
+				'type'          => 'text',
+				'default_value' => $pdv( 'profile_role' ),
+			),
+			array(
+				'key'           => 'field_kb_pf_bio',
+				'name'          => 'profile_bio',
+				'label'         => '自己紹介文',
+				'type'          => 'textarea',
+				'rows'          => 5,
+				'default_value' => $pdv( 'profile_bio' ),
+			),
+			array(
+				'key'           => 'field_kb_pf_career',
+				'name'          => 'profile_career',
+				'label'         => '経歴（1行につき1項目・新しい順）',
+				'type'          => 'textarea',
+				'rows'          => 9,
+				'instructions'  => '書式: 期間 | タイトル | 説明　（説明は省略可。「|」で区切る）',
+				'default_value' => $pdv( 'profile_career' ),
+			),
+			array(
+				'key'           => 'field_kb_pf_skills',
+				'name'          => 'profile_skills',
+				'label'         => 'スキル・強み（1行につき1グループ）',
+				'type'          => 'textarea',
+				'rows'          => 5,
+				'instructions'  => '書式: グループ名 | スキル、スキル、スキル　（スキルは読点「、」区切り）',
+				'default_value' => $pdv( 'profile_skills' ),
+			),
+			array(
+				'key'           => 'field_kb_pf_research_title',
+				'name'          => 'profile_research_title',
+				'label'         => '研究テーマ（タイトル）',
+				'type'          => 'text',
+				'default_value' => $pdv( 'profile_research_title' ),
+			),
+			array(
+				'key'           => 'field_kb_pf_research_body',
+				'name'          => 'profile_research_body',
+				'label'         => '研究テーマ（説明）',
+				'type'          => 'textarea',
+				'rows'          => 4,
+				'default_value' => $pdv( 'profile_research_body' ),
+			),
+			array(
+				'key'           => 'field_kb_pf_activities',
+				'name'          => 'profile_activities',
+				'label'         => '登壇・対外活動（1行につき1項目）',
+				'type'          => 'textarea',
+				'rows'          => 4,
+				'default_value' => $pdv( 'profile_activities' ),
+			),
+		),
+		'location' => array(
+			array(
+				array(
+					'param'    => 'page_template',
+					'operator' => '==',
+					'value'    => 'page-profile.php',
+				),
+			),
+		),
+		'position' => 'normal',
+	) );
+
 	/* ---------- 資料情報（投稿タイプ: document） ---------- */
 	acf_add_local_field_group( array(
 		'key'      => 'group_kb_document_info',
