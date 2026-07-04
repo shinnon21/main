@@ -226,7 +226,7 @@ function kb_sns_accounts() {
 	return array(
 		'linkedin'  => array( 'label' => 'LinkedIn', 'url' => 'https://www.linkedin.com/in/shinnosuke-kobayashi/' ),
 		'facebook'  => array( 'label' => 'Facebook', 'url' => 'https://www.facebook.com/shinnon21' ),
-		'instagram' => array( 'label' => 'Instagram', 'url' => '' ),
+		'instagram' => array( 'label' => 'Instagram', 'url' => 'https://www.instagram.com/shinnon21/' ),
 	);
 }
 function kb_sns_links() {
