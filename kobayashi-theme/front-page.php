@@ -93,44 +93,10 @@ if ( $featured->have_posts() ) : ?>
 </section>
 <?php endif; wp_reset_postdata(); ?>
 
-<!-- 4. 新着実績 -->
-<?php $new_works = new WP_Query( array( 'post_type' => 'works', 'posts_per_page' => 6 ) );
-if ( $new_works->have_posts() ) : ?>
-<section class="sec" style="padding-top:0">
-	<div class="container">
-		<div class="sec-head">
-			<div class="l"><p class="lbl">works</p><h2>新着実績</h2></div>
-			<a class="more" href="<?php echo esc_url( get_post_type_archive_link( 'works' ) ); ?>">すべて見る →</a>
-		</div>
-		<div class="grid3">
-			<?php while ( $new_works->have_posts() ) : $new_works->the_post(); get_template_part( 'parts/card', 'works' ); endwhile; ?>
-		</div>
-		<div class="center-btn"><a class="btn ghost" href="<?php echo esc_url( get_post_type_archive_link( 'works' ) ); ?>">実績一覧を見る →</a></div>
-	</div>
-</section>
-<?php endif; wp_reset_postdata(); ?>
-
-<!-- 5. 新着コラム＋ランキング -->
-<?php $cols = new WP_Query( array( 'post_type' => 'column', 'posts_per_page' => 4 ) );
-if ( $cols->have_posts() ) : ?>
-<section class="sec" style="background:#fff">
-	<div class="container col-wrap">
-		<div>
-			<div class="sec-head">
-				<div class="l"><p class="lbl">column</p><h2>新着コラム</h2></div>
-				<a class="more" href="<?php echo esc_url( get_post_type_archive_link( 'column' ) ); ?>">コラム一覧へ →</a>
-			</div>
-			<?php while ( $cols->have_posts() ) : $cols->the_post(); get_template_part( 'parts/card', 'column' ); endwhile; wp_reset_postdata(); ?>
-		</div>
-		<aside><?php get_template_part( 'parts/side-ranking' ); ?></aside>
-	</div>
-</section>
-<?php endif; ?>
-
-<!-- 6. お知らせ -->
+<!-- 4. お知らせ -->
 <?php $news = new WP_Query( array( 'post_type' => 'news', 'posts_per_page' => 3 ) );
 if ( $news->have_posts() ) : ?>
-<section class="sec">
+<section class="sec" style="padding-top:0">
 	<div class="container">
 		<div class="sec-head">
 			<div class="l"><p class="lbl">news</p><h2>お知らせ</h2></div>
@@ -149,8 +115,25 @@ if ( $news->have_posts() ) : ?>
 </section>
 <?php endif; ?>
 
-<!-- 8. プロフィールダイジェスト -->
-<section class="sec" style="padding-top:0">
+<!-- 5. 新着コラム＋ランキング -->
+<?php $cols = new WP_Query( array( 'post_type' => 'column', 'posts_per_page' => 4 ) );
+if ( $cols->have_posts() ) : ?>
+<section class="sec" style="background:#fff">
+	<div class="container col-wrap">
+		<div>
+			<div class="sec-head">
+				<div class="l"><p class="lbl">column</p><h2>新着コラム</h2></div>
+				<a class="more" href="<?php echo esc_url( get_post_type_archive_link( 'column' ) ); ?>">コラム一覧へ →</a>
+			</div>
+			<?php while ( $cols->have_posts() ) : $cols->the_post(); get_template_part( 'parts/card', 'column' ); endwhile; wp_reset_postdata(); ?>
+		</div>
+		<aside><?php get_template_part( 'parts/side-ranking' ); ?></aside>
+	</div>
+</section>
+<?php endif; ?>
+
+<!-- 6. プロフィールダイジェスト -->
+<section class="sec">
 	<div class="container">
 		<div class="prof">
 			<?php kb_avatar(); ?>
@@ -168,7 +151,7 @@ if ( $news->have_posts() ) : ?>
 	</div>
 </section>
 
-<!-- 9. お問い合わせCTA -->
+<!-- 7. お問い合わせCTA -->
 <section class="sec" style="padding-top:0">
 	<div class="container">
 		<div class="contact-cta">
