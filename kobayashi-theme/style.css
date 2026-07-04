@@ -3,7 +3,7 @@ Theme Name: Kobayashi Portfolio
 Theme URI: https://shinnosuke-kobayashi.jp/
 Author: Shinnosuke Kobayashi
 Description: 「小林慎之助」ポートフォリオサイト用オリジナルテーマ。サイト設計書v1.1・デザインカンプ準拠。カスタム投稿タイプ（実績・コラム・お知らせ・資料）と条件検索を実装。
-Version: 1.6.0
+Version: 1.7.0
 Requires at least: 6.0
 Requires PHP: 8.0
 License: GNU General Public License v2 or later
@@ -84,19 +84,21 @@ nav.gnav a:hover::after,nav.gnav .current-menu-item a::after{width:100%}
 /* ===== hero(top) ===== */
 /* ファーストビュー＝ヘッダー(73px)＋ヒーロー＋ティッカー(約60px)で1画面に収める */
 .hero{position:relative;overflow:hidden;display:flex;align-items:center;padding:64px 0;
-  min-height:calc(100vh - 133px);min-height:min(calc(100svh - 133px),820px)}
+  min-height:calc(100vh - 133px);min-height:min(calc(100svh - 133px),820px);
+  cursor:crosshair;touch-action:manipulation}
+.hero a,.hero button{cursor:pointer}
 .hero .container{position:relative;z-index:2;width:100%;display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center}
 .hero .lbl{font-family:var(--font-en);font-size:13.5px;font-weight:800;color:var(--crimson);letter-spacing:.2em;margin-bottom:18px}
 .hero h1{font-size:clamp(36px,4.9vw,56px);font-weight:900;line-height:1.35;letter-spacing:.03em}
 .hero h1 .u{background:linear-gradient(transparent 68%,var(--tint-light) 68%)}
 .hero .lead{margin-top:22px;font-size:16.5px;color:#4a4a4a;max-width:520px}
 .hero .cta{margin-top:34px;display:flex;gap:14px;flex-wrap:wrap}
-.hero-visual{position:relative;aspect-ratio:1/0.9;animation:floaty 7s ease-in-out infinite}
-.hero-visual svg{width:100%;height:100%;overflow:visible;transform:scale(1.12);cursor:crosshair;touch-action:manipulation}
+/* 背景格子＝ヒーロー全面（キャッチコピーの背後まで敷く）。操作は.hero側で拾う */
+.hero-visual{position:absolute;inset:0;z-index:1;pointer-events:none}
+.hero-visual svg{display:block;width:100%;height:100%}
 .hero-bg{position:absolute;inset:0;z-index:1;pointer-events:none;
   background:radial-gradient(600px 380px at 88% 8%, rgba(194,39,64,.06), transparent 60%),
              radial-gradient(500px 320px at 4% 96%, rgba(132,25,42,.05), transparent 60%)}
-@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 
 /* ===== ticker ===== */
 .ticker{background:var(--deep);color:#fff;overflow:hidden;padding:13px 0}
@@ -368,7 +370,6 @@ table.spec th{background:var(--tint);width:150px;font-weight:700}
   header.site .search{display:none}
   .hero{padding:48px 0 56px}
   .hero .container{grid-template-columns:1fr}
-  .hero-visual{max-width:340px;margin:0 auto}
   .featured{grid-template-columns:1fr}
   .grid3,.doc-grid{grid-template-columns:repeat(2,1fr)}
   .col-wrap{grid-template-columns:1fr}

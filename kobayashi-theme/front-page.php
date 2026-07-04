@@ -6,6 +6,24 @@ get_header();
 <!-- 1. ヒーロー -->
 <section class="hero">
 	<div class="hero-bg"></div>
+	<div class="hero-visual" aria-hidden="true">
+		<?php /* ファーストビュー全面の背景格子。波アニメ＋クリックでポイント追加は assets/main.js（#heroNet）が制御。
+		         静的パスは no-JS／reduced-motion 時のフォールバック（1280×720想定。JSが実アスペクト比でviewBoxごと再生成する） */ ?>
+		<svg id="heroNet" viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+			<defs><linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#C22740"/><stop offset="1" stop-color="#84192A"/></linearGradient></defs>
+			<g id="heroWaves" fill="none" stroke="#84192A" stroke-opacity=".14" stroke-width="1.2">
+				<path d="M-20 -16 C 427 -56, 853 24, 1300 -16"/><path d="M-20 78 C 427 38, 853 118, 1300 78"/><path d="M-20 172 C 427 132, 853 212, 1300 172"/><path d="M-20 266 C 427 226, 853 306, 1300 266"/><path d="M-20 360 C 427 320, 853 400, 1300 360"/><path d="M-20 454 C 427 414, 853 494, 1300 454"/><path d="M-20 548 C 427 508, 853 588, 1300 548"/><path d="M-20 642 C 427 602, 853 682, 1300 642"/><path d="M-20 736 C 427 696, 853 776, 1300 736"/>
+				<path d="M-16 -20 C -56 240, 24 480, -16 740"/><path d="M78 -20 C 38 240, 118 480, 78 740"/><path d="M171 -20 C 131 240, 211 480, 171 740"/><path d="M265 -20 C 225 240, 305 480, 265 740"/><path d="M359 -20 C 319 240, 399 480, 359 740"/><path d="M453 -20 C 413 240, 493 480, 453 740"/><path d="M546 -20 C 506 240, 586 480, 546 740"/><path d="M640 -20 C 600 240, 680 480, 640 740"/><path d="M734 -20 C 694 240, 774 480, 734 740"/><path d="M827 -20 C 787 240, 867 480, 827 740"/><path d="M921 -20 C 881 240, 961 480, 921 740"/><path d="M1015 -20 C 975 240, 1055 480, 1015 740"/><path d="M1109 -20 C 1069 240, 1149 480, 1109 740"/><path d="M1202 -20 C 1162 240, 1242 480, 1202 740"/><path d="M1296 -20 C 1256 240, 1336 480, 1296 740"/>
+			</g>
+			<g id="heroLinks">
+				<path d="M717 216 L998 331 L819 461 L538 504" stroke="#C22740" stroke-width="1.6" stroke-opacity=".5" fill="none"/>
+			</g>
+			<g id="heroDots">
+				<circle cx="717" cy="216" r="7" fill="url(#lg1)"/><circle cx="998" cy="331" r="10" fill="#C22740"/><circle cx="819" cy="461" r="5" fill="#84192A"/><circle cx="538" cy="504" r="6" fill="#C22740" fill-opacity=".55"/><circle cx="1101" cy="144" r="4" fill="#84192A" fill-opacity=".5"/>
+			</g>
+			<circle id="heroCursor" r="6" fill="#C22740" fill-opacity=".3" style="display:none"/>
+		</svg>
+	</div>
 	<div class="container">
 		<div>
 			<p class="lbl">POLITICS × TECHNOLOGY × SOCIAL DESIGN</p>
@@ -15,24 +33,6 @@ get_header();
 				<a class="btn primary" href="<?php echo esc_url( get_post_type_archive_link( 'works' ) ); ?>">実績を見る →</a>
 				<a class="btn ghost" href="<?php echo esc_url( home_url( '/profile/' ) ); ?>">プロフィール</a>
 			</div>
-		</div>
-		<div class="hero-visual" aria-hidden="true">
-			<?php /* 波アニメーション＋クリックでポイント追加は assets/main.js（#heroNet）が制御 */ ?>
-			<svg id="heroNet" viewBox="0 0 400 360" xmlns="http://www.w3.org/2000/svg">
-				<defs><linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#C22740"/><stop offset="1" stop-color="#84192A"/></linearGradient></defs>
-				<g id="heroWaves" fill="none" stroke="#84192A" stroke-opacity=".14" stroke-width="1.2">
-					<?php /* no-JS時のフォールバック格子。位置は main.js の H_YS / V_XS と揃える */ ?>
-					<path d="M-20 -12 C 120 -52, 280 28, 420 -12"/><path d="M-20 52 C 120 12, 280 92, 420 52"/><path d="M-20 116 C 120 76, 280 156, 420 116"/><path d="M-20 180 C 120 140, 280 220, 420 180"/><path d="M-20 244 C 120 204, 280 284, 420 244"/><path d="M-20 308 C 120 268, 280 348, 420 308"/><path d="M-20 372 C 120 332, 280 412, 420 372"/>
-					<path d="M-16 -20 C -56 120, 24 240, -16 380"/><path d="M56 -20 C 16 120, 96 240, 56 380"/><path d="M128 -20 C 88 120, 168 240, 128 380"/><path d="M200 -20 C 160 120, 240 240, 200 380"/><path d="M272 -20 C 232 120, 312 240, 272 380"/><path d="M344 -20 C 304 120, 384 240, 344 380"/><path d="M416 -20 C 376 120, 456 240, 416 380"/>
-				</g>
-				<g id="heroLinks">
-					<path d="M140 118 L300 180 L220 240 L80 260" stroke="#C22740" stroke-width="1.6" stroke-opacity=".5" fill="none"/>
-				</g>
-				<g id="heroDots">
-					<circle cx="140" cy="118" r="7" fill="url(#lg1)"/><circle cx="300" cy="180" r="10" fill="#C22740"/><circle cx="220" cy="240" r="5" fill="#84192A"/><circle cx="80" cy="260" r="6" fill="#C22740" fill-opacity=".55"/><circle cx="330" cy="80" r="4" fill="#84192A" fill-opacity=".5"/>
-				</g>
-				<circle id="heroCursor" r="6" fill="#C22740" fill-opacity=".3" style="display:none"/>
-			</svg>
 		</div>
 	</div>
 </section>
