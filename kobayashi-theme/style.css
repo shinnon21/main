@@ -3,7 +3,7 @@ Theme Name: Kobayashi Portfolio
 Theme URI: https://shinnosuke-kobayashi.jp/
 Author: Shinnosuke Kobayashi
 Description: 「小林慎之助」ポートフォリオサイト用オリジナルテーマ。サイト設計書v1.1・デザインカンプ準拠。カスタム投稿タイプ（実績・コラム・お知らせ・資料）と条件検索を実装。
-Version: 1.12.0
+Version: 1.12.1
 Requires at least: 6.0
 Requires PHP: 8.0
 License: GNU General Public License v2 or later
@@ -70,10 +70,10 @@ header.site .container{display:flex;align-items:center;justify-content:space-bet
 .logo .sub{font-family:var(--font-en);font-size:9.5px;font-weight:600;color:var(--gray);letter-spacing:.22em;text-transform:uppercase;display:block}
 .logo-img{height:30px;width:auto;display:block}
 nav.gnav ul{display:flex;gap:28px}
-nav.gnav a{display:block;text-align:center;font-size:14.5px;font-weight:700;padding:6px 2px;position:relative}
-nav.gnav a small{display:block;font-family:var(--font-en);font-size:9.5px;font-weight:600;color:var(--crimson);letter-spacing:.15em;text-transform:lowercase}
-nav.gnav a::after{content:"";position:absolute;left:0;bottom:-2px;width:0;height:2px;background:var(--crimson);transition:.25s}
-nav.gnav a:hover::after,nav.gnav .current-menu-item a::after{width:100%}
+nav.gnav ul a{display:block;text-align:center;font-size:14.5px;font-weight:700;padding:6px 2px;position:relative}
+nav.gnav ul a small{display:block;font-family:var(--font-en);font-size:9.5px;font-weight:600;color:var(--crimson);letter-spacing:.15em;text-transform:lowercase}
+nav.gnav ul a::after{content:"";position:absolute;left:0;bottom:-2px;width:0;height:2px;background:var(--crimson);transition:.25s}
+nav.gnav ul a:hover::after,nav.gnav ul .current-menu-item a::after{width:100%}
 .h-right{display:flex;align-items:center;gap:14px}
 .search{display:flex;align-items:center;background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 14px;gap:8px;width:190px}
 .search input{border:none;outline:none;background:none;font-family:var(--font-jp);font-size:13px;width:100%}
@@ -424,8 +424,8 @@ footer.site-footer .bottom{border-top:1px solid rgba(255,255,255,.1);padding:20p
   nav.gnav.open li:nth-child(4){transition-delay:.19s}
   nav.gnav.open li:nth-child(5){transition-delay:.24s}
   nav.gnav.open li:nth-child(n+6){transition-delay:.29s}
-  nav.gnav a{display:flex;gap:12px;align-items:baseline;justify-content:space-between;font-size:19px;padding:17px 4px;border-bottom:1px solid var(--line);text-align:left}
-  nav.gnav a small{font-size:10.5px}
+  nav.gnav ul a{display:flex;gap:12px;align-items:baseline;justify-content:space-between;font-size:19px;padding:17px 4px;border-bottom:1px solid var(--line);text-align:left}
+  nav.gnav ul a small{font-size:10.5px}
   .menu-btn{display:flex}
   header.site .search{display:none}
   /* メニュー内の検索・SNS・CTA（項目のあとに遅れてフェードイン） */
