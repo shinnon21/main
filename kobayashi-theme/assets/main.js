@@ -91,9 +91,17 @@
       waves.appendChild(p);
       return p;
     };
+    var lastW = 0, lastH = 0;
     var rebuild = function () {
       var r = net.getBoundingClientRect();
       if (!r.width || !r.height) { return; }
+      /* iOSはスクロール中のツールバー開閉でもresizeが発火する。ヒーローの
+         実寸が変わっていなければ何もしない（格子の全消去→再生成による
+         スクロール中のちらつき・ブレを防ぐ） */
+      var w = Math.round(r.width), h = Math.round(r.height);
+      if ( w === lastW && h === lastH ) { return; }
+      lastW = w;
+      lastH = h;
       vbW = Math.round(VB_H * r.width / r.height);
       net.setAttribute('viewBox', '0 0 ' + vbW + ' ' + VB_H);
       H_YS = spread(-MARGIN, VB_H + MARGIN, GRID_SP);
@@ -163,13 +171,15 @@
        成立せず、演出ごと無効化する */
     if (!reduced) {
     stage.addEventListener('pointermove', function (e) {
-      if (onUi(e)) { cursorDot.style.display = 'none'; return; }
+      /* タッチではスクロール開始時に点が明滅して見えるため、追従表示はマウスのみ */
+      if (e.pointerType !== 'mouse' || onUi(e)) { cursorDot.style.display = 'none'; return; }
       var p = toSvg(e);
       cursorDot.style.display = '';
       cursorDot.setAttribute('cx', p.x);
       cursorDot.setAttribute('cy', p.y);
     });
     stage.addEventListener('pointerleave', function () { cursorDot.style.display = 'none'; });
+    stage.addEventListener('pointercancel', function () { cursorDot.style.display = 'none'; });
 
     /* クリックでポイントを打ち、最寄りのポイントと結ぶ */
     stage.addEventListener('click', function (e) {
