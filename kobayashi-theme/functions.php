@@ -219,6 +219,32 @@ function kb_avatar() {
 	echo '</div>';
 }
 
+/* ---------- SNSリンク ----------
+   URLを空にするとそのアカウントは非表示になる（Instagramは
+   アカウントURL確定後にここへ記入するだけで表示される） */
+function kb_sns_accounts() {
+	return array(
+		'linkedin'  => array( 'label' => 'LinkedIn', 'url' => 'https://www.linkedin.com/in/shinnosuke-kobayashi/' ),
+		'facebook'  => array( 'label' => 'Facebook', 'url' => 'https://www.facebook.com/shinnon21' ),
+		'instagram' => array( 'label' => 'Instagram', 'url' => '' ),
+	);
+}
+function kb_sns_links() {
+	$icons = array(
+		'linkedin'  => '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.4 9.2H3.7V20h2.7V9.2zM5 7.9a1.6 1.6 0 1 0 0-3.2 1.6 1.6 0 0 0 0 3.2zM20.4 20h-2.7v-5.6c0-1.4-.5-2.3-1.7-2.3-.9 0-1.5.6-1.7 1.2-.1.2-.1.5-.1.8V20h-2.7V9.2h2.7v1.5c.4-.6 1.2-1.7 3-1.7 2.2 0 3.2 1.4 3.2 4.1V20z"/></svg>',
+		'facebook'  => '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M13.6 21v-7.2h2.4l.4-2.8h-2.8V9.2c0-.8.2-1.4 1.4-1.4h1.5V5.3c-.3 0-1.2-.1-2.2-.1-2.2 0-3.7 1.4-3.7 3.9v2H8.1v2.8h2.5V21h3z"/></svg>',
+		'instagram' => '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.2" y="3.2" width="17.6" height="17.6" rx="4.8" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="12" cy="12" r="4.1" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="17.1" cy="6.9" r="1.3" fill="currentColor"/></svg>',
+	);
+	$out = '';
+	foreach ( kb_sns_accounts() as $key => $a ) {
+		if ( empty( $a['url'] ) ) { continue; }
+		$out .= '<a class="sns-btn" href="' . esc_url( $a['url'] ) . '" target="_blank" rel="noopener">' . $icons[ $key ] . '<span>' . esc_html( $a['label'] ) . '</span></a>';
+	}
+	if ( $out ) {
+		echo '<div class="sns-row">' . $out . '</div>';
+	}
+}
+
 /* ---------- 実績種別バッジ ---------- */
 function kb_type_badge() {
 	$types = get_the_terms( get_the_ID(), 'works_type' );

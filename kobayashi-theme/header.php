@@ -10,7 +10,7 @@
 <header class="site">
 	<div class="container">
 		<a class="logo" href="<?php echo esc_url( home_url( '/' ) ); ?>">
-			<img class="logo-img" src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/logo-horizontal.svg' ); ?>" alt="<?php bloginfo( 'name' ); ?>" width="589" height="128">
+			<img class="logo-img" src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/logo-horizontal.svg' ); ?>" alt="<?php bloginfo( 'name' ); ?>" width="514" height="66">
 		</a>
 
 		<nav class="gnav" id="gnav">
