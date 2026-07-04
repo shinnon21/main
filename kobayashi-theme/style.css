@@ -3,7 +3,7 @@ Theme Name: Kobayashi Portfolio
 Theme URI: https://shinnosuke-kobayashi.jp/
 Author: Shinnosuke Kobayashi
 Description: 「小林慎之助」ポートフォリオサイト用オリジナルテーマ。サイト設計書v1.1・デザインカンプ準拠。カスタム投稿タイプ（実績・コラム・お知らせ・資料）と条件検索を実装。
-Version: 1.9.1
+Version: 1.10.0
 Requires at least: 6.0
 Requires PHP: 8.0
 License: GNU General Public License v2 or later
@@ -80,6 +80,12 @@ nav.gnav a:hover::after,nav.gnav .current-menu-item a::after{width:100%}
 .search button{border:none;background:none;cursor:pointer;display:flex}
 .menu-btn{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:6px}
 .menu-btn span{width:24px;height:2px;background:var(--ink);transition:.3s}
+/* 開いている間はハンバーガー→×にモーフ */
+.menu-btn.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.menu-btn.open span:nth-child(2){opacity:0;transform:scaleX(.4)}
+.menu-btn.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.gnav-extra{display:none}
+html.menu-open{overflow:hidden}
 
 /* ===== hero(top) ===== */
 /* ファーストビュー＝ヘッダー(73px)＋ヒーロー＋ティッカー(約60px)で1画面に収める */
@@ -388,12 +394,36 @@ footer.site-footer .bottom{border-top:1px solid rgba(255,255,255,.1);padding:20p
   header.site .search{width:150px}
 }
 @media (max-width:960px){
-  nav.gnav{display:none;position:absolute;top:72px;left:0;right:0;background:#fff;border-bottom:1px solid var(--line);box-shadow:var(--shadow)}
-  nav.gnav.open{display:block}
-  nav.gnav ul{flex-direction:column;gap:0;padding:12px 24px}
-  nav.gnav a{display:flex;gap:10px;align-items:baseline;padding:14px 4px;border-bottom:1px solid var(--line);text-align:left}
+  /* 全画面オーバーレイメニュー（ヒーローと同系の淡いクリムゾングラデ背景）
+     header.siteのbackdrop-filterがfixedの基準になるため、bottom:0ではなく
+     高さを明示指定する（ヘッダーは常にビューポート上端に張り付いている） */
+  nav.gnav{position:fixed;top:73px;left:0;right:0;z-index:99;overflow-y:auto;
+    height:calc(100vh - 73px);height:calc(100svh - 73px);
+    padding:20px 24px 44px;
+    background:radial-gradient(420px 300px at 88% 8%, rgba(194,39,64,.08), transparent 60%),
+               radial-gradient(380px 280px at 6% 94%, rgba(132,25,42,.06), transparent 60%),var(--bg);
+    opacity:0;visibility:hidden;transform:translateY(-10px);transition:.28s ease}
+  nav.gnav.open{opacity:1;visibility:visible;transform:none}
+  nav.gnav ul{flex-direction:column;gap:0;padding:0}
+  nav.gnav li{opacity:0;transform:translateY(12px);transition:opacity .34s ease,transform .34s ease}
+  nav.gnav.open li{opacity:1;transform:none}
+  nav.gnav.open li:nth-child(1){transition-delay:.04s}
+  nav.gnav.open li:nth-child(2){transition-delay:.09s}
+  nav.gnav.open li:nth-child(3){transition-delay:.14s}
+  nav.gnav.open li:nth-child(4){transition-delay:.19s}
+  nav.gnav.open li:nth-child(5){transition-delay:.24s}
+  nav.gnav.open li:nth-child(n+6){transition-delay:.29s}
+  nav.gnav a{display:flex;gap:12px;align-items:baseline;justify-content:space-between;font-size:19px;padding:17px 4px;border-bottom:1px solid var(--line);text-align:left}
+  nav.gnav a small{font-size:10.5px}
   .menu-btn{display:flex}
   header.site .search{display:none}
+  /* メニュー内の検索・SNS・CTA（項目のあとに遅れてフェードイン） */
+  .gnav-extra{display:flex;flex-direction:column;gap:16px;margin-top:28px;
+    opacity:0;transform:translateY(12px);transition:opacity .34s ease .3s,transform .34s ease .3s}
+  nav.gnav.open .gnav-extra{opacity:1;transform:none}
+  nav.gnav .gnav-extra .search{display:flex;width:100%;padding:11px 16px}
+  .gnav-extra .sns-row{justify-content:flex-start}
+  .gnav-extra .btn{justify-content:center}
   .hero{padding:48px 0 56px}
   .hero .container{grid-template-columns:1fr}
   .featured{grid-template-columns:1fr}

@@ -22,6 +22,17 @@
 				kb_default_nav();
 			}
 			?>
+			<?php /* モバイルの全画面メニュー内のみ表示（検索・SNS・CTA） */ ?>
+			<div class="gnav-extra">
+				<form class="search" role="search" method="get" action="<?php echo esc_url( home_url( '/' ) ); ?>">
+					<button type="submit" aria-label="検索">
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5C5C5C" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+					</button>
+					<input type="text" name="s" value="<?php echo esc_attr( get_search_query() ); ?>" placeholder="フリーワードで検索">
+				</form>
+				<?php kb_sns_links(); ?>
+				<a class="btn primary" href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">お問い合わせ →</a>
+			</div>
 		</nav>
 
 		<div class="h-right">
@@ -31,7 +42,7 @@
 				</button>
 				<input type="text" name="s" value="<?php echo esc_attr( get_search_query() ); ?>" placeholder="フリーワードで検索">
 			</form>
-			<button class="menu-btn" id="menuBtn" aria-label="メニュー"><span></span><span></span><span></span></button>
+			<button class="menu-btn" id="menuBtn" aria-label="メニュー" aria-controls="gnav" aria-expanded="false"><span></span><span></span><span></span></button>
 		</div>
 	</div>
 </header>

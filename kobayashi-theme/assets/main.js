@@ -9,11 +9,25 @@
     lane.dataset.cloned = '1';
   }
 
-  /* モバイルメニュー開閉 */
+  /* モバイルメニュー開閉（全画面オーバーレイ）
+     ハンバーガー⇄×のモーフ、背景スクロールロック、
+     リンクタップ・Escキーで閉じる */
   var btn = document.getElementById('menuBtn');
   var nav = document.getElementById('gnav');
   if (btn && nav) {
-    btn.addEventListener('click', function () { nav.classList.toggle('open'); });
+    var setMenu = function (open) {
+      nav.classList.toggle('open', open);
+      btn.classList.toggle('open', open);
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      document.documentElement.classList.toggle('menu-open', open);
+    };
+    btn.addEventListener('click', function () { setMenu(!nav.classList.contains('open')); });
+    nav.addEventListener('click', function (e) {
+      if (e.target.closest && e.target.closest('a')) { setMenu(false); }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && nav.classList.contains('open')) { setMenu(false); }
+    });
   }
 
   /* URLコピー（シェアボタン） */
