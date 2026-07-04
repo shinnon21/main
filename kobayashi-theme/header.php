@@ -10,7 +10,8 @@
 <header class="site">
 	<div class="container">
 		<a class="logo" href="<?php echo esc_url( home_url( '/' ) ); ?>">
-			<img class="logo-img" src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/logo-horizontal.svg' ); ?>" alt="<?php bloginfo( 'name' ); ?>" width="514" height="66">
+			<?php /* ?v= はロゴ差し替え時のブラウザキャッシュ対策（テーマVersion連動） */ ?>
+			<img class="logo-img" src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/logo-horizontal.svg?v=' . wp_get_theme()->get( 'Version' ) ); ?>" alt="<?php bloginfo( 'name' ); ?>" width="575" height="58">
 		</a>
 
 		<nav class="gnav" id="gnav">

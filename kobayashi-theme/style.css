@@ -3,7 +3,7 @@ Theme Name: Kobayashi Portfolio
 Theme URI: https://shinnosuke-kobayashi.jp/
 Author: Shinnosuke Kobayashi
 Description: 「小林慎之助」ポートフォリオサイト用オリジナルテーマ。サイト設計書v1.1・デザインカンプ準拠。カスタム投稿タイプ（実績・コラム・お知らせ・資料）と条件検索を実装。
-Version: 1.9.0
+Version: 1.9.1
 Requires at least: 6.0
 Requires PHP: 8.0
 License: GNU General Public License v2 or later
@@ -381,6 +381,12 @@ footer.site-footer .bottom{border-top:1px solid rgba(255,255,255,.1);padding:20p
 /* ============================================================
    responsive
 ============================================================ */
+/* 中間幅: ロゴ（横長化）とナビ・検索が1行に収まるよう詰める */
+@media (max-width:1200px){
+  .logo-img{height:30px}
+  nav.gnav ul{gap:20px}
+  header.site .search{width:150px}
+}
 @media (max-width:960px){
   nav.gnav{display:none;position:absolute;top:72px;left:0;right:0;background:#fff;border-bottom:1px solid var(--line);box-shadow:var(--shadow)}
   nav.gnav.open{display:block}
