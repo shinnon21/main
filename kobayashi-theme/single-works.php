@@ -32,7 +32,7 @@ while ( have_posts() ) : the_post();
 				<?php if ( $inds && ! is_wp_error( $inds ) ) : ?><div class="ov-item"><dt>業界</dt><dd><?php echo esc_html( implode( '／', wp_list_pluck( $inds, 'name' ) ) ); ?></dd></div><?php endif; ?>
 				<?php if ( kb_field( 'period_start' ) ) : ?><div class="ov-item"><dt>期間</dt><dd><?php kb_works_period(); ?></dd></div><?php endif; ?>
 				<?php if ( $role ) : ?><div class="ov-item"><dt>役割</dt><dd><?php echo esc_html( $role ); ?></dd></div><?php endif; ?>
-				<?php if ( $scope ) : ?><div class="ov-item"><dt>担当範囲</dt><dd><?php echo esc_html( is_array( $scope ) ? implode( '／', $scope ) : $scope ); ?></dd></div><?php endif; ?>
+				<?php if ( $scope ) : ?><div class="ov-item"><dt>担当領域</dt><dd><?php echo esc_html( is_array( $scope ) ? implode( '／', $scope ) : $scope ); ?></dd></div><?php endif; ?>
 				<?php if ( $tech ) : ?><div class="ov-item"><dt>使用技術</dt><dd><?php echo esc_html( $tech ); ?></dd></div><?php endif; ?>
 				<?php if ( $url ) : ?><div class="ov-item"><dt>ウェブサイト</dt><dd><a class="ov-link" href="<?php echo esc_url( $url ); ?>" target="_blank" rel="noopener"><?php echo esc_html( preg_replace( '~^https?://(www\.)?|/$~', '', $url ) ); ?> ↗</a></dd></div><?php endif; ?>
 			</dl>
