@@ -51,8 +51,8 @@
     /* --- 波アニメーション ---
        格子の位置定義。本数を変える場合は front-page.php の静的パス
        （no-JSフォールバック）も合わせて更新すること */
-    var H_YS = [30, 90, 150, 210, 270, 330];
-    var V_XS = [20, 92, 164, 236, 308, 380];
+    var H_YS = [-12, 52, 116, 180, 244, 308, 372];
+    var V_XS = [-16, 56, 128, 200, 272, 344, 416];
     if (!reduced) {
       /* 格子パスをJSで再構築し、制御点をsin波で揺らす */
       waves.textContent = '';
@@ -73,13 +73,13 @@
           var b = Math.sin(t * 1.0 + i * 0.9 + 2.4) * 13;
           var e1 = Math.sin(t * 0.8 + i) * 3;
           var e2 = Math.sin(t * 0.8 + i + 2) * 3;
-          p.setAttribute('d', 'M0 ' + (y + e1) + ' C 120 ' + (y - 40 + a) + ', 280 ' + (y + 40 + b) + ', 400 ' + (y + e2));
+          p.setAttribute('d', 'M-20 ' + (y + e1) + ' C 120 ' + (y - 40 + a) + ', 280 ' + (y + 40 + b) + ', 420 ' + (y + e2));
         });
         vPaths.forEach(function (p, i) {
           var x = V_XS[i];
           var a = Math.sin(t * 0.85 + i * 1.1 + 1) * 13;
           var b = Math.sin(t * 0.85 + i * 1.1 + 3.4) * 13;
-          p.setAttribute('d', 'M' + x + ' 0 C ' + (x - 40 + a) + ' 120, ' + (x + 40 + b) + ' 240, ' + x + ' 360');
+          p.setAttribute('d', 'M' + x + ' -20 C ' + (x - 40 + a) + ' 120, ' + (x + 40 + b) + ' 240, ' + x + ' 380');
         });
         requestAnimationFrame(wave);
       };
