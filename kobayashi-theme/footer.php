@@ -6,7 +6,7 @@
 				<span class="sub">shinnosuke-kobayashi.jp</span>
 				<p><?php bloginfo( 'description' ); ?></p>
 				<?php /* プロフィールと同じアカウント群をアイコンのみで表示（kb_sns_accounts が正） */ ?>
-				<?php kb_sns_links( true ); ?>
+				<?php kb_sns_links( 'icons' ); ?>
 			</div>
 			<div>
 				<h4>sitemap</h4>

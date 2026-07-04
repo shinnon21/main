@@ -85,7 +85,16 @@
 [submit "送信する"]
 ```
 
-メール設定: 件名 `[小林慎之助ポートフォリオ] [your-type]`、`Reply-To: [your-email]` を追加ヘッダーに。メール(2)を有効化して自動返信を設定。
+メール設定（「メール」タブ。送信先・返信元は contact@shinnosuke-kobayashi.jp に統一）:
+
+| 項目 | メール（管理者宛） | メール(2)（自動返信・要有効化） |
+|---|---|---|
+| 送信先 | `contact@shinnosuke-kobayashi.jp` | `[your-email]` |
+| 送信元 | `[_site_title] <contact@shinnosuke-kobayashi.jp>` | `[_site_title] <contact@shinnosuke-kobayashi.jp>` |
+| 件名 | `[小林慎之助 公式ホームページ] [your-type]` | `【小林慎之助 公式ホームページ】お問い合わせを受け付けました` |
+| 追加ヘッダー | `Reply-To: [your-email]` | `Reply-To: contact@shinnosuke-kobayashi.jp` |
+
+> 前提: `contact@shinnosuke-kobayashi.jp` の受信メールボックスがメールサービス側（DNSのMX設定含む）に存在すること。届かない場合はドメインのSPFレコードにVMのIP（35.189.147.122）を追加する。
 
 ## 6. 本番公開 — GCP（ドメイン: shinnosuke-kobayashi.jp）
 

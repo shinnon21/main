@@ -3,7 +3,7 @@ Theme Name: Kobayashi Portfolio
 Theme URI: https://shinnosuke-kobayashi.jp/
 Author: Shinnosuke Kobayashi
 Description: 「小林慎之助」ポートフォリオサイト用オリジナルテーマ。サイト設計書v1.1・デザインカンプ準拠。カスタム投稿タイプ（実績・コラム・お知らせ・資料）と条件検索を実装。
-Version: 1.11.1
+Version: 1.12.0
 Requires at least: 6.0
 Requires PHP: 8.0
 License: GNU General Public License v2 or later
@@ -68,7 +68,7 @@ header.site .container{display:flex;align-items:center;justify-content:space-bet
 .logo{line-height:1.2;display:block}
 .logo .jp{font-size:24px;font-weight:900;letter-spacing:.06em;display:block}
 .logo .sub{font-family:var(--font-en);font-size:9.5px;font-weight:600;color:var(--gray);letter-spacing:.22em;text-transform:uppercase;display:block}
-.logo-img{height:36px;width:auto;display:block}
+.logo-img{height:30px;width:auto;display:block}
 nav.gnav ul{display:flex;gap:28px}
 nav.gnav a{display:block;text-align:center;font-size:14.5px;font-weight:700;padding:6px 2px;position:relative}
 nav.gnav a small{display:block;font-family:var(--font-en);font-size:9.5px;font-weight:600;color:var(--crimson);letter-spacing:.15em;text-transform:lowercase}
@@ -208,6 +208,12 @@ html.menu-open{overflow:hidden}
 .sns-icons .sns-btn{width:46px;height:46px;padding:0;justify-content:center;border-radius:50%;border-color:transparent}
 .sns-icons .sns-btn svg{width:22px;height:22px}
 footer.site-footer .sns-row{margin-top:20px}
+/* タイル表示（プロフィールのSNSセクション: 上にロゴ・下に媒体名） */
+.sns-tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:0}
+.sns-tiles .sns-btn{flex-direction:column;gap:12px;padding:26px 10px 20px;border-radius:var(--radius);
+  font-size:12.5px;justify-content:center;background:var(--bg);border:1px solid var(--line)}
+.sns-tiles .sns-btn svg{width:30px;height:30px}
+.sns-tiles .sns-btn:hover{border-color:var(--crimson);transform:translateY(-3px)}
 
 /* ===== contact CTA ===== */
 .contact-cta{background:linear-gradient(135deg,var(--crimson),var(--crimson-dark));color:#fff;text-align:center;padding:72px 24px;border-radius:16px}
@@ -394,7 +400,7 @@ footer.site-footer .bottom{border-top:1px solid rgba(255,255,255,.1);padding:20p
 ============================================================ */
 /* 中間幅: ロゴ（横長化）とナビ・検索が1行に収まるよう詰める */
 @media (max-width:1200px){
-  .logo-img{height:30px}
+  .logo-img{height:26px}
   nav.gnav ul{gap:20px}
   header.site .search{width:150px}
 }
@@ -447,6 +453,7 @@ footer.site-footer .bottom{border-top:1px solid rgba(255,255,255,.1);padding:20p
 }
 @media (max-width:600px){
   .grid3,.grid2,.doc-grid{grid-template-columns:1fr}
+  .sns-tiles{grid-template-columns:repeat(2,1fr)}
   .sec{padding:52px 0}
   .article .a-thumb{flex:0 0 110px}
   .filter-row .f-lbl{flex:0 0 100%}

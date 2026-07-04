@@ -25,7 +25,7 @@ if ( ! taxonomy_exists( 'works_type' ) || ! post_type_exists( 'works' ) ) {
 }
 
 /* ---------- 1. 一般設定 ---------- */
-update_option( 'blogname', '小林慎之助' );
+update_option( 'blogname', '小林慎之助 公式ホームページ' );
 update_option( 'blogdescription', '政治・行政のDXから医薬品サプライチェーン研究まで。日本の技術を社会に届けるコーディネーターを志す、小林慎之助のポートフォリオサイトです。' );
 update_option( 'timezone_string', 'Asia/Tokyo' );
 update_option( 'permalink_structure', '/%postname%/' );

@@ -17,7 +17,6 @@ get_template_part( 'parts/page-hero', null, array( 'label' => 'profile', 'title'
 				<h2><?php echo esc_html( kb_profile_field( 'profile_name' ) ); ?></h2>
 				<p class="role"><?php echo esc_html( kb_profile_field( 'profile_role' ) ); ?></p>
 				<p><?php echo nl2br( esc_html( kb_profile_field( 'profile_bio' ) ) ); ?></p>
-				<?php kb_sns_links(); ?>
 			</div>
 		</div>
 
@@ -68,6 +67,11 @@ get_template_part( 'parts/page-hero', null, array( 'label' => 'profile', 'title'
 				<li style="margin-bottom:8px"><?php echo esc_html( $line ); ?></li>
 				<?php endforeach; ?>
 			</ul>
+		</div>
+
+		<div class="profile-sec">
+			<h2><span class="lbl">follow</span>SNSアカウント</h2>
+			<?php kb_sns_links( 'tiles' ); ?>
 		</div>
 
 		<div class="contact-cta">
