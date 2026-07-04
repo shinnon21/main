@@ -5,6 +5,8 @@
 				<span class="jp"><?php bloginfo( 'name' ); ?></span>
 				<span class="sub">shinnosuke-kobayashi.jp</span>
 				<p><?php bloginfo( 'description' ); ?></p>
+				<?php /* プロフィールと同じアカウント群をアイコンのみで表示（kb_sns_accounts が正） */ ?>
+				<?php kb_sns_links( true ); ?>
 			</div>
 			<div>
 				<h4>sitemap</h4>
@@ -28,11 +30,6 @@
 		</div>
 		<div class="bottom">
 			<span class="en">© <?php echo esc_html( date_i18n( 'Y' ) ); ?> Shinnosuke Kobayashi</span>
-			<span class="en">
-				<a href="https://www.linkedin.com/in/shinnosuke-kobayashi/" target="_blank" rel="noopener">LinkedIn</a> ／
-				<a href="https://www.facebook.com/shinnon21" target="_blank" rel="noopener">Facebook</a> ／
-				<a href="https://note.com/shinnon21" target="_blank" rel="noopener">note</a>
-			</span>
 		</div>
 	</div>
 </footer>
