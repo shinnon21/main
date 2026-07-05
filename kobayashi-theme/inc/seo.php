@@ -55,11 +55,14 @@ add_action( 'wp_head', function () {
 	$title = wp_get_document_title();
 	$type  = is_singular( array( 'works', 'column', 'news' ) ) ? 'article' : 'website';
 	$image = '';
+	$w = $h = 0;
 	if ( is_singular() && has_post_thumbnail() ) {
 		$image = get_the_post_thumbnail_url( get_the_ID(), 'large' );
 	}
 	if ( ! $image ) {
-		$image = get_template_directory_uri() . '/assets/img/logo-mark.png';
+		$image = get_template_directory_uri() . '/assets/img/og-default.png';
+		$w = 1200;
+		$h = 630;
 	}
 
 	if ( $desc ) {
@@ -73,26 +76,51 @@ add_action( 'wp_head', function () {
 		echo '<meta property="og:description" content="' . esc_attr( $desc ) . '">' . "\n";
 	}
 	echo '<meta property="og:image" content="' . esc_url( $image ) . '">' . "\n";
+	if ( $w ) {
+		echo '<meta property="og:image:width" content="' . (int) $w . '"><meta property="og:image:height" content="' . (int) $h . '">' . "\n";
+	}
 	echo '<meta property="og:locale" content="ja_JP">' . "\n";
-	echo '<meta name="twitter:card" content="' . ( is_singular() && has_post_thumbnail() ? 'summary_large_image' : 'summary' ) . '">' . "\n";
+	echo '<meta name="twitter:card" content="summary_large_image">' . "\n";
 }, 6 );
 
-/* ---------- JSON-LD: Person（設計書 Phase2「構造化データ強化」） ---------- */
+/* ---------- JSON-LD: Person（設計書 Phase2「構造化データ強化」） ----------
+   名前・肩書・自己紹介・SNSはプロフィール編集欄／kb_sns_accounts()と連動 */
 function kb_jsonld_person() {
-	return array(
+	$same_as = array();
+	foreach ( kb_sns_accounts() as $a ) {
+		if ( ! empty( $a['url'] ) ) { $same_as[] = $a['url']; }
+	}
+	$person = array(
 		'@type'         => 'Person',
-		'name'          => '小林 慎之助',
+		'name'          => kb_profile_field( 'profile_name' ),
 		'alternateName' => 'Shinnosuke Kobayashi',
 		'url'           => home_url( '/profile/' ),
 		'jobTitle'      => '共同創業者・代表取締役 CEO',
+		'description'   => wp_trim_words( kb_profile_field( 'profile_bio' ), 60, '…' ),
 		'affiliation'   => array(
 			array( '@type' => 'Organization', 'name' => 'Weeave株式会社', 'url' => 'https://www.weeave.co.jp/' ),
-			array( '@type' => 'CollegeOrUniversity', 'name' => '筑波大学' ),
 		),
-		'sameAs'        => array(
-			'https://www.linkedin.com/in/shinnosuke-kobayashi/',
-			'https://www.facebook.com/shinnon21',
-			'https://note.com/shinnon21',
+		'alumniOf'      => array( '@type' => 'CollegeOrUniversity', 'name' => '筑波大学' ),
+		'knowsAbout'    => array( '政治・行政のDX', 'データ分析', '事業開発', '経営工学', '医薬品サプライチェーン', '選挙シミュレーション', 'マーケティング・広報', 'コミュニティ構築' ),
+		'sameAs'        => $same_as,
+	);
+	$profile = get_page_by_path( 'profile' );
+	if ( $profile && has_post_thumbnail( $profile->ID ) ) {
+		$person['image'] = get_the_post_thumbnail_url( $profile->ID, 'large' );
+	}
+	return $person;
+}
+
+/* ---------- JSON-LD: パンくず（実績・コラム・お知らせ詳細） ---------- */
+function kb_jsonld_breadcrumbs() {
+	$pt = get_post_type_object( get_post_type() );
+	if ( ! $pt ) { return null; }
+	return array(
+		'@type'           => 'BreadcrumbList',
+		'itemListElement' => array(
+			array( '@type' => 'ListItem', 'position' => 1, 'name' => 'ホーム', 'item' => home_url( '/' ) ),
+			array( '@type' => 'ListItem', 'position' => 2, 'name' => $pt->labels->name, 'item' => get_post_type_archive_link( get_post_type() ) ),
+			array( '@type' => 'ListItem', 'position' => 3, 'name' => get_the_title() ),
 		),
 	);
 }
@@ -100,24 +128,45 @@ function kb_jsonld_person() {
 add_action( 'wp_head', function () {
 	$graph = array();
 
-	if ( is_front_page() || is_page( 'profile' ) ) {
+	if ( is_front_page() ) {
+		$graph[] = array(
+			'@type'           => 'WebSite',
+			'name'            => get_bloginfo( 'name' ),
+			'url'             => home_url( '/' ),
+			'inLanguage'      => 'ja',
+			'description'     => get_bloginfo( 'description' ),
+			'potentialAction' => array(
+				'@type'       => 'SearchAction',
+				'target'      => array( '@type' => 'EntryPoint', 'urlTemplate' => home_url( '/?s={search_term_string}' ) ),
+				'query-input' => 'required name=search_term_string',
+			),
+		);
 		$graph[] = kb_jsonld_person();
-	} elseif ( is_singular( array( 'works', 'column' ) ) ) {
+	} elseif ( is_page( 'profile' ) ) {
+		$graph[] = array(
+			'@type'      => 'ProfilePage',
+			'url'        => get_permalink(),
+			'mainEntity' => kb_jsonld_person(),
+		);
+	} elseif ( is_singular( array( 'works', 'column', 'news' ) ) ) {
 		$article = array(
-			'@type'         => 'Article',
+			'@type'         => is_singular( 'news' ) ? 'NewsArticle' : 'Article',
 			'headline'      => get_the_title(),
 			'datePublished' => get_the_date( 'c' ),
 			'dateModified'  => get_the_modified_date( 'c' ),
+			'inLanguage'    => 'ja',
 			'mainEntityOfPage' => get_permalink(),
 			'author'        => kb_jsonld_person(),
 		);
 		if ( has_excerpt() ) {
 			$article['description'] = wp_strip_all_tags( get_the_excerpt() );
 		}
-		if ( has_post_thumbnail() ) {
-			$article['image'] = get_the_post_thumbnail_url( get_the_ID(), 'large' );
-		}
+		$article['image'] = has_post_thumbnail()
+			? get_the_post_thumbnail_url( get_the_ID(), 'large' )
+			: get_template_directory_uri() . '/assets/img/og-default.png';
 		$graph[] = $article;
+		$crumbs  = kb_jsonld_breadcrumbs();
+		if ( $crumbs ) { $graph[] = $crumbs; }
 	}
 
 	if ( ! $graph ) { return; }

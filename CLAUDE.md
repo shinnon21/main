@@ -41,6 +41,7 @@
 ## テーマ実装済み事項（kobayashi-theme/）
 
 - CPT: `works`（実績）/ `column` / `news` / `document`。タクソノミー: `works_type` / `skill`（横断タグ）/ `industry` / `news_type`（お知らせ種別バッジ・初期値4種を自動投入）
+- SEO/AIO（v1.15〜）: `inc/seo.php`＝OGP既定画像 `og-default.png`・Person/WebSite/ProfilePage/Article/BreadcrumbList JSON-LD（プロフィール編集欄・kb_sns_accounts連動）／`inc/aio.php`＝robots.txtでAIクローラー明示許可＋sitemap案内・`/llms.txt` 動的生成（**パーマリンク再保存が必要**）・検索結果noindex
 - 条件検索（page-searches.php）: kw×期間×種別×skillタグ、公開順/更新順、GETクエリ保持
 - PVランキング内蔵（`kb_views` メタ、プラグイン不要）、パンくず、シェア、公開日/更新日2軸表示
 - ACF互換ヘルパー `kb_field()`（ACF未導入でも動作）。実績フィールド仕様は設計書§6.3
@@ -57,7 +58,7 @@
 6. ~~カードレイアウト崩壊（余白がおかしい）の修正~~ ✅ 完了（2026-07-03, v1.3）: カード`<a>`内に `kb_skill_chips()` が `<a class="chip">` を出力しアンカーが入れ子 → HTMLパーサーが外側リンクを分割し `.thumb`/`.body` がグリッドの別セルに割れていた。カード内チップを `<span>` 化（`kb_skill_chips( n, false )`）して解消。デザインカンプも `<span class="chip">` が正
 7. ~~OGP・構造化データ~~ ✅ 完了（v1.3）: `inc/seo.php` で meta description／OGP／Twitterカードをフォールバック出力（SEO SIMPLE PACK等の有効時は自動で出力停止）＋ Person／Article JSON-LD
 8. ~~About・プライバシーポリシー本文の投入~~ ✅ 完了（2026-07-03）: 本番VMで `wp eval-file seed-pages.php` 実行済み（raw.githubusercontent.comから取得して実行する手順で対応）
-9. 運用設定（残り）: GA4/GTM設置、SiteGuardログインURL変更、BackWPupスケジュール、GCEスナップショット週次、実績アイキャッチ画像の差し込み（ユーザーがWP管理画面から）。**本番WP管理画面での実施待ち（2026-07-04依頼）**: ①サイトのタイトルを「小林慎之助 公式ホームページ」に変更（設定→一般）②CF7のメール送信先/送信元を contact@shinnosuke-kobayashi.jp に変更（導入手順.md §5-5の表が正）
+9. 運用設定（残り）: GA4/GTM設置、SiteGuardログインURL変更、BackWPupスケジュール、GCEスナップショット週次、実績アイキャッチ画像の差し込み（ユーザーがWP管理画面から）。**本番WP管理画面での実施待ち（2026-07-04依頼）**: ①サイトのタイトルを「小林慎之助 公式ホームページ」に変更（設定→一般）②CF7のメール送信先/送信元を contact@shinnosuke-kobayashi.jp に変更（導入手順.md §5-5の表が正）③設定→パーマリンクで「変更を保存」を1クリック（news_type・llms.txtのルーティング登録）④キャッチフレーズ末尾を「〜公式サイトです。」に
 10. Cloudflare導入（`Cloudflare導入手順.md` 作成済み・実施待ち）: DNS切替とダッシュボード設定はユーザー操作。VM側の mod_remoteip／オリジン遮断コマンドは手順書§5参照
 11. Phase 2候補: 登壇イベントCPT有効化、スキル辞典
 

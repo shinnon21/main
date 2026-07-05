@@ -12,6 +12,9 @@ require_once get_template_directory() . '/inc/acf-fields.php';
 /* ---------- SEO（description/OGPフォールバック＋JSON-LD） ---------- */
 require_once get_template_directory() . '/inc/seo.php';
 
+/* ---------- AIO（robots.txt・llms.txt・noindex制御） ---------- */
+require_once get_template_directory() . '/inc/aio.php';
+
 /* ---------- テーマ基本設定 ---------- */
 add_action( 'after_setup_theme', function () {
 	add_theme_support( 'title-tag' );
