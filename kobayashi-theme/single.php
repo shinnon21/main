@@ -8,7 +8,7 @@ while ( have_posts() ) : the_post();
 		<?php kb_breadcrumbs(); ?>
 		<article class="entry-wrap" style="margin-top:18px;max-width:none">
 			<header class="entry-head">
-				<div class="meta"><?php kb_dates(); ?></div>
+				<div class="meta"><?php if ( 'news' === get_post_type() ) { kb_news_type_badge(); } ?><?php kb_dates(); ?></div>
 				<h1><?php the_title(); ?></h1>
 			</header>
 			<div class="entry-content"><?php the_content(); ?></div>

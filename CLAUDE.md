@@ -40,7 +40,7 @@
 
 ## テーマ実装済み事項（kobayashi-theme/）
 
-- CPT: `works`（実績）/ `column` / `news` / `document`。タクソノミー: `works_type` / `skill`（横断タグ）/ `industry`
+- CPT: `works`（実績）/ `column` / `news` / `document`。タクソノミー: `works_type` / `skill`（横断タグ）/ `industry` / `news_type`（お知らせ種別バッジ・初期値4種を自動投入）
 - 条件検索（page-searches.php）: kw×期間×種別×skillタグ、公開順/更新順、GETクエリ保持
 - PVランキング内蔵（`kb_views` メタ、プラグイン不要）、パンくず、シェア、公開日/更新日2軸表示
 - ACF互換ヘルパー `kb_field()`（ACF未導入でも動作）。実績フィールド仕様は設計書§6.3

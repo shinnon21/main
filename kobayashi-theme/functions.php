@@ -65,6 +65,22 @@ add_action( 'init', function () {
 		'show_in_rest' => true,
 	) );
 
+	/* お知らせの種別（記事ごとに管理画面から選択→一覧でバッジ表示）。
+	   works_type と同じく news/type スラッグをCPTより先に登録する */
+	register_taxonomy( 'news_type', 'news', array(
+		'labels'       => array( 'name' => 'お知らせ種別', 'singular_name' => 'お知らせ種別', 'add_new_item' => '種別を追加' ),
+		'hierarchical' => true,
+		'rewrite'      => array( 'slug' => 'news/type' ),
+		'show_in_rest' => true,
+	) );
+	/* 種別の初期値を一度だけ投入（以後は管理画面から自由に追加・変更可） */
+	if ( ! get_option( 'kb_news_types_seeded' ) ) {
+		foreach ( array( 'お知らせ', '登壇・イベント', 'メディア掲載', 'リリース' ) as $t ) {
+			if ( ! term_exists( $t, 'news_type' ) ) { wp_insert_term( $t, 'news_type' ); }
+		}
+		update_option( 'kb_news_types_seeded', 1 );
+	}
+
 	register_post_type( 'works', array(
 		'labels'       => array( 'name' => '実績', 'singular_name' => '実績', 'add_new_item' => '実績を追加' ),
 		'public'       => true,
@@ -320,6 +336,14 @@ function kb_type_badge() {
 	$types = get_the_terms( get_the_ID(), 'works_type' );
 	if ( $types && ! is_wp_error( $types ) ) {
 		echo '<span class="badge accent">' . esc_html( $types[0]->name ) . '</span>';
+	}
+}
+
+/* ---------- お知らせ種別バッジ（未選択なら何も出さない） ---------- */
+function kb_news_type_badge() {
+	$types = get_the_terms( get_the_ID(), 'news_type' );
+	if ( $types && ! is_wp_error( $types ) ) {
+		echo '<span class="badge">' . esc_html( $types[0]->name ) . '</span>';
 	}
 }
 
