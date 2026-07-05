@@ -77,7 +77,7 @@ get_template_part( 'parts/page-hero', null, array( 'label' => 'profile', 'title'
 		<div class="contact-cta">
 			<p class="lbl">contact</p>
 			<h2>お問い合わせ・ご相談</h2>
-			<p>採用・案件・協業のご相談はお気軽にご連絡ください。</p>
+			<p>案件のご相談、取材・登壇のご依頼、協業のお声がけなど、お気軽にご連絡ください。</p>
 			<a class="btn white" href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">お問い合わせ →</a>
 		</div>
 
