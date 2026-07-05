@@ -79,7 +79,7 @@ while ( have_posts() ) : the_post();
 				<p class="lbl">contact</p>
 				<h2>この実績について相談する</h2>
 				<p>ご相談・詳細のご質問はお気軽にどうぞ。</p>
-				<a class="btn primary" href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">この実績について問い合わせる</a>
+				<a class="btn primary" href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">お問い合わせフォームへ →</a>
 				<a class="btn ghost" href="<?php echo esc_url( home_url( '/profile/' ) ); ?>">プロフィールを見る</a>
 			</div>
 		</article>

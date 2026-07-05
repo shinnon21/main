@@ -28,7 +28,7 @@ get_header();
 		<div>
 			<p class="lbl">POLITICS × TECHNOLOGY × SOCIAL DESIGN</p>
 			<h1>構想を、<br><span class="u">社会に実装する。</span></h1>
-			<p class="lead">政治・行政のDX支援から、医薬品サプライチェーンの研究まで。「日本の技術を社会に届けるコーディネーター」を志す、小林慎之助のポートフォリオサイトです。</p>
+			<p class="lead">政治・行政のDX支援から、医薬品サプライチェーンの研究まで。「日本の技術を社会に届けるコーディネーター」を志す、小林慎之助の公式サイトです。</p>
 			<div class="cta">
 				<a class="btn primary" href="<?php echo esc_url( get_post_type_archive_link( 'works' ) ); ?>">実績を見る →</a>
 				<a class="btn ghost" href="<?php echo esc_url( home_url( '/profile/' ) ); ?>">プロフィール</a>
@@ -100,7 +100,7 @@ if ( $news->have_posts() ) : ?>
 	<div class="container">
 		<div class="sec-head">
 			<div class="l"><p class="lbl">news</p><h2>お知らせ</h2></div>
-			<a class="more" href="<?php echo esc_url( get_post_type_archive_link( 'news' ) ); ?>">一覧へ →</a>
+			<a class="more" href="<?php echo esc_url( get_post_type_archive_link( 'news' ) ); ?>">お知らせ一覧へ →</a>
 		</div>
 		<div class="news-list">
 			<?php while ( $news->have_posts() ) : $news->the_post(); ?>

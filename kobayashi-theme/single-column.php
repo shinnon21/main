@@ -33,7 +33,7 @@ while ( have_posts() ) : the_post();
 				<?php kb_avatar(); ?>
 				<div>
 					<div class="n"><?php echo esc_html( kb_profile_field( 'profile_name' ) ); ?></div>
-					<div class="r">Weeave株式会社 共同創業者・代表取締役 CEO ／ 筑波大学 経営工学主専攻</div>
+					<div class="r"><?php echo esc_html( kb_profile_field( 'profile_role' ) ); ?></div>
 					<p>政治・行政DXと社会実装をテーマに、実務と研究の両面から得た知見を発信しています。<a href="<?php echo esc_url( home_url( '/profile/' ) ); ?>" style="color:var(--crimson)">プロフィールを見る →</a></p>
 				</div>
 			</div>

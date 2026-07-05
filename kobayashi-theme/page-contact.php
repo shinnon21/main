@@ -19,7 +19,8 @@ get_template_part( 'parts/page-hero', null, array( 'label' => 'contact', 'title'
 		</article>
 
 		<div class="contact-alt">
-			<p>フォーム以外でも、<a href="https://www.linkedin.com/in/shinnosuke-kobayashi/" target="_blank" rel="noopener">LinkedIn</a>・<a href="https://www.facebook.com/shinnon21" target="_blank" rel="noopener">Facebook</a> からもご連絡いただけます。</p>
+			<p>フォームのほか、各SNSのDMからもご連絡いただけます。</p>
+			<?php kb_sns_links(); ?>
 		</div>
 
 	</div>
