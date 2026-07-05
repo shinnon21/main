@@ -50,7 +50,7 @@ if ( $skills && ! is_wp_error( $skills ) ) : ?>
 </div>
 <?php endif; ?>
 
-<!-- 3. 注目実績 -->
+<!-- 3. 主な実績 -->
 <?php
 $featured = new WP_Query( array(
 	'post_type'      => 'works',
@@ -64,7 +64,7 @@ if ( $featured->have_posts() ) : ?>
 <section class="sec">
 	<div class="container">
 		<div class="sec-head">
-			<div class="l"><p class="lbl">featured works</p><h2>注目の実績</h2></div>
+			<div class="l"><p class="lbl">selected works</p><h2>主な実績</h2></div>
 			<a class="more" href="<?php echo esc_url( get_post_type_archive_link( 'works' ) ); ?>">実績一覧を見る →</a>
 		</div>
 		<div class="featured">

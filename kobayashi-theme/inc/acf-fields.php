@@ -77,7 +77,7 @@ add_action( 'acf/init', function () {
 		array(
 			'key'     => 'field_kb_is_featured',
 			'name'    => 'is_featured',
-			'label'   => '注目の実績（トップに表示）',
+			'label'   => '主な実績としてトップに表示',
 			'type'    => 'true_false',
 			'ui'      => 1,
 		),
