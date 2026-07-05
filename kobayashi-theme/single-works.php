@@ -64,16 +64,8 @@ while ( have_posts() ) : the_post();
 			</div>
 			<?php endif; ?>
 
-			<?php /* シェア（F-08） */
-			$share_url   = rawurlencode( get_permalink() );
-			$share_title = rawurlencode( get_the_title() ); ?>
-			<div class="share">
-				<span class="s-lbl">SHARE</span>
-				<a href="https://x.com/intent/tweet?url=<?php echo $share_url; ?>&text=<?php echo $share_title; ?>" target="_blank" rel="noopener">X</a>
-				<a href="https://www.facebook.com/sharer/sharer.php?u=<?php echo $share_url; ?>" target="_blank" rel="noopener">Facebook</a>
-				<a href="https://b.hatena.ne.jp/entry/<?php echo esc_url( get_permalink() ); ?>" target="_blank" rel="noopener">はてな</a>
-				<button type="button" class="js-copy-url">URLコピー</button>
-			</div>
+			<?php /* シェア（F-08） */ ?>
+			<?php kb_share_buttons(); ?>
 
 			<div class="entry-cta">
 				<p class="lbl">contact</p>
