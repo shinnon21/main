@@ -106,7 +106,6 @@ if ( $news->have_posts() ) : ?>
 			<?php while ( $news->have_posts() ) : $news->the_post(); ?>
 			<a class="news-item" href="<?php the_permalink(); ?>">
 				<span class="d"><?php echo esc_html( get_the_date( 'Y.m.d' ) ); ?></span>
-				<span class="badge">お知らせ</span>
 				<span class="t"><?php the_title(); ?></span>
 			</a>
 			<?php endwhile; wp_reset_postdata(); ?>
