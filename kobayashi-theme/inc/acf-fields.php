@@ -136,6 +136,16 @@ add_action( 'acf/init', function () {
 	   未保存でもテンプレート側が同じ初期値にフォールバックする */
 	$pd  = function_exists( 'kb_profile_defaults' ) ? kb_profile_defaults() : array();
 	$pdv = function ( $k ) use ( $pd ) { return isset( $pd[ $k ] ) ? $pd[ $k ] : ''; };
+	/* 場所ルール: テンプレート一致に加え、スラッグ profile のページIDでも一致させる。
+	   （テンプレート欄が「デフォルト」のままでもスラッグ階層で page-profile.php が
+	   適用されて表示は正常なため、編集画面にだけ欄が出ない事故が起きる） */
+	$kb_profile_location = array(
+		array( array( 'param' => 'page_template', 'operator' => '==', 'value' => 'page-profile.php' ) ),
+	);
+	$kb_profile_page = get_page_by_path( 'profile' );
+	if ( $kb_profile_page ) {
+		$kb_profile_location[] = array( array( 'param' => 'page', 'operator' => '==', 'value' => $kb_profile_page->ID ) );
+	}
 	acf_add_local_field_group( array(
 		'key'      => 'group_kb_profile',
 		'title'    => 'プロフィール編集',
@@ -213,15 +223,7 @@ add_action( 'acf/init', function () {
 				'default_value' => $pdv( 'profile_activities' ),
 			),
 		),
-		'location' => array(
-			array(
-				array(
-					'param'    => 'page_template',
-					'operator' => '==',
-					'value'    => 'page-profile.php',
-				),
-			),
-		),
+		'location' => $kb_profile_location,
 		'position' => 'normal',
 	) );
 

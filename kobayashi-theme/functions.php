@@ -266,6 +266,20 @@ function kb_profile_field( $key ) {
 	$d = kb_profile_defaults();
 	return isset( $d[ $key ] ) ? $d[ $key ] : '';
 }
+/* プロフィール固定ページにテンプレートを明示付与（自己修復）。
+   スラッグ階層で page-profile.php が適用されるため表示は問題ないが、
+   _wp_page_template が未設定だと編集画面の「プロフィール編集」欄（ACFの
+   場所ルール）が一致せず表示されない */
+add_action( 'admin_init', function () {
+	$p = get_page_by_path( 'profile' );
+	if ( $p ) {
+		$tpl = get_post_meta( $p->ID, '_wp_page_template', true );
+		if ( ! $tpl || 'default' === $tpl ) {
+			update_post_meta( $p->ID, '_wp_page_template', 'page-profile.php' );
+		}
+	}
+} );
+
 /* 「1行1項目」形式のフィールドを行配列で返す */
 function kb_profile_lines( $key ) {
 	return array_values( array_filter( array_map( 'trim', preg_split( '/\r\n|\r|\n/', kb_profile_field( $key ) ) ), 'strlen' ) );
