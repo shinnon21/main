@@ -3,7 +3,7 @@
 get_header();
 
 $is_tax = is_tax( 'works_type' );
-$title  = $is_tax ? single_term_title( '', false ) : '実績';
+$title  = $is_tax ? kb_term_en( single_term_title( '', false ) ) : kb_t( '実績', 'Works' );
 get_template_part( 'parts/page-hero', null, array( 'label' => 'works', 'title' => $title ) );
 ?>
 
@@ -14,14 +14,14 @@ get_template_part( 'parts/page-hero', null, array( 'label' => 'works', 'title' =
 		$skills = get_terms( array( 'taxonomy' => 'skill', 'number' => 12, 'orderby' => 'count', 'order' => 'DESC' ) );
 		if ( $skills && ! is_wp_error( $skills ) ) : ?>
 		<div class="filter-box" style="padding:22px 28px">
-			<form method="get" action="<?php echo esc_url( home_url( '/searches/' ) ); ?>">
+			<form method="get" action="<?php echo esc_url( kb_home( '/searches/' ) ); ?>">
 				<input type="hidden" name="types[]" value="works">
 				<?php foreach ( $skills as $t ) : ?>
-				<label class="check-pill"><input type="checkbox" name="skills[]" value="<?php echo esc_attr( $t->slug ); ?>"># <?php echo esc_html( $t->name ); ?></label>
+				<label class="check-pill"><input type="checkbox" name="skills[]" value="<?php echo esc_attr( $t->slug ); ?>"># <?php echo esc_html( kb_term_en( $t->name ) ); ?></label>
 				<?php endforeach; ?>
 				<div class="filter-actions" style="margin-top:12px">
-					<button type="submit" class="btn primary sm">条件から実績を探す</button>
-					<a class="btn ghost sm" href="<?php echo esc_url( get_post_type_archive_link( 'works' ) ); ?>">条件をリセット</a>
+					<button type="submit" class="btn primary sm"><?php echo esc_html( kb_t( '条件から実績を探す', 'Search works by criteria' ) ); ?></button>
+					<a class="btn ghost sm" href="<?php echo esc_url( get_post_type_archive_link( 'works' ) ); ?>"><?php echo esc_html( kb_t( '条件をリセット', 'Reset' ) ); ?></a>
 				</div>
 			</form>
 		</div>
@@ -35,7 +35,7 @@ get_template_part( 'parts/page-hero', null, array( 'label' => 'works', 'title' =
 				</div>
 				<?php kb_pagination(); ?>
 				<?php else : ?>
-				<p>該当する実績はまだありません。</p>
+				<p><?php echo esc_html( kb_t( '該当する実績はまだありません。', 'No works found yet.' ) ); ?></p>
 				<?php endif; ?>
 			</div>
 			<aside>
@@ -43,9 +43,9 @@ get_template_part( 'parts/page-hero', null, array( 'label' => 'works', 'title' =
 				<?php $all_skills = get_terms( array( 'taxonomy' => 'skill', 'hide_empty' => true ) );
 				if ( $all_skills && ! is_wp_error( $all_skills ) ) : ?>
 				<div class="side-box">
-					<div class="sb-head"><span class="lbl">tags</span><h3>タグから探す</h3></div>
+					<div class="sb-head"><span class="lbl">tags</span><h3><?php echo esc_html( kb_t( 'タグから探す', 'Browse by tag' ) ); ?></h3></div>
 					<?php foreach ( $all_skills as $t ) : ?>
-					<a class="chip" href="<?php echo esc_url( get_term_link( $t ) ); ?>"># <?php echo esc_html( $t->name ); ?></a>
+					<a class="chip" href="<?php echo esc_url( get_term_link( $t ) ); ?>"># <?php echo esc_html( kb_term_en( $t->name ) ); ?></a>
 					<?php endforeach; ?>
 				</div>
 				<?php endif; ?>

@@ -225,6 +225,45 @@ add_action( 'acf/init', function () {
 		'position' => 'normal',
 	) );
 
+	/* ---------- 英語版コンテンツ（実績・コラム・お知らせ・固定ページ） ----------
+	   /en/ 表示時に使用。未入力の項目は日本語にフォールバックする */
+	acf_add_local_field_group( array(
+		'key'      => 'group_kb_en_content',
+		'title'    => '英語版コンテンツ（English）',
+		'fields'   => array(
+			array(
+				'key'          => 'field_kb_en_title',
+				'name'         => 'title_en',
+				'label'        => 'タイトル（英語）',
+				'type'         => 'text',
+				'instructions' => '空欄なら日本語タイトルを表示',
+			),
+			array(
+				'key'          => 'field_kb_en_excerpt',
+				'name'         => 'excerpt_en',
+				'label'        => '抜粋（英語）',
+				'type'         => 'textarea',
+				'rows'         => 3,
+				'instructions' => 'カード・リード文・meta descriptionに使用。空欄なら日本語抜粋',
+			),
+			array(
+				'key'          => 'field_kb_en_content',
+				'name'         => 'content_en',
+				'label'        => '本文（英語）',
+				'type'         => 'wysiwyg',
+				'media_upload' => 0,
+				'instructions' => '空欄なら日本語本文を表示',
+			),
+		),
+		'location' => array(
+			array( array( 'param' => 'post_type', 'operator' => '==', 'value' => 'works' ) ),
+			array( array( 'param' => 'post_type', 'operator' => '==', 'value' => 'column' ) ),
+			array( array( 'param' => 'post_type', 'operator' => '==', 'value' => 'news' ) ),
+			array( array( 'param' => 'post_type', 'operator' => '==', 'value' => 'page' ) ),
+		),
+		'position' => 'normal',
+	) );
+
 	/* ---------- 資料情報（投稿タイプ: document） ---------- */
 	acf_add_local_field_group( array(
 		'key'      => 'group_kb_document_info',

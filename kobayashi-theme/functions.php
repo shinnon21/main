@@ -15,6 +15,9 @@ require_once get_template_directory() . '/inc/seo.php';
 /* ---------- AIO（robots.txt・llms.txt・noindex制御） ---------- */
 require_once get_template_directory() . '/inc/aio.php';
 
+/* ---------- 日英2言語対応（/en/ ルーティング・翻訳ヘルパー） ---------- */
+require_once get_template_directory() . '/inc/i18n.php';
+
 /* ---------- テーマ基本設定 ---------- */
 add_action( 'after_setup_theme', function () {
 	add_theme_support( 'title-tag' );
@@ -210,11 +213,51 @@ function kb_profile_defaults() {
 		) ),
 	);
 }
+/* 英語版プロフィールの初期値（/en/ 用。プロフィール編集欄に
+   「<キー>_en」のメタを保存すればそちらが優先される） */
+function kb_profile_defaults_en() {
+	return array(
+		'profile_kana' => '小林 慎之助',
+		'profile_name' => 'Shinnosuke Kobayashi',
+		'profile_role' => 'Co-founder & CEO, Weeave Inc. / Management Science & Engineering, University of Tsukuba',
+		'profile_bio'  => 'A student entrepreneur studying management science and engineering at the University of Tsukuba while working on DX and social challenges across politics, government, and business. My strengths are data-driven strategy and community building that connects people — with a consistent commitment to implementing ideas as systems that actually work in the field, rather than leaving them as concepts. In the long term, I aim to be a coordinator who delivers Japanese technology to society, supporting the social implementation of deep tech from the business and capital side.',
+		'profile_career' => implode( "\n", array(
+			'2025.09 – | Co-founded Weeave Inc. — Representative Director & CEO | Co-founded a University of Tsukuba-certified startup driving DX for politics, government, and business, built on three pillars: political DX and communication strategy, visualization of community needs, and system development for social implementation.',
+			'2025.01 – 2025.12 | JSIP (Japan Southeast Asia Innovation Platform) — Community Accelerator | Supported Japanese companies entering Southeast Asia from a Singapore base, building relationships with nearly 100 new-business managers in about three months.',
+			'2025.04 – 2025.09 | Office of a Member of the House of Representatives — Digital Transformation Manager | Led DX for political and legislative activities. Developed an original election simulation model enabling data-driven strategy.',
+			'2024.11 – 2025.06 | RULEMAKERS DAO — Team Manager | Planned and executed a multi-channel marketing strategy to establish the RIFT brand.',
+			'2024.04 – 2025.03 | AIESEC — Business Development Manager | Led external relations, building corporate partnerships and planning deep-tech × student events.',
+			'2024.01 – 2024.12 | Geears Inc. — Growth Marketing Intern | Joined in the first year of university by reaching out directly. Led strategy work including political branding — the starting point of co-founding Weeave.',
+			'2023.04 – | University of Tsukuba — College of Policy and Planning Sciences | Majoring in Management Science and Engineering. Expected to graduate in March 2027 and advance to the graduate program in Service Engineering (Arima Lab).',
+		) ),
+		'profile_skills' => implode( "\n", array(
+			'Business & DX | New business development、Political & governmental DX、Cross-border business development',
+			'Data & Analysis | Data analysis、Election simulation、Management science / OR',
+			'Marketing & Community | Marketing & PR、Branding、Community building、Event planning',
+			'Languages | Japanese (native)、English (business level)',
+		) ),
+		'profile_research_title' => 'Predictive and proactive optimization of pharmaceutical supply chains based on wastewater surveillance',
+		'profile_research_body'  => 'This research integrates early epidemic signals from wastewater-based epidemiology (WBE) into inventory and logistics decisions in pharmaceutical supply chains, aiming to shift from reactive response to predictive, proactive management. Conducted at the Arima Lab, it bridges operations research and public health data with a strong focus on social implementation.',
+		'profile_activities' => implode( "\n", array(
+			'AI study session for members of the Shizuoka Prefectural Assembly (organizer & lecturer) — practical use of generative AI in politics',
+			'Pitch talk at "Strategic University Life vol.49" (April 2025 / Tsukuba Place Lab)',
+			'Internship interview featured on JSIP official media',
+		) ),
+	);
+}
 function kb_profile_field( $key ) {
 	static $page_id = null;
 	if ( $page_id === null ) {
 		$p = get_page_by_path( 'profile' );
 		$page_id = $p ? $p->ID : 0;
+	}
+	if ( kb_is_en() ) {
+		$v = $page_id ? kb_field( $key . '_en', $page_id ) : '';
+		if ( is_string( $v ) && trim( $v ) !== '' ) {
+			return trim( $v );
+		}
+		$d = kb_profile_defaults_en();
+		if ( isset( $d[ $key ] ) ) { return $d[ $key ]; }
 	}
 	$v = $page_id ? kb_field( $key, $page_id ) : '';
 	if ( is_string( $v ) && trim( $v ) !== '' ) {
@@ -233,33 +276,32 @@ function kb_dates() {
 	$pub = get_the_date( 'Y.m.d' );
 	$mod = get_the_modified_date( 'Y.m.d' );
 	if ( $mod && $mod !== $pub ) {
-		echo '<span>更新日 ' . esc_html( $mod ) . '</span><span>公開日 ' . esc_html( $pub ) . '</span>';
+		echo '<span>' . esc_html( kb_t( '更新日 ', 'Updated ' ) . $mod ) . '</span><span>' . esc_html( kb_t( '公開日 ', 'Published ' ) . $pub ) . '</span>';
 	} else {
-		echo '<span>公開日 ' . esc_html( $pub ) . '</span>';
+		echo '<span>' . esc_html( kb_t( '公開日 ', 'Published ' ) . $pub ) . '</span>';
 	}
 }
 
 /* ---------- パンくず（F-06） ---------- */
 function kb_breadcrumbs() {
 	if ( is_front_page() ) { return; }
-	echo '<nav class="breadcrumbs" aria-label="パンくず"><a href="' . esc_url( home_url( '/' ) ) . '">top</a>';
+	echo '<nav class="breadcrumbs" aria-label="パンくず"><a href="' . esc_url( kb_home( '/' ) ) . '">top</a>';
 	$sep = '<span class="sep">›</span>';
 
 	if ( is_singular( array( 'works', 'column', 'news' ) ) ) {
-		$pt  = get_post_type_object( get_post_type() );
-		echo $sep . '<a href="' . esc_url( get_post_type_archive_link( get_post_type() ) ) . '">' . esc_html( $pt->labels->name ) . '</a>';
-		echo $sep . '<span>' . esc_html( get_the_title() ) . '</span>';
+		echo $sep . '<a href="' . esc_url( get_post_type_archive_link( get_post_type() ) ) . '">' . esc_html( kb_pt_label() ) . '</a>';
+		echo $sep . '<span>' . esc_html( kb_get_title() ) . '</span>';
 	} elseif ( is_post_type_archive() ) {
-		echo $sep . '<span>' . esc_html( post_type_archive_title( '', false ) ) . '</span>';
+		echo $sep . '<span>' . esc_html( kb_pt_label() ) . '</span>';
 	} elseif ( is_tax( 'works_type' ) ) {
-		echo $sep . '<a href="' . esc_url( get_post_type_archive_link( 'works' ) ) . '">実績</a>';
-		echo $sep . '<span>' . esc_html( single_term_title( '', false ) ) . '</span>';
+		echo $sep . '<a href="' . esc_url( get_post_type_archive_link( 'works' ) ) . '">' . esc_html( kb_t( '実績', 'Works' ) ) . '</a>';
+		echo $sep . '<span>' . esc_html( kb_term_en( single_term_title( '', false ) ) ) . '</span>';
 	} elseif ( is_tax() || is_tag() || is_category() ) {
-		echo $sep . '<span>' . esc_html( single_term_title( '', false ) ) . '</span>';
+		echo $sep . '<span>' . esc_html( kb_term_en( single_term_title( '', false ) ) ) . '</span>';
 	} elseif ( is_page() ) {
-		echo $sep . '<span>' . esc_html( get_the_title() ) . '</span>';
+		echo $sep . '<span>' . esc_html( kb_get_title() ) . '</span>';
 	} elseif ( is_search() ) {
-		echo $sep . '<span>検索結果</span>';
+		echo $sep . '<span>' . esc_html( kb_t( '検索結果', 'Search results' ) ) . '</span>';
 	}
 	echo '</nav>';
 }
@@ -269,7 +311,7 @@ function kb_thumb( $class = 'thumb' ) {
 	$id    = get_the_ID();
 	$grad  = 'g' . ( ( $id % 6 ) + 1 );
 	$types = get_the_terms( $id, 'works_type' );
-	$label = ( $types && ! is_wp_error( $types ) ) ? $types[0]->name : strtoupper( get_post_type() );
+	$label = ( $types && ! is_wp_error( $types ) ) ? kb_term_en( $types[0]->name ) : strtoupper( get_post_type() );
 	echo '<div class="' . esc_attr( $class . ' ' . $grad ) . '">';
 	if ( has_post_thumbnail() ) {
 		the_post_thumbnail( 'medium_large' );
@@ -340,20 +382,20 @@ function kb_sns_links( $style = 'pill' ) {
 function kb_type_badge() {
 	$types = get_the_terms( get_the_ID(), 'works_type' );
 	if ( $types && ! is_wp_error( $types ) ) {
-		echo '<span class="badge accent">' . esc_html( $types[0]->name ) . '</span>';
+		echo '<span class="badge accent">' . esc_html( kb_term_en( $types[0]->name ) ) . '</span>';
 	}
 }
 
 /* ---------- シェアボタン（F-08。媒体は LinkedIn / Facebook / X ＋URLコピー） ---------- */
 function kb_share_buttons() {
 	$url   = rawurlencode( get_permalink() );
-	$title = rawurlencode( get_the_title() );
+	$title = rawurlencode( kb_get_title() );
 	echo '<div class="share">';
 	echo '<span class="s-lbl">SHARE</span>';
 	echo '<a href="https://www.linkedin.com/sharing/share-offsite/?url=' . $url . '" target="_blank" rel="noopener">LinkedIn</a>';
 	echo '<a href="https://www.facebook.com/sharer/sharer.php?u=' . $url . '" target="_blank" rel="noopener">Facebook</a>';
 	echo '<a href="https://x.com/intent/tweet?url=' . $url . '&amp;text=' . $title . '" target="_blank" rel="noopener">X</a>';
-	echo '<button type="button" class="js-copy-url">URLコピー</button>';
+	echo '<button type="button" class="js-copy-url" data-copied="' . esc_attr( kb_t( 'コピーしました', 'Copied!' ) ) . '">' . esc_html( kb_t( 'URLコピー', 'Copy URL' ) ) . '</button>';
 	echo '</div>';
 }
 
@@ -361,7 +403,12 @@ function kb_share_buttons() {
 function kb_news_type_badge() {
 	$types = get_the_terms( get_the_ID(), 'news_type' );
 	if ( $types && ! is_wp_error( $types ) ) {
-		echo '<span class="badge">' . esc_html( $types[0]->name ) . '</span>';
+		$name = $types[0]->name;
+		if ( kb_is_en() ) {
+			$map  = array( 'お知らせ' => 'News', '登壇・イベント' => 'Talks & Events', 'メディア掲載' => 'Media', 'リリース' => 'Release' );
+			$name = isset( $map[ $name ] ) ? $map[ $name ] : $name;
+		}
+		echo '<span class="badge">' . esc_html( $name ) . '</span>';
 	}
 }
 
@@ -375,9 +422,9 @@ function kb_skill_chips( $limit = 3, $linked = true ) {
 	echo '<div class="tags">';
 	foreach ( array_slice( $terms, 0, $limit ) as $t ) {
 		if ( $linked ) {
-			echo '<a class="chip" href="' . esc_url( get_term_link( $t ) ) . '"># ' . esc_html( $t->name ) . '</a>';
+			echo '<a class="chip" href="' . esc_url( get_term_link( $t ) ) . '"># ' . esc_html( kb_term_en( $t->name ) ) . '</a>';
 		} else {
-			echo '<span class="chip"># ' . esc_html( $t->name ) . '</span>';
+			echo '<span class="chip"># ' . esc_html( kb_term_en( $t->name ) ) . '</span>';
 		}
 	}
 	echo '</div>';
@@ -388,7 +435,7 @@ function kb_works_period() {
 	$s = kb_field( 'period_start' );
 	$e = kb_field( 'period_end' );
 	if ( $s ) {
-		echo '<span>' . esc_html( $s ) . ' – ' . esc_html( $e ? $e : '現在' ) . '</span>';
+		echo '<span>' . esc_html( $s ) . ' – ' . esc_html( $e ? $e : kb_t( '現在', 'Present' ) ) . '</span>';
 	}
 }
 
@@ -416,11 +463,11 @@ add_filter( 'excerpt_more', function () { return '…'; } );
 /* ---------- デフォルトナビ（メニュー未設定時のフォールバック） ---------- */
 function kb_default_nav() {
 	$items = array(
-		array( '実績', 'works', get_post_type_archive_link( 'works' ) ),
-		array( 'コラム', 'column', get_post_type_archive_link( 'column' ) ),
-		array( 'お知らせ', 'news', get_post_type_archive_link( 'news' ) ),
-		array( 'プロフィール', 'profile', home_url( '/profile/' ) ),
-		array( 'About', 'about', home_url( '/about/' ) ),
+		array( kb_t( '実績', 'Works' ), kb_t( 'works', '実績' ), get_post_type_archive_link( 'works' ) ),
+		array( kb_t( 'コラム', 'Column' ), kb_t( 'column', 'コラム' ), get_post_type_archive_link( 'column' ) ),
+		array( kb_t( 'お知らせ', 'News' ), kb_t( 'news', 'お知らせ' ), get_post_type_archive_link( 'news' ) ),
+		array( kb_t( 'プロフィール', 'Profile' ), kb_t( 'profile', 'プロフィール' ), kb_home( '/profile/' ) ),
+		array( 'About', kb_t( 'about', 'このサイトについて' ), kb_home( '/about/' ) ),
 	);
 	echo '<ul>';
 	foreach ( $items as $i ) {

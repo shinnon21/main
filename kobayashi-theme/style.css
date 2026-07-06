@@ -3,7 +3,7 @@ Theme Name: Kobayashi Portfolio
 Theme URI: https://shinnosuke-kobayashi.jp/
 Author: Shinnosuke Kobayashi
 Description: 「小林慎之助」ポートフォリオサイト用オリジナルテーマ。サイト設計書v1.1・デザインカンプ準拠。カスタム投稿タイプ（実績・コラム・お知らせ・資料）と条件検索を実装。
-Version: 1.17.0
+Version: 1.18.0
 Requires at least: 6.0
 Requires PHP: 8.0
 License: GNU General Public License v2 or later
@@ -71,13 +71,18 @@ header.site .container{display:flex;align-items:center;justify-content:space-bet
 .logo-img{height:30px;width:auto;display:block}
 nav.gnav ul{display:flex;gap:28px}
 nav.gnav ul a{display:block;text-align:center;font-size:14.5px;font-weight:700;padding:6px 2px;position:relative}
-nav.gnav ul a small{display:block;font-family:var(--font-en);font-size:9.5px;font-weight:600;color:var(--crimson);letter-spacing:.15em;text-transform:lowercase}
+nav.gnav ul a small{display:block;font-family:var(--font-en);font-size:9.5px;font-weight:600;color:var(--crimson);letter-spacing:.15em;text-transform:lowercase;white-space:nowrap}
 nav.gnav ul a::after{content:"";position:absolute;left:0;bottom:-2px;width:0;height:2px;background:var(--crimson);transition:.25s}
 nav.gnav ul a:hover::after,nav.gnav ul .current-menu-item a::after{width:100%}
 .h-right{display:flex;align-items:center;gap:14px}
 .search{display:flex;align-items:center;background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 14px;gap:8px;width:190px}
 .search input{border:none;outline:none;background:none;font-family:var(--font-jp);font-size:13px;width:100%}
 .search button{border:none;background:none;cursor:pointer;display:flex}
+/* 言語切替（JA/EN。ヘッダー右・モバイルでも常時表示） */
+.lang-switch{display:inline-flex;align-items:center;gap:5px;font-family:var(--font-en);font-size:11.5px;font-weight:700;letter-spacing:.05em;color:var(--gray);border:1px solid var(--line);border-radius:999px;padding:8px 13px;background:#fff;white-space:nowrap;transition:.2s}
+.lang-switch:hover{border-color:var(--crimson);color:var(--ink)}
+.lang-switch .on{color:var(--deep)}
+.lang-switch .sep{color:var(--line)}
 .menu-btn{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:6px}
 .menu-btn span{width:24px;height:2px;background:var(--ink);transition:.3s}
 /* 開いている間はハンバーガー→×にモーフ */
@@ -422,6 +427,7 @@ footer.site-footer .bottom{border-top:1px solid rgba(255,255,255,.1);padding:20p
   .logo-img{height:26px}
   nav.gnav ul{gap:20px}
   header.site .search{width:150px}
+  .lang-switch{padding:7px 11px;font-size:11px}
 }
 @media (max-width:960px){
   /* 全画面オーバーレイメニュー（ヒーローと同系の淡いクリムゾングラデ背景）

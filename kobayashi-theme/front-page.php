@@ -27,11 +27,11 @@ get_header();
 	<div class="container">
 		<div>
 			<p class="lbl">POLITICS × TECHNOLOGY × SOCIAL DESIGN</p>
-			<h1>構想を、<br><span class="u">社会に実装する。</span></h1>
-			<p class="lead">政治・行政のDX支援から、医薬品サプライチェーンの研究まで。「日本の技術を社会に届けるコーディネーター」を志す、小林慎之助の公式サイトです。</p>
+			<h1><?php echo wp_kses_post( kb_t( '構想を、<br><span class="u">社会に実装する。</span>', 'Vision,<br><span class="u">implemented in society.</span>' ) ); ?></h1>
+			<p class="lead"><?php echo esc_html( kb_t( '政治・行政のDX支援から、医薬品サプライチェーンの研究まで。「日本の技術を社会に届けるコーディネーター」を志す、小林慎之助の公式サイトです。', 'From DX support for politics and government to research on pharmaceutical supply chains — the official website of Shinnosuke Kobayashi, an aspiring coordinator who delivers Japanese technology to society.' ) ); ?></p>
 			<div class="cta">
-				<a class="btn primary" href="<?php echo esc_url( get_post_type_archive_link( 'works' ) ); ?>">実績を見る →</a>
-				<a class="btn ghost" href="<?php echo esc_url( home_url( '/profile/' ) ); ?>">プロフィール</a>
+				<a class="btn primary" href="<?php echo esc_url( get_post_type_archive_link( 'works' ) ); ?>"><?php echo esc_html( kb_t( '実績を見る →', 'View works →' ) ); ?></a>
+				<a class="btn ghost" href="<?php echo esc_url( kb_home( '/profile/' ) ); ?>"><?php echo esc_html( kb_t( 'プロフィール', 'Profile' ) ); ?></a>
 			</div>
 		</div>
 	</div>
@@ -44,7 +44,7 @@ if ( $skills && ! is_wp_error( $skills ) ) : ?>
 <div class="ticker">
 	<div class="lane" id="tickerLane">
 		<?php foreach ( $skills as $t ) : ?>
-		<a href="<?php echo esc_url( get_term_link( $t ) ); ?>"># <?php echo esc_html( $t->name ); ?></a>
+		<a href="<?php echo esc_url( get_term_link( $t ) ); ?>"># <?php echo esc_html( kb_term_en( $t->name ) ); ?></a>
 		<?php endforeach; ?>
 	</div>
 </div>
@@ -64,8 +64,8 @@ if ( $featured->have_posts() ) : ?>
 <section class="sec">
 	<div class="container">
 		<div class="sec-head">
-			<div class="l"><p class="lbl">selected works</p><h2>主な実績</h2></div>
-			<a class="more" href="<?php echo esc_url( get_post_type_archive_link( 'works' ) ); ?>">実績一覧を見る →</a>
+			<div class="l"><p class="lbl">selected works</p><h2><?php echo esc_html( kb_t( '主な実績', 'Selected Works' ) ); ?></h2></div>
+			<a class="more" href="<?php echo esc_url( get_post_type_archive_link( 'works' ) ); ?>"><?php echo esc_html( kb_t( '実績一覧を見る →', 'All works →' ) ); ?></a>
 		</div>
 		<div class="featured">
 			<?php $i = 0; while ( $featured->have_posts() ) : $featured->the_post(); $i++; ?>
@@ -74,8 +74,8 @@ if ( $featured->have_posts() ) : ?>
 					<?php kb_thumb(); ?>
 					<div class="body">
 						<div class="meta"><?php kb_type_badge(); ?><?php kb_works_period(); ?></div>
-						<h3><?php the_title(); ?></h3>
-						<?php if ( has_excerpt() ) : ?><p class="desc"><?php echo esc_html( get_the_excerpt() ); ?></p><?php endif; ?>
+						<h3><?php kb_the_title(); ?></h3>
+						<?php $kb_d = kb_get_excerpt(); if ( $kb_d ) : ?><p class="desc"><?php echo esc_html( $kb_d ); ?></p><?php endif; ?>
 						<?php kb_skill_chips( 3, false ); ?>
 					</div>
 				</a>
@@ -83,7 +83,7 @@ if ( $featured->have_posts() ) : ?>
 				<?php else : ?>
 					<a class="card" href="<?php the_permalink(); ?>">
 						<?php kb_thumb(); ?>
-						<div class="body"><div class="meta"><?php kb_type_badge(); ?></div><h3><?php the_title(); ?></h3></div>
+						<div class="body"><div class="meta"><?php kb_type_badge(); ?></div><h3><?php kb_the_title(); ?></h3></div>
 					</a>
 				<?php endif; ?>
 			<?php endwhile; ?>
@@ -99,15 +99,15 @@ if ( $news->have_posts() ) : ?>
 <section class="sec" style="padding-top:0">
 	<div class="container">
 		<div class="sec-head">
-			<div class="l"><p class="lbl">news</p><h2>お知らせ</h2></div>
-			<a class="more" href="<?php echo esc_url( get_post_type_archive_link( 'news' ) ); ?>">お知らせ一覧へ →</a>
+			<div class="l"><p class="lbl">news</p><h2><?php echo esc_html( kb_t( 'お知らせ', 'News' ) ); ?></h2></div>
+			<a class="more" href="<?php echo esc_url( get_post_type_archive_link( 'news' ) ); ?>"><?php echo esc_html( kb_t( 'お知らせ一覧へ →', 'All news →' ) ); ?></a>
 		</div>
 		<div class="news-list">
 			<?php while ( $news->have_posts() ) : $news->the_post(); ?>
 			<a class="news-item" href="<?php the_permalink(); ?>">
 				<span class="d"><?php echo esc_html( get_the_date( 'Y.m.d' ) ); ?></span>
 				<?php kb_news_type_badge(); ?>
-				<span class="t"><?php the_title(); ?></span>
+				<span class="t"><?php kb_the_title(); ?></span>
 			</a>
 			<?php endwhile; wp_reset_postdata(); ?>
 		</div>
@@ -122,8 +122,8 @@ if ( $cols->have_posts() ) : ?>
 	<div class="container col-wrap">
 		<div>
 			<div class="sec-head">
-				<div class="l"><p class="lbl">column</p><h2>新着コラム</h2></div>
-				<a class="more" href="<?php echo esc_url( get_post_type_archive_link( 'column' ) ); ?>">コラム一覧へ →</a>
+				<div class="l"><p class="lbl">column</p><h2><?php echo esc_html( kb_t( '新着コラム', 'Latest Columns' ) ); ?></h2></div>
+				<a class="more" href="<?php echo esc_url( get_post_type_archive_link( 'column' ) ); ?>"><?php echo esc_html( kb_t( 'コラム一覧へ →', 'All columns →' ) ); ?></a>
 			</div>
 			<?php while ( $cols->have_posts() ) : $cols->the_post(); get_template_part( 'parts/card', 'column' ); endwhile; wp_reset_postdata(); ?>
 		</div>
@@ -141,10 +141,10 @@ if ( $cols->have_posts() ) : ?>
 				<p class="kana"><?php echo esc_html( kb_profile_field( 'profile_kana' ) ); ?></p>
 				<h2><?php echo esc_html( kb_profile_field( 'profile_name' ) ); ?></h2>
 				<p class="role"><?php echo esc_html( kb_profile_field( 'profile_role' ) ); ?></p>
-				<p>筑波大学で経営工学を学びながら、政治・行政・企業のDXと社会課題の解決に取り組む学生起業家。データドリブンな戦略立案とコミュニティ構築を強みに、「構想で終わらせず、現場で使われる仕組みとして社会に実装する」ことにこだわり続けています。</p>
+				<p><?php echo esc_html( kb_t( '筑波大学で経営工学を学びながら、政治・行政・企業のDXと社会課題の解決に取り組む学生起業家。データドリブンな戦略立案とコミュニティ構築を強みに、「構想で終わらせず、現場で使われる仕組みとして社会に実装する」ことにこだわり続けています。', 'A student entrepreneur studying management science and engineering at the University of Tsukuba while working on DX and social challenges across politics, government, and business. With strengths in data-driven strategy and community building, I am committed to implementing ideas as systems that actually work in the field — not leaving them as concepts.' ) ); ?></p>
 				<div class="p-cta">
-					<a class="btn primary" href="<?php echo esc_url( home_url( '/profile/' ) ); ?>">プロフィール詳細 →</a>
-					<a class="btn ghost" href="<?php echo esc_url( home_url( '/profile/#research' ) ); ?>">研究テーマを見る</a>
+					<a class="btn primary" href="<?php echo esc_url( kb_home( '/profile/' ) ); ?>"><?php echo esc_html( kb_t( 'プロフィール詳細 →', 'Full profile →' ) ); ?></a>
+					<a class="btn ghost" href="<?php echo esc_url( kb_home( '/profile/#research' ) ); ?>"><?php echo esc_html( kb_t( '研究テーマを見る', 'Research theme' ) ); ?></a>
 				</div>
 			</div>
 		</div>
@@ -156,9 +156,9 @@ if ( $cols->have_posts() ) : ?>
 	<div class="container">
 		<div class="contact-cta">
 			<p class="lbl">contact</p>
-			<h2>お仕事のご相談・ご連絡</h2>
-			<p>DX支援・データ分析・事業開発のご相談、取材・登壇のご依頼、協業のお声がけなど、お問い合わせフォームからお気軽にご連絡ください。</p>
-			<a class="btn white" href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">お問い合わせ →</a>
+			<h2><?php echo esc_html( kb_t( 'お仕事のご相談・ご連絡', 'Work Inquiries' ) ); ?></h2>
+			<p><?php echo esc_html( kb_t( 'DX支援・データ分析・事業開発のご相談、取材・登壇のご依頼、協業のお声がけなど、お問い合わせフォームからお気軽にご連絡ください。', 'For consulting on DX, data analysis, or business development, interview and speaking requests, or collaboration proposals — feel free to reach out via the contact form.' ) ); ?></p>
+			<a class="btn white" href="<?php echo esc_url( kb_home( '/contact/' ) ); ?>"><?php echo esc_html( kb_t( 'お問い合わせ →', 'Contact →' ) ); ?></a>
 		</div>
 	</div>
 </section>

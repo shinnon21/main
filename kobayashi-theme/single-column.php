@@ -9,8 +9,8 @@ while ( have_posts() ) : the_post();
 
 		<article class="entry-wrap" style="margin-top:18px;max-width:none">
 			<header class="entry-head">
-				<div class="meta"><?php kb_dates(); ?><span class="badge accent" style="font-size:10px">コラム</span></div>
-				<h1><?php the_title(); ?></h1>
+				<div class="meta"><?php kb_dates(); ?><span class="badge accent" style="font-size:10px"><?php echo esc_html( kb_t( 'コラム', 'Column' ) ); ?></span></div>
+				<h1><?php kb_the_title(); ?></h1>
 				<?php kb_skill_chips( 6 ); ?>
 			</header>
 
@@ -18,7 +18,7 @@ while ( have_posts() ) : the_post();
 			<div class="entry-thumb"><?php the_post_thumbnail( 'large' ); ?></div>
 			<?php endif; ?>
 
-			<div class="entry-content"><?php the_content(); ?></div>
+			<div class="entry-content"><?php kb_the_content(); ?></div>
 
 			<?php kb_share_buttons(); ?>
 
@@ -27,7 +27,7 @@ while ( have_posts() ) : the_post();
 				<div>
 					<div class="n"><?php echo esc_html( kb_profile_field( 'profile_name' ) ); ?></div>
 					<div class="r"><?php echo esc_html( kb_profile_field( 'profile_role' ) ); ?></div>
-					<p>政治・行政DXと社会実装をテーマに、実務と研究の両面から得た知見を発信しています。<a href="<?php echo esc_url( home_url( '/profile/' ) ); ?>" style="color:var(--crimson)">プロフィールを見る →</a></p>
+					<p><?php echo esc_html( kb_t( '政治・行政DXと社会実装をテーマに、実務と研究の両面から得た知見を発信しています。', 'Writing on political and governmental DX and social implementation, drawing on insights from both practice and research.' ) ); ?><a href="<?php echo esc_url( kb_home( '/profile/' ) ); ?>" style="color:var(--crimson)"><?php echo esc_html( kb_t( 'プロフィールを見る →', 'View profile →' ) ); ?></a></p>
 				</div>
 			</div>
 		</article>
@@ -43,7 +43,7 @@ while ( have_posts() ) : the_post();
 			) );
 			if ( $related->have_posts() ) : ?>
 		<section style="margin-top:56px">
-			<div class="sec-head"><div class="l"><p class="lbl">related</p><h2>関連記事</h2></div></div>
+			<div class="sec-head"><div class="l"><p class="lbl">related</p><h2><?php echo esc_html( kb_t( '関連記事', 'Related Articles' ) ); ?></h2></div></div>
 			<?php while ( $related->have_posts() ) : $related->the_post(); get_template_part( 'parts/card', 'column' ); endwhile; wp_reset_postdata(); ?>
 		</section>
 		<?php endif; endif; ?>

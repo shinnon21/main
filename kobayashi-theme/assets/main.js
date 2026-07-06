@@ -63,12 +63,13 @@
     });
   }
 
-  /* URLコピー（シェアボタン） */
+  /* URLコピー（シェアボタン）。表示文言は data 属性（日英対応） */
   document.querySelectorAll('.js-copy-url').forEach(function (el) {
+    var idle = el.textContent;
     el.addEventListener('click', function () {
       navigator.clipboard.writeText(location.href).then(function () {
-        el.textContent = 'コピーしました';
-        setTimeout(function () { el.textContent = 'URLコピー'; }, 1600);
+        el.textContent = el.dataset.copied || 'コピーしました';
+        setTimeout(function () { el.textContent = idle; }, 1600);
       });
     });
   });
@@ -78,7 +79,8 @@
   if (tgl) {
     tgl.addEventListener('click', function () {
       document.querySelectorAll('.skill-extra').forEach(function (el) { el.classList.toggle('open'); });
-      tgl.textContent = tgl.textContent.indexOf('すべて') !== -1 ? '閉じる ▲' : 'すべて表示する ▼';
+      var opened = tgl.textContent === (tgl.dataset.close || '閉じる ▲');
+      tgl.textContent = opened ? (tgl.dataset.open || 'すべて表示する ▼') : (tgl.dataset.close || '閉じる ▲');
     });
   }
 

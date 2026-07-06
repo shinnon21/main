@@ -14,8 +14,8 @@
 
 | パス | 内容 |
 |---|---|
-| `kobayashi-theme/` | WordPressオリジナルテーマ v1.7（**主要成果物・ブランド反映済み**。works_type 404修正＋ACFコード登録 `inc/acf-fields.php`＋SEO出力 `inc/seo.php`。v1.3: カード内アンカー入れ子によるレイアウト崩壊修正／v1.4: ユーティリティバー削除・ヒーロー波アニメ＋クリックでポイント／v1.5: アバター顔写真化 `kb_avatar()`・CF7スタイリング `page-contact.php`・ロゴ44px＋文字サイズ一括アップ／v1.6: ファーストビュー1画面化 `100svh-133px` 上限820px／v1.7: 格子をヒーロー全面の背景に（viewBox=実アスペクト比でJS動的生成・格子間隔94・ドット群は横長/縦長で配置切替、クリック演出は`.hero`側で拾いリンク上は無効。v1.7.1: 端に向かうradial-gradientマスクで格子をフェードさせ境界に余白感／v1.8: SNSリンク `kb_sns_links()`（プロフィール掲載・Instagramは`kb_sns_accounts()`にURL記入で表示）・実績詳細を刷新（spec表→`dl.ov`概要グリッド・リード文`.standfirst`・KPI/ギャラリーに`.blk-head`見出し・CTA刷新）・ロゴSVGの焼き込み余白をviewBoxクロップ（表示36px）／v1.10: モバイルを全画面オーバーレイメニュー化（×モーフ・段差フェード・検索/SNS/CTA内蔵・スクロールロック。header.siteのbackdrop-filterがfixedの基準になるためbottom:0でなく高さ明示）／v1.9: プロフィールを管理画面編集化（ACFテキスト欄＝無印ACF対応「1行1項目・パイプ区切り」方式。`kb_profile_defaults()`が初期値兼フォールバックで未保存でも表示不変。名前/肩書はトップ・コラム著者欄にも連動）） |
-| `kobayashi-theme.zip` | 上記のインストール用zip（35ファイル） |
+| `kobayashi-theme/` | WordPressオリジナルテーマ v1.7（**主要成果物・ブランド反映済み**。works_type 404修正＋ACFコード登録 `inc/acf-fields.php`＋SEO出力 `inc/seo.php`。v1.3: カード内アンカー入れ子によるレイアウト崩壊修正／v1.4: ユーティリティバー削除・ヒーロー波アニメ＋クリックでポイント／v1.5: アバター顔写真化 `kb_avatar()`・CF7スタイリング `page-contact.php`・ロゴ44px＋文字サイズ一括アップ／v1.6: ファーストビュー1画面化 `100svh-133px` 上限820px／v1.7: 格子をヒーロー全面の背景に（viewBox=実アスペクト比でJS動的生成・格子間隔94・ドット群は横長/縦長で配置切替、クリック演出は`.hero`側で拾いリンク上は無効。v1.7.1: 端に向かうradial-gradientマスクで格子をフェードさせ境界に余白感／v1.8: SNSリンク `kb_sns_links()`（プロフィール掲載・Instagramは`kb_sns_accounts()`にURL記入で表示）・実績詳細を刷新（spec表→`dl.ov`概要グリッド・リード文`.standfirst`・KPI/ギャラリーに`.blk-head`見出し・CTA刷新）・ロゴSVGの焼き込み余白をviewBoxクロップ（表示36px）／v1.10: モバイルを全画面オーバーレイメニュー化（×モーフ・段差フェード・検索/SNS/CTA内蔵・スクロールロック。header.siteのbackdrop-filterがfixedの基準になるためbottom:0でなく高さ明示）／v1.9: プロフィールを管理画面編集化（ACFテキスト欄＝無印ACF対応「1行1項目・パイプ区切り」方式。`kb_profile_defaults()`が初期値兼フォールバックで未保存でも表示不変。名前/肩書はトップ・コラム著者欄にも連動）／v1.18: **全ページ日英2言語対応**（プラグイン不要 `inc/i18n.php`＝`/en/`プレフィックスの書き換えルール・`kb_t()`/`kb_home()`/`kb_term_en()`/`kb_scope_label()`/`kb_field_i18n()`・EN時は内部リンクを自動で/en/化・hreflang/lang属性/言語切替ピル`kb_lang_switcher()`。記事コンテンツはメタ `title_en`/`excerpt_en`/`content_en`（＋実績は`client_name_en`等）でJPフォールバック＝ACF欄「英語版コンテンツ」から編集可。ENプロフィール初期値は`kb_profile_defaults_en()`。SEO/OGP/JSON-LD/`<title>`もEN連動。**公開にはパーマリンク再保存＋`deploy/seed-en.php`実行が必要**）） |
+| `kobayashi-theme.zip` | 上記のインストール用zip（38ファイル） |
 | `サイト設計書_小林慎之助.md` | 要件・IA・画面設計・コンテンツモデル・機能要件（正本） |
 | `WordPress導入手順.md` | セットアップ〜GCP公開手順 |
 | `デザインカンプ_トップ_小林慎之助.html` | トップページのデザインリファレンス（ブラウザで開く） |
@@ -24,7 +24,7 @@
 | `小林慎之助_ポートフォリオ.md` | 実績・経歴の元データ（入稿コンテンツのソース） |
 | `Shinnosuke_Face.png` | プロフィール顔写真（シードがprofileページのアイキャッチに自動設定。`kb_avatar()` がトップ/著者欄でも流用） |
 | `Cloudflare導入手順.md` | Cloudflare導入によるセキュリティ強化手順（DNS切替・SSL Full(strict)・WAF・レート制限・mod_remoteip・オリジン遮断。**未実施**＝ユーザーのCloudflare/レジストラ操作が必要） |
-| `deploy/` | GCPデプロイ一式（`gcp-deploy.sh`→`gcp-ssl.sh`の2段階。`seed-content.php`は入稿シード・ローカルE2E検証済み。`seed-pages.php`はAbout/プライバシーポリシー本文の投入用＝本番実行済み 2026-07-03） |
+| `deploy/` | GCPデプロイ一式（`gcp-deploy.sh`→`gcp-ssl.sh`の2段階。`seed-content.php`は入稿シード・ローカルE2E検証済み。`seed-pages.php`はAbout/プライバシーポリシー本文の投入用＝本番実行済み 2026-07-03。`seed-en.php`は英語版メタ（実績7件・お知らせ・固定ページのtitle_en/excerpt_en/content_en等）の投入用＝**本番未実行**） |
 
 ## デザイントークン（ブランドガイド準拠・変更禁止）
 
@@ -58,7 +58,7 @@
 6. ~~カードレイアウト崩壊（余白がおかしい）の修正~~ ✅ 完了（2026-07-03, v1.3）: カード`<a>`内に `kb_skill_chips()` が `<a class="chip">` を出力しアンカーが入れ子 → HTMLパーサーが外側リンクを分割し `.thumb`/`.body` がグリッドの別セルに割れていた。カード内チップを `<span>` 化（`kb_skill_chips( n, false )`）して解消。デザインカンプも `<span class="chip">` が正
 7. ~~OGP・構造化データ~~ ✅ 完了（v1.3）: `inc/seo.php` で meta description／OGP／Twitterカードをフォールバック出力（SEO SIMPLE PACK等の有効時は自動で出力停止）＋ Person／Article JSON-LD
 8. ~~About・プライバシーポリシー本文の投入~~ ✅ 完了（2026-07-03）: 本番VMで `wp eval-file seed-pages.php` 実行済み（raw.githubusercontent.comから取得して実行する手順で対応）
-9. 運用設定（残り）: ~~GA4/GTM設置~~ ✅ ユーザーがWP側で導入済み（2026-07-05）、SiteGuardログインURL変更、BackWPupスケジュール、GCEスナップショット週次、実績アイキャッチ画像の差し込み（ユーザーがWP管理画面から）。**本番WP管理画面での実施待ち（2026-07-04依頼）**: ①サイトのタイトルを「小林慎之助 公式ホームページ」に変更（設定→一般）②CF7のメール送信先/送信元を contact@shinnosuke-kobayashi.jp に変更（導入手順.md §5-5の表が正）③設定→パーマリンクで「変更を保存」を1クリック（news_type・llms.txtのルーティング登録）④キャッチフレーズ末尾を「〜公式サイトです。」に
+9. 運用設定（残り）: ~~GA4/GTM設置~~ ✅ ユーザーがWP側で導入済み（2026-07-05）、SiteGuardログインURL変更、BackWPupスケジュール、GCEスナップショット週次、実績アイキャッチ画像の差し込み（ユーザーがWP管理画面から）。**本番WP管理画面での実施待ち（2026-07-04依頼）**: ①サイトのタイトルを「小林慎之助 公式ホームページ」に変更（設定→一般）②CF7のメール送信先/送信元を contact@shinnosuke-kobayashi.jp に変更（導入手順.md §5-5の表が正）③設定→パーマリンクで「変更を保存」を1クリック（news_type・llms.txt・**/en/** のルーティング登録）④キャッチフレーズ末尾を「〜公式サイトです。」に ⑤英語版コンテンツ投入: VMで `wp eval-file` により raw.githubusercontent.com の `deploy/seed-en.php` を実行（seed-pagesと同じ手順）→ ③のパーマリンク再保存。EN版CF7フォーム（英語の問い合わせフォーム）は未作成＝/en/contact/ は日本語フォームを流用
 10. Cloudflare導入（`Cloudflare導入手順.md` 作成済み・実施待ち）: DNS切替とダッシュボード設定はユーザー操作。VM側の mod_remoteip／オリジン遮断コマンドは手順書§5参照
 11. Phase 2候補: 登壇イベントCPT有効化、スキル辞典
 

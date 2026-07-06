@@ -20,18 +20,23 @@ function kb_seo_plugin_active() {
 /* ---------- description文字列 ---------- */
 function kb_meta_description() {
 	if ( is_singular() ) {
-		if ( has_excerpt() ) {
-			return wp_strip_all_tags( get_the_excerpt() );
+		$ex = kb_get_excerpt();
+		if ( $ex ) {
+			return $ex;
 		}
-		return wp_trim_words( wp_strip_all_tags( get_post_field( 'post_content', get_the_ID() ) ), 60, '…' );
+		$body = kb_is_en() ? get_post_meta( get_the_ID(), 'content_en', true ) : '';
+		if ( ! is_string( $body ) || '' === trim( $body ) ) {
+			$body = get_post_field( 'post_content', get_the_ID() );
+		}
+		return wp_trim_words( wp_strip_all_tags( $body ), 60, '…' );
 	}
 	if ( is_tax() || is_tag() || is_category() ) {
-		return single_term_title( '', false ) . 'に関する実績・記事の一覧です。';
+		return sprintf( kb_t( '%sに関する実績・記事の一覧です。', 'Works and articles related to %s.' ), kb_term_en( single_term_title( '', false ) ) );
 	}
 	if ( is_post_type_archive() ) {
-		return post_type_archive_title( '', false ) . 'の一覧です。';
+		return kb_is_en() ? sprintf( 'A list of %s by Shinnosuke Kobayashi.', kb_pt_label() ) : post_type_archive_title( '', false ) . 'の一覧です。';
 	}
-	return get_bloginfo( 'description' );
+	return kb_t( get_bloginfo( 'description' ), 'From political and governmental DX to pharmaceutical supply chain research — the official website of Shinnosuke Kobayashi.' );
 }
 
 /* ---------- 現在URL ---------- */
@@ -43,7 +48,7 @@ function kb_canonical_url() {
 		$link = ( $term && ! is_wp_error( $term ) ) ? get_term_link( $term ) : '';
 		if ( $link && ! is_wp_error( $link ) ) { return $link; }
 	}
-	return home_url( '/' );
+	return kb_home( '/' );
 }
 
 /* ---------- meta description + OGP + Twitterカード ---------- */
@@ -68,7 +73,7 @@ add_action( 'wp_head', function () {
 	if ( $desc ) {
 		echo '<meta name="description" content="' . esc_attr( $desc ) . '">' . "\n";
 	}
-	echo '<meta property="og:site_name" content="' . esc_attr( get_bloginfo( 'name' ) ) . '">' . "\n";
+	echo '<meta property="og:site_name" content="' . esc_attr( kb_t( get_bloginfo( 'name' ), 'Shinnosuke Kobayashi Official Website' ) ) . '">' . "\n";
 	echo '<meta property="og:title" content="' . esc_attr( $title ) . '">' . "\n";
 	echo '<meta property="og:type" content="' . esc_attr( $type ) . '">' . "\n";
 	echo '<meta property="og:url" content="' . esc_url( $url ) . '">' . "\n";
@@ -79,7 +84,7 @@ add_action( 'wp_head', function () {
 	if ( $w ) {
 		echo '<meta property="og:image:width" content="' . (int) $w . '"><meta property="og:image:height" content="' . (int) $h . '">' . "\n";
 	}
-	echo '<meta property="og:locale" content="ja_JP">' . "\n";
+	echo '<meta property="og:locale" content="' . esc_attr( kb_t( 'ja_JP', 'en_US' ) ) . '">' . "\n";
 	echo '<meta name="twitter:card" content="summary_large_image">' . "\n";
 }, 6 );
 
@@ -93,15 +98,17 @@ function kb_jsonld_person() {
 	$person = array(
 		'@type'         => 'Person',
 		'name'          => kb_profile_field( 'profile_name' ),
-		'alternateName' => 'Shinnosuke Kobayashi',
-		'url'           => home_url( '/profile/' ),
-		'jobTitle'      => '共同創業者・代表取締役 CEO',
+		'alternateName' => kb_t( 'Shinnosuke Kobayashi', '小林 慎之助' ),
+		'url'           => kb_home( '/profile/' ),
+		'jobTitle'      => kb_t( '共同創業者・代表取締役 CEO', 'Co-founder & CEO' ),
 		'description'   => wp_trim_words( kb_profile_field( 'profile_bio' ), 60, '…' ),
 		'affiliation'   => array(
-			array( '@type' => 'Organization', 'name' => 'Weeave株式会社', 'url' => 'https://www.weeave.co.jp/' ),
+			array( '@type' => 'Organization', 'name' => kb_t( 'Weeave株式会社', 'Weeave Inc.' ), 'url' => 'https://www.weeave.co.jp/' ),
 		),
-		'alumniOf'      => array( '@type' => 'CollegeOrUniversity', 'name' => '筑波大学' ),
-		'knowsAbout'    => array( '政治・行政のDX', 'データ分析', '事業開発', '経営工学', '医薬品サプライチェーン', '選挙シミュレーション', 'マーケティング・広報', 'コミュニティ構築' ),
+		'alumniOf'      => array( '@type' => 'CollegeOrUniversity', 'name' => kb_t( '筑波大学', 'University of Tsukuba' ) ),
+		'knowsAbout'    => kb_is_en()
+			? array( 'Political & governmental DX', 'Data analysis', 'Business development', 'Management science', 'Pharmaceutical supply chains', 'Election simulation', 'Marketing & PR', 'Community building' )
+			: array( '政治・行政のDX', 'データ分析', '事業開発', '経営工学', '医薬品サプライチェーン', '選挙シミュレーション', 'マーケティング・広報', 'コミュニティ構築' ),
 		'sameAs'        => $same_as,
 	);
 	$profile = get_page_by_path( 'profile' );
@@ -118,9 +125,9 @@ function kb_jsonld_breadcrumbs() {
 	return array(
 		'@type'           => 'BreadcrumbList',
 		'itemListElement' => array(
-			array( '@type' => 'ListItem', 'position' => 1, 'name' => 'ホーム', 'item' => home_url( '/' ) ),
-			array( '@type' => 'ListItem', 'position' => 2, 'name' => $pt->labels->name, 'item' => get_post_type_archive_link( get_post_type() ) ),
-			array( '@type' => 'ListItem', 'position' => 3, 'name' => get_the_title() ),
+			array( '@type' => 'ListItem', 'position' => 1, 'name' => kb_t( 'ホーム', 'Home' ), 'item' => kb_home( '/' ) ),
+			array( '@type' => 'ListItem', 'position' => 2, 'name' => kb_pt_label(), 'item' => get_post_type_archive_link( get_post_type() ) ),
+			array( '@type' => 'ListItem', 'position' => 3, 'name' => kb_get_title() ),
 		),
 	);
 }
@@ -128,16 +135,16 @@ function kb_jsonld_breadcrumbs() {
 add_action( 'wp_head', function () {
 	$graph = array();
 
-	if ( is_front_page() ) {
+	if ( is_front_page() || get_query_var( 'kb_en_front' ) ) {
 		$graph[] = array(
 			'@type'           => 'WebSite',
-			'name'            => get_bloginfo( 'name' ),
-			'url'             => home_url( '/' ),
-			'inLanguage'      => 'ja',
-			'description'     => get_bloginfo( 'description' ),
+			'name'            => kb_t( get_bloginfo( 'name' ), 'Shinnosuke Kobayashi Official Website' ),
+			'url'             => kb_home( '/' ),
+			'inLanguage'      => kb_t( 'ja', 'en' ),
+			'description'     => kb_t( get_bloginfo( 'description' ), 'From political and governmental DX to pharmaceutical supply chain research — the official website of Shinnosuke Kobayashi.' ),
 			'potentialAction' => array(
 				'@type'       => 'SearchAction',
-				'target'      => array( '@type' => 'EntryPoint', 'urlTemplate' => home_url( '/?s={search_term_string}' ) ),
+				'target'      => array( '@type' => 'EntryPoint', 'urlTemplate' => kb_home( '/' ) . '?s={search_term_string}' ),
 				'query-input' => 'required name=search_term_string',
 			),
 		);
@@ -151,15 +158,16 @@ add_action( 'wp_head', function () {
 	} elseif ( is_singular( array( 'works', 'column', 'news' ) ) ) {
 		$article = array(
 			'@type'         => is_singular( 'news' ) ? 'NewsArticle' : 'Article',
-			'headline'      => get_the_title(),
+			'headline'      => kb_get_title(),
 			'datePublished' => get_the_date( 'c' ),
 			'dateModified'  => get_the_modified_date( 'c' ),
-			'inLanguage'    => 'ja',
+			'inLanguage'    => kb_t( 'ja', 'en' ),
 			'mainEntityOfPage' => get_permalink(),
 			'author'        => kb_jsonld_person(),
 		);
-		if ( has_excerpt() ) {
-			$article['description'] = wp_strip_all_tags( get_the_excerpt() );
+		$kb_ex = kb_get_excerpt();
+		if ( $kb_ex ) {
+			$article['description'] = $kb_ex;
 		}
 		$article['image'] = has_post_thumbnail()
 			? get_the_post_thumbnail_url( get_the_ID(), 'large' )
