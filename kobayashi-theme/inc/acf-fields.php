@@ -227,6 +227,94 @@ add_action( 'acf/init', function () {
 		'position' => 'normal',
 	) );
 
+	/* ---------- プロフィール編集（英語版） ----------
+	   /en/ のプロフィール・トップダイジェスト・著者欄で使用。
+	   初期値はテーマ内蔵の英訳（kb_profile_defaults_en）。未保存でも同じ内容で表示される */
+	$pde  = function_exists( 'kb_profile_defaults_en' ) ? kb_profile_defaults_en() : array();
+	$pdev = function ( $k ) use ( $pde ) { return isset( $pde[ $k ] ) ? $pde[ $k ] : ''; };
+	acf_add_local_field_group( array(
+		'key'      => 'group_kb_profile_en',
+		'title'    => 'プロフィール編集（英語版 English）',
+		'fields'   => array(
+			array(
+				'key'           => 'field_kb_pf_kana_en',
+				'name'          => 'profile_kana_en',
+				'label'         => '名前の上の小さな表記（英語版）',
+				'type'          => 'text',
+				'instructions'  => '英語版では日本語名を表示するのが初期設定',
+				'default_value' => $pdev( 'profile_kana' ),
+				'wrapper'       => array( 'width' => '34' ),
+			),
+			array(
+				'key'           => 'field_kb_pf_name_en',
+				'name'          => 'profile_name_en',
+				'label'         => '名前（英語）',
+				'type'          => 'text',
+				'default_value' => $pdev( 'profile_name' ),
+				'wrapper'       => array( 'width' => '66' ),
+			),
+			array(
+				'key'           => 'field_kb_pf_role_en',
+				'name'          => 'profile_role_en',
+				'label'         => '肩書き（英語）',
+				'type'          => 'text',
+				'default_value' => $pdev( 'profile_role' ),
+			),
+			array(
+				'key'           => 'field_kb_pf_bio_en',
+				'name'          => 'profile_bio_en',
+				'label'         => '自己紹介文（英語）',
+				'type'          => 'textarea',
+				'rows'          => 5,
+				'default_value' => $pdev( 'profile_bio' ),
+			),
+			array(
+				'key'           => 'field_kb_pf_career_en',
+				'name'          => 'profile_career_en',
+				'label'         => '経歴（英語・1行につき1項目・新しい順）',
+				'type'          => 'textarea',
+				'rows'          => 9,
+				'instructions'  => '書式: 期間 | タイトル | 説明　（日本語版と同じパイプ区切り）',
+				'default_value' => $pdev( 'profile_career' ),
+			),
+			array(
+				'key'           => 'field_kb_pf_skills_en',
+				'name'          => 'profile_skills_en',
+				'label'         => 'スキル・強み（英語・1行につき1グループ）',
+				'type'          => 'textarea',
+				'rows'          => 5,
+				'instructions'  => '書式: グループ名 | スキル、スキル、スキル',
+				'default_value' => $pdev( 'profile_skills' ),
+			),
+			array(
+				'key'           => 'field_kb_pf_research_title_en',
+				'name'          => 'profile_research_title_en',
+				'label'         => '研究テーマ タイトル（英語）',
+				'type'          => 'text',
+				'default_value' => $pdev( 'profile_research_title' ),
+			),
+			array(
+				'key'           => 'field_kb_pf_research_body_en',
+				'name'          => 'profile_research_body_en',
+				'label'         => '研究テーマ 説明（英語）',
+				'type'          => 'textarea',
+				'rows'          => 4,
+				'default_value' => $pdev( 'profile_research_body' ),
+			),
+			array(
+				'key'           => 'field_kb_pf_activities_en',
+				'name'          => 'profile_activities_en',
+				'label'         => '登壇・対外活動（英語・1行につき1項目）',
+				'type'          => 'textarea',
+				'rows'          => 4,
+				'default_value' => $pdev( 'profile_activities' ),
+			),
+		),
+		'location'      => $kb_profile_location,
+		'position'      => 'normal',
+		'menu_order'    => 10,
+	) );
+
 	/* ---------- 英語版コンテンツ（実績・コラム・お知らせ・固定ページ） ----------
 	   /en/ 表示時に使用。未入力の項目は日本語にフォールバックする */
 	acf_add_local_field_group( array(
@@ -264,6 +352,66 @@ add_action( 'acf/init', function () {
 			array( array( 'param' => 'post_type', 'operator' => '==', 'value' => 'page' ) ),
 		),
 		'position' => 'normal',
+	) );
+
+	/* ---------- 英語版 実績情報（投稿タイプ: works） ----------
+	   実績詳細の概要グリッドで使用（クライアント名・役割・使用技術）。
+	   空欄なら日本語の値を表示。期間・URL・担当領域は言語共通（担当領域は自動対訳） */
+	$works_en_fields = array(
+		array(
+			'key'          => 'field_kb_en_client',
+			'name'         => 'client_name_en',
+			'label'        => 'クライアント名（英語）',
+			'type'         => 'text',
+			'instructions' => '空欄なら日本語のクライアント名を表示',
+		),
+		array(
+			'key'          => 'field_kb_en_role',
+			'name'         => 'role_en',
+			'label'        => '役割（英語）',
+			'type'         => 'text',
+			'instructions' => '空欄なら日本語の役割を表示',
+		),
+		array(
+			'key'          => 'field_kb_en_tech',
+			'name'         => 'tech_stack_en',
+			'label'        => '使用技術・ツール（英語）',
+			'type'         => 'text',
+			'instructions' => '空欄なら日本語の使用技術を表示',
+		),
+	);
+	if ( class_exists( 'acf_pro' ) || defined( 'ACF_PRO' ) ) {
+		$works_en_fields[] = array(
+			'key'        => 'field_kb_en_kpi',
+			'name'       => 'kpi_results_en',
+			'label'      => 'KPI・成果（英語）',
+			'type'       => 'repeater',
+			'layout'     => 'table',
+			'sub_fields' => array(
+				array(
+					'key'   => 'field_kb_en_kpi_label',
+					'name'  => 'label',
+					'label' => '項目（英語）',
+					'type'  => 'text',
+				),
+				array(
+					'key'   => 'field_kb_en_kpi_value',
+					'name'  => 'value',
+					'label' => '数値・結果（英語）',
+					'type'  => 'text',
+				),
+			),
+		);
+	}
+	acf_add_local_field_group( array(
+		'key'      => 'group_kb_en_works',
+		'title'    => '英語版 実績情報（English）',
+		'fields'   => $works_en_fields,
+		'location' => array(
+			array( array( 'param' => 'post_type', 'operator' => '==', 'value' => 'works' ) ),
+		),
+		'position'   => 'normal',
+		'menu_order' => 10,
 	) );
 
 	/* ---------- 資料情報（投稿タイプ: document） ---------- */
