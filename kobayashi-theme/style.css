@@ -3,7 +3,7 @@ Theme Name: Kobayashi Portfolio
 Theme URI: https://shinnosuke-kobayashi.jp/
 Author: Shinnosuke Kobayashi
 Description: 「小林慎之助」ポートフォリオサイト用オリジナルテーマ。サイト設計書v1.1・デザインカンプ準拠。カスタム投稿タイプ（実績・コラム・お知らせ・資料）と条件検索を実装。
-Version: 1.19.0
+Version: 1.20.0
 Requires at least: 6.0
 Requires PHP: 8.0
 License: GNU General Public License v2 or later
@@ -412,6 +412,60 @@ footer.site-footer .bottom{border-top:1px solid rgba(255,255,255,.1);padding:20p
 .tl-item p{font-size:13.5px;color:#4a4a4a}
 .skill-group{margin-bottom:18px}
 .skill-group .g{font-size:13.5px;font-weight:700;margin-bottom:6px}
+
+/* ===== AIチャットボット（右下ウィジェット） ===== */
+.kb-chat{position:fixed;right:20px;bottom:20px;z-index:98;font-family:var(--font-jp)}
+.kb-chat-fab{position:relative;width:58px;height:58px;border-radius:50%;border:none;cursor:pointer;color:#fff;
+  background:linear-gradient(135deg,var(--crimson),var(--deep));box-shadow:0 10px 26px rgba(132,25,42,.35);
+  display:flex;align-items:center;justify-content:center;transition:.25s}
+.kb-chat-fab:hover{transform:translateY(-3px)}
+.kb-chat-fab svg{width:26px;height:26px}
+.kb-chat-fab-badge{position:absolute;top:-4px;right:-4px;background:#fff;color:var(--deep);font-family:var(--font-en);
+  font-size:9.5px;font-weight:800;letter-spacing:.08em;border:1px solid var(--tint);border-radius:999px;padding:2px 7px;box-shadow:var(--shadow)}
+.kb-chat-panel{position:absolute;right:0;bottom:74px;width:min(374px,calc(100vw - 40px));display:flex;flex-direction:column;
+  max-height:calc(100vh - 110px);max-height:calc(100dvh - 110px);
+  background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 18px 48px rgba(26,26,26,.22);overflow:hidden}
+/* hidden属性はUAスタイルの display:none（非!important）のため、作者スタイルの
+   display:flex が勝ってしまう。属性セレクタで閉状態を明示的に復元する */
+.kb-chat-panel[hidden]{display:none}
+.kb-chat-head{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);background:linear-gradient(135deg,var(--tint-light),#fff 70%);flex-shrink:0}
+.kb-chat-face{width:34px;height:34px;border-radius:50%;overflow:hidden;flex:none;background:linear-gradient(135deg,var(--deep),var(--crimson));display:flex;align-items:center;justify-content:center;color:#fff}
+.kb-chat-face img{width:100%;height:100%;object-fit:cover}
+.kb-chat-face .init{font-family:var(--font-en);font-size:12px;font-weight:800}
+.kb-chat-title{font-size:13.5px;font-weight:900;line-height:1.3;display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+.kb-chat-title small{font-family:var(--font-en);font-size:9px;font-weight:800;color:var(--crimson);letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--tint);border-radius:999px;padding:1px 7px;background:#fff}
+.kb-chat-close{border:none;background:none;cursor:pointer;color:var(--gray);display:flex;padding:4px}
+.kb-chat-close svg{width:18px;height:18px}
+.kb-chat-close:hover{color:var(--ink)}
+.kb-chat-note{font-size:10.5px;color:var(--gray);background:var(--bg);padding:8px 16px;border-bottom:1px solid var(--line);line-height:1.55;flex-shrink:0}
+/* bodyのみ縮小可＝低いビューポート（横向きスマホ等）ではパネルのmax-heightに合わせて縮む */
+.kb-chat-body{height:min(46vh,420px);min-height:0;overflow-y:auto;padding:16px 14px;display:flex;flex-direction:column;gap:10px}
+.kb-chat-msg{max-width:86%;font-size:13.5px;line-height:1.7;padding:10px 14px;border-radius:14px;overflow-wrap:anywhere}
+.kb-chat-msg.model{align-self:flex-start;background:var(--tint-light);border-bottom-left-radius:4px}
+.kb-chat-msg.user{align-self:flex-end;background:var(--crimson);color:#fff;border-bottom-right-radius:4px}
+.kb-chat-msg a{color:var(--crimson);text-decoration:underline;word-break:break-all}
+.kb-chat-msg.user a{color:#fff}
+.kb-chat-suggests{display:flex;flex-wrap:wrap;gap:6px}
+.kb-chat-suggest{font-family:var(--font-jp);font-size:12px;font-weight:500;color:var(--deep);background:#fff;border:1px solid var(--tint);border-radius:999px;padding:6px 13px;cursor:pointer;transition:.2s}
+.kb-chat-suggest:hover{background:var(--tint-light);border-color:var(--crimson)}
+.kb-chat-typing{display:flex;gap:4px;align-items:center;padding:14px}
+.kb-chat-typing span{width:6px;height:6px;border-radius:50%;background:var(--crimson);opacity:.4;animation:kbChatBlink 1.1s infinite}
+.kb-chat-typing span:nth-child(2){animation-delay:.18s}
+.kb-chat-typing span:nth-child(3){animation-delay:.36s}
+@keyframes kbChatBlink{0%,100%{opacity:.25;transform:translateY(0)}45%{opacity:1;transform:translateY(-2px)}}
+.kb-chat-form{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line);background:#fff;flex-shrink:0}
+/* 入力は16px（iOSのフォーカス時自動ズームを防ぐ） */
+.kb-chat-form input{flex:1;min-width:0;font-family:var(--font-jp);font-size:16px;border:1px solid var(--line);border-radius:999px;padding:9px 16px;background:var(--bg);outline:none;transition:.2s}
+.kb-chat-form input:focus{border-color:var(--crimson);background:#fff;box-shadow:0 0 0 3px var(--tint-light)}
+.kb-chat-send{flex:none;width:42px;height:42px;border-radius:50%;border:none;cursor:pointer;background:var(--crimson);color:#fff;display:flex;align-items:center;justify-content:center;transition:.2s}
+.kb-chat-send:hover{background:var(--crimson-dark)}
+.kb-chat.busy .kb-chat-send{opacity:.55;cursor:wait}
+.kb-chat-send svg{width:17px;height:17px}
+@media (max-width:600px){
+  .kb-chat{right:14px;bottom:14px}
+  .kb-chat-panel{position:fixed;left:12px;right:12px;bottom:84px;width:auto}
+  .kb-chat-body{height:min(52vh,420px)}
+}
 
 /* ===== 404 / 汎用 ===== */
 .notfound{text-align:center;padding:100px 24px}

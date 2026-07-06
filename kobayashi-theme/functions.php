@@ -18,6 +18,9 @@ require_once get_template_directory() . '/inc/aio.php';
 /* ---------- 日英2言語対応（/en/ ルーティング・翻訳ヘルパー） ---------- */
 require_once get_template_directory() . '/inc/i18n.php';
 
+/* ---------- AIチャットボット（Vertex AI / Gemini） ---------- */
+require_once get_template_directory() . '/inc/chatbot.php';
+
 /* ---------- テーマ基本設定 ---------- */
 add_action( 'after_setup_theme', function () {
 	add_theme_support( 'title-tag' );
