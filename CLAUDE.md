@@ -8,7 +8,7 @@
 - **設計方針**: 「おしえて！アミタさん」の情報設計（条件検索・ランキング・タグ・資料DL等）を踏襲し、主役を「実績（Works）」に置き換えたメディア型ポートフォリオ
 - **CMS**: WordPress（オリジナルテーマ実装済み）
 - **ドメイン**: shinnosuke-kobayashi.jp（取得済み・**公開中**: https://shinnosuke-kobayashi.jp/）
-- **ホスティング**: GCP プロジェクト `shinnosuke-kbys`／VM `wp-portfolio`（e2-small・asia-northeast1-b）／静的IP 35.189.147.122／Let's Encrypt（certbot.timerで自動更新）。管理者情報はVM内 `/root/wp-credentials.txt`（user: kobayashi）
+- **ホスティング**: GCP プロジェクト `shinnosuke-kbys`（**2026-07-06に weeave.com 組織から shinnosuke-kobayashi.jp 組織 `393032890466` へ移行済み**。管理者: hello@shinnosuke-kobayashi.jp／課金も同組織の課金アカウント「AMEX」`01AD2E-66381C-FFA6B2` に切替済み。**weeave.comアカウントの権限は全て削除済み（2026-07-06）＝gcloud操作は必ず `--account=hello@shinnosuke-kobayashi.jp` で行うこと**）／VM `wp-portfolio`（e2-small・asia-northeast1-b）／静的IP 35.189.147.122／Let's Encrypt（certbot.timerで自動更新）。管理者情報はVM内 `/root/wp-credentials.txt`（user: kobayashi）
 
 ## ファイルマップ
 
