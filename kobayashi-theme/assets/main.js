@@ -9,6 +9,39 @@
     lane.dataset.cloned = '1';
   }
 
+  /* スクロールリビール：主要ブロックがスクロールに応じて浮かび上がる。
+     クラスはJSが付与するためno-JSでは常時表示。同じ親の中では出現を
+     70msずつ段差させる。完了後はクラスと遅延を外して各要素本来の
+     hover transition（カードの持ち上がり等）に戻す */
+  var motionOk = !( window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches );
+  if (motionOk && 'IntersectionObserver' in window) {
+    var revealTargets = document.querySelectorAll(
+      '.sec-head, .featured .card, .grid3 .card, .news-list .news-item, .col-wrap .article,' +
+      ' .prof, .profile-sec, .contact-cta, .kpi-grid .kpi, .timeline .tl-item, .sns-tiles .sns-btn'
+    );
+    if (revealTargets.length) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (!en.isIntersecting) { return; }
+          en.target.classList.add('in');
+          io.unobserve(en.target);
+        });
+      }, { rootMargin: '0px 0px -8% 0px', threshold: 0.1 });
+      Array.prototype.forEach.call(revealTargets, function (el) {
+        var parent = el.parentElement;
+        var n = parent.__kbRevealCount || 0;
+        parent.__kbRevealCount = n + 1;
+        el.classList.add('js-reveal');
+        el.style.transitionDelay = Math.min(n * 70, 420) + 'ms';
+        el.addEventListener('transitionend', function () {
+          el.classList.remove('js-reveal', 'in');
+          el.style.transitionDelay = '';
+        }, { once: true });
+        io.observe(el);
+      });
+    }
+  }
+
   /* モバイルメニュー開閉（全画面オーバーレイ）
      ハンバーガー⇄×のモーフ、背景スクロールロック、
      リンクタップ・Escキーで閉じる */
