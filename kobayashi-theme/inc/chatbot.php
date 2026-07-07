@@ -636,20 +636,42 @@ add_action( 'init', function () {
 	update_option( 'kb_chat_page_seeded', 1 );
 }, 20 );
 
-/* 全画面ページの大きなアバター（本人写真＋周囲/本体の強めアニメーション）。
-   まばたき（肌色まぶた）は常時、is-thinking で首かしげ＋思考ドット、
-   is-talking で大きくうなずき＋ソナー＋波形。全てCSS（style.css）で駆動 */
+/* 全画面ページの大きなアバター（本人写真をもとにしたオリジナルSVGキャラ）。
+   キャラなので表情も動く: まばたきは常時、is-thinking で首かしげ＋眉上げ＋
+   思考ドット、is-talking で口パク＋大きくうなずき＋ソナー＋波形。
+   周囲の演出（ハロー・破線リング・波形・思考ドット）と本体アニメは style.css で駆動 */
 function kb_chat_avatar_svg() {
-	$src = esc_url( kb_avatar_face_url() );
 	$alt = esc_attr( kb_t( '小林慎之助', 'Shinnosuke Kobayashi' ) );
 	return '<div class="kbc-avatar" id="kbcAvatar">'
 		. '<span class="kbc-halo"></span>'
 		. '<span class="kbc-sonar"><i></i><i></i><i></i></span>'
 		. '<span class="kbc-dash"></span>'
-		. '<span class="kbc-face"><span class="kbc-photo">'
-		. '<img src="' . $src . '" alt="' . $alt . '" width="360" height="360">'
-		. '<span class="kbc-lid kbc-lid-l"></span><span class="kbc-lid kbc-lid-r"></span>'
-		. '</span></span>'
+		. '<span class="kbc-face">'
+		. '<svg class="kbc-char" viewBox="0 0 240 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' . $alt . '">'
+		. '<path class="c-suit" d="M12 260 C12 194 62 168 120 168 C178 168 228 194 228 260 Z"/>'
+		. '<path class="c-shirt" d="M99 170 L120 214 L141 170 Z"/>'
+		. '<path class="c-shirt" d="M99 170 L120 188 L108 196 Z"/>'
+		. '<path class="c-shirt" d="M141 170 L120 188 L132 196 Z"/>'
+		. '<path class="c-lapel" d="M99 170 L88 216 L106 184 Z"/>'
+		. '<path class="c-lapel" d="M141 170 L152 216 L134 184 Z"/>'
+		. '<path class="c-tie" d="M114 186 L126 186 L131 250 L120 260 L109 250 Z"/>'
+		. '<g class="c-tiedots"><circle cx="118" cy="202" r="1.5"/><circle cx="123" cy="212" r="1.5"/><circle cx="117" cy="224" r="1.5"/><circle cx="122" cy="234" r="1.5"/></g>'
+		. '<rect class="c-skin" x="106" y="150" width="28" height="32" rx="13"/>'
+		. '<g class="kbc-head">'
+		. '<ellipse class="c-skinsh" cx="66" cy="116" rx="8" ry="13"/><ellipse class="c-skinsh" cx="174" cy="116" rx="8" ry="13"/>'
+		. '<ellipse class="c-skin" cx="120" cy="112" rx="54" ry="57"/>'
+		. '<path class="c-hair" d="M57 126 C45 16 195 12 183 126 C182 104 171 94 151 93 C131 92 120 101 104 99 C95 98 86 92 74 100 C65 107 59 115 57 126 Z"/>'
+		. '<g class="kbc-brows"><path class="c-brow" d="M85 100 Q99 94 113 99 L112 103 Q99 98 86 104 Z"/><path class="c-brow" d="M127 99 Q141 94 155 100 L154 104 Q141 99 128 103 Z"/></g>'
+		. '<g class="kbc-eyes">'
+		. '<g><ellipse class="c-eye" cx="99" cy="114" rx="8.6" ry="5.8"/><circle class="c-eyehl" cx="101.5" cy="112" r="1.6"/><path class="c-lid" d="M90 110 Q99 106 108 110"/></g>'
+		. '<g><ellipse class="c-eye" cx="141" cy="114" rx="8.6" ry="5.8"/><circle class="c-eyehl" cx="143.5" cy="112" r="1.6"/><path class="c-lid" d="M132 110 Q141 106 150 110"/></g>'
+		. '</g>'
+		. '<path class="c-nose" d="M120 116 q5 11 -4 15"/>'
+		. '<ellipse class="c-cheek" cx="90" cy="130" rx="8" ry="5"/><ellipse class="c-cheek" cx="150" cy="130" rx="8" ry="5"/>'
+		. '<path class="kbc-mouth kbc-mouth-smile c-mouthline" d="M106 138 Q120 147 134 138"/>'
+		. '<g class="kbc-mouth kbc-mouth-open"><ellipse class="c-moutho" cx="120" cy="140" rx="10" ry="7"/><ellipse class="c-tongue" cx="120" cy="144" rx="5.5" ry="3"/></g>'
+		. '</g></svg>'
+		. '</span>'
 		. '<span class="kbc-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>'
 		. '<span class="kbc-think" aria-hidden="true"><i></i><i></i><i></i></span>'
 		. '</div>';

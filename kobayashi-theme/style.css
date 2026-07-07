@@ -3,7 +3,7 @@ Theme Name: Kobayashi Portfolio
 Theme URI: https://shinnosuke-kobayashi.jp/
 Author: Shinnosuke Kobayashi
 Description: 「小林慎之助」ポートフォリオサイト用オリジナルテーマ。サイト設計書v1.1・デザインカンプ準拠。カスタム投稿タイプ（実績・コラム・お知らせ・資料）と条件検索を実装。
-Version: 1.21.1
+Version: 1.21.2
 Requires at least: 6.0
 Requires PHP: 8.0
 License: GNU General Public License v2 or later
@@ -528,31 +528,42 @@ footer.site-footer .bottom{border-top:1px solid rgba(255,255,255,.1);padding:20p
 .kbc-prep{text-align:center;padding:44px 28px}
 .kbc-prep p{font-size:15px;color:#4a4a4a;margin-bottom:22px}
 
-/* --- 本人写真アバター（周囲＋本体を強めにアニメーション） --- */
+/* --- 本人写真をもとにしたキャラアバター（周囲＋本体＋表情を強めに動かす） --- */
 .kbc-halo{width:100%;height:100%;border-radius:50%;background:radial-gradient(closest-side,rgba(194,39,64,.30),rgba(194,39,64,.06) 60%,transparent 74%)}
-.kbc-dash{width:93%;height:93%;border-radius:50%;border:2px dashed rgba(194,39,64,.42)}
-.kbc-sonar{position:relative;width:80%;height:80%}
+.kbc-dash{width:95%;height:95%;border-radius:50%;border:2px dashed rgba(194,39,64,.42)}
+.kbc-sonar{position:relative;width:82%;height:82%}
 .kbc-sonar i{position:absolute;inset:0;border-radius:50%;border:2px solid var(--crimson);opacity:0}
-.kbc-face{position:relative;width:80%;height:80%;transform-origin:50% 92%}
-.kbc-photo{position:absolute;inset:0;border-radius:50%;overflow:hidden;border:4px solid #fff;box-shadow:0 14px 34px rgba(132,25,42,.30)}
-.kbc-photo img{width:100%;height:100%;object-fit:cover;display:block}
-/* まばたき（目の位置に合わせた肌色まぶた・控えめで高速） */
-.kbc-lid{position:absolute;width:19%;height:11%;border-radius:0 0 60% 60%/0 0 100% 100%;
-  background:linear-gradient(#EBC8AC,#D9AC8A);filter:blur(.6px);transform:scaleY(0);transform-origin:top center}
-.kbc-lid-l{left:31%;top:42%}
-.kbc-lid-r{left:52%;top:41%}
+.kbc-face{position:relative;width:96%;height:96%;transform-origin:50% 88%}
+.kbc-char{width:100%;height:100%;display:block;overflow:visible}
+/* キャラの配色（ブランド寄り。本人の装い＝チャコールのスーツ＋紺ドットタイ） */
+.c-suit{fill:#2A2E37}.c-lapel{fill:#3A404B}.c-shirt{fill:#F4F6F8}.c-tie{fill:#21324F}
+.c-tiedots circle{fill:#E4EAF2}
+.c-skin{fill:#F0C6A0}.c-skinsh{fill:#E3B187}
+.c-hair{fill:#17130F}.c-brow{fill:#17130F}
+.c-eye{fill:#241B15}.c-eyehl{fill:#fff}
+.c-lid{fill:none;stroke:#1D1610;stroke-width:2;stroke-linecap:round}
+.c-nose{fill:none;stroke:#DBA982;stroke-width:2.4;stroke-linecap:round}
+.c-cheek{fill:rgba(194,39,64,.12)}
+.c-mouthline{fill:none;stroke:#9E5545;stroke-width:3;stroke-linecap:round}
+.c-moutho{fill:#7A3B34}.c-tongue{fill:#E28A83}
+/* 表情パーツの変形基準 */
+.kbc-eyes{transform-box:fill-box;transform-origin:center}
+.kbc-brows{transform-box:fill-box;transform-origin:center}
+.kbc-mouth-open{display:none;transform-box:fill-box;transform-origin:center}
+.kbc-avatar.is-talking .kbc-mouth-smile{display:none}
+.kbc-avatar.is-talking .kbc-mouth-open{display:block}
+.kbc-avatar.is-thinking .kbc-brows{transform:translateY(-2px)}
 /* 回答中の波形（下部）・考え中の思考ドット（右上） */
-.kbc-wave{align-self:end;justify-self:center;margin-bottom:5%;display:flex;gap:4px;align-items:flex-end;height:22px;opacity:0;transition:opacity .2s;pointer-events:none}
+.kbc-wave{align-self:end;justify-self:center;margin-bottom:3%;display:flex;gap:4px;align-items:flex-end;height:22px;opacity:0;transition:opacity .2s;pointer-events:none}
 .kbc-wave i{width:4px;height:6px;background:var(--crimson);border-radius:3px;box-shadow:0 3px 8px rgba(194,39,64,.4)}
-.kbc-think{align-self:start;justify-self:end;margin:5% 6% 0 0;display:flex;gap:7px;opacity:0;transition:opacity .2s;pointer-events:none}
+.kbc-think{align-self:start;justify-self:end;margin:4% 4% 0 0;display:flex;gap:7px;opacity:0;transition:opacity .2s;pointer-events:none}
 .kbc-think i{width:9px;height:9px;border-radius:50%;background:var(--crimson)}
 .kbc-avatar.is-talking .kbc-wave{opacity:1}
 .kbc-avatar.is-thinking .kbc-think{opacity:1}
 /* アニメーション（動作環境のみ。reduced-motion時は静止） */
 @media (prefers-reduced-motion:no-preference){
-  .kbc-photo{animation:kbcAlive 4.6s ease-in-out infinite}
-  .kbc-lid{animation:kbcBlink 4s infinite}
-  .kbc-lid-r{animation-delay:.06s}
+  .kbc-char{animation:kbcAlive 4.6s ease-in-out infinite}
+  .kbc-eyes{animation:kbcEyeBlink 5s infinite}
   .kbc-dash{animation:kbcSpin 20s linear infinite}
   .kbc-halo{animation:kbcHaloP 3.6s ease-in-out infinite}
   .kbc-avatar.is-thinking .kbc-face{animation:kbcTilt 2.4s ease-in-out infinite}
@@ -560,6 +571,8 @@ footer.site-footer .bottom{border-top:1px solid rgba(255,255,255,.1);padding:20p
   .kbc-avatar.is-thinking .kbc-think i:nth-child(2){animation-delay:.18s}
   .kbc-avatar.is-thinking .kbc-think i:nth-child(3){animation-delay:.36s}
   .kbc-avatar.is-talking .kbc-face{animation:kbcNod .62s ease-in-out infinite}
+  .kbc-avatar.is-talking .kbc-mouth-open{animation:kbcTalk .24s ease-in-out infinite}
+  .kbc-avatar.is-talking .kbc-brows{animation:kbcBrow .48s ease-in-out infinite}
   .kbc-avatar.is-talking .kbc-dash{animation-duration:6s}
   .kbc-avatar.is-talking .kbc-sonar i{animation:kbcSonar 1.7s ease-out infinite}
   .kbc-avatar.is-talking .kbc-sonar i:nth-child(2){animation-delay:.57s}
@@ -570,8 +583,10 @@ footer.site-footer .bottom{border-top:1px solid rgba(255,255,255,.1);padding:20p
   .kbc-avatar.is-talking .kbc-wave i:nth-child(4){animation-delay:.3s}
   .kbc-avatar.is-talking .kbc-wave i:nth-child(5){animation-delay:.15s}
 }
-@keyframes kbcAlive{0%,100%{transform:translateY(0) scale(1) rotate(0)}25%{transform:translateY(-4px) scale(1.015) rotate(1deg)}50%{transform:translateY(0) scale(1.005) rotate(0)}75%{transform:translateY(-2px) scale(1.012) rotate(-1deg)}}
-@keyframes kbcBlink{0%,93%,100%{transform:scaleY(0)}96%{transform:scaleY(1)}}
+@keyframes kbcAlive{0%,100%{transform:translateY(0) scale(1) rotate(0)}25%{transform:translateY(-4px) scale(1.012) rotate(.8deg)}50%{transform:translateY(0) scale(1.004) rotate(0)}75%{transform:translateY(-2px) scale(1.01) rotate(-.8deg)}}
+@keyframes kbcEyeBlink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.08)}}
+@keyframes kbcTalk{0%,100%{transform:scaleY(.32)}50%{transform:scaleY(1)}}
+@keyframes kbcBrow{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.6px)}}
 @keyframes kbcSpin{to{transform:rotate(360deg)}}
 @keyframes kbcHaloP{0%,100%{opacity:.75;transform:scale(1)}50%{opacity:1;transform:scale(1.05)}}
 @keyframes kbcTilt{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
