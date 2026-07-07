@@ -437,19 +437,27 @@ add_action( 'save_post', function ( $post_id, $post ) {
 /* ---------- フロント（ウィジェット出力＋アセット） ---------- */
 add_action( 'wp_enqueue_scripts', function () {
 	if ( ! kb_chatbot_enabled() ) { return; }
-	wp_enqueue_script( 'kb-chatbot', get_template_directory_uri() . '/assets/chatbot.js', array(), wp_get_theme()->get( 'Version' ), true );
-	wp_localize_script( 'kb-chatbot', 'kbChatCfg', array(
+	$cfg = array(
 		'endpoint' => rest_url( 'kobayashi/v1/chat' ),
 		'lang'     => kb_is_en() ? 'en' : 'ja',
 		'strings'  => array(
 			'error'   => kb_t( 'すみません、回答の取得に失敗しました。時間をおいてお試しください。', 'Sorry, something went wrong. Please try again later.' ),
 			'limited' => kb_t( 'ご利用が集中しています。しばらくしてからお試しください。', 'The assistant is busy right now. Please try again in a while.' ),
 		),
-	) );
+	);
+	$ver = wp_get_theme()->get( 'Version' );
+	/* 専用ページ（page-chat.php）では全画面チャットのみ。浮遊ウィジェットは出さない */
+	if ( kb_is_chat_page() ) {
+		wp_enqueue_script( 'kb-chat-page', get_template_directory_uri() . '/assets/chat-page.js', array(), $ver, true );
+		wp_localize_script( 'kb-chat-page', 'kbChatCfg', $cfg );
+		return;
+	}
+	wp_enqueue_script( 'kb-chatbot', get_template_directory_uri() . '/assets/chatbot.js', array(), $ver, true );
+	wp_localize_script( 'kb-chatbot', 'kbChatCfg', $cfg );
 } );
 
 add_action( 'wp_footer', function () {
-	if ( ! kb_chatbot_enabled() ) { return; }
+	if ( ! kb_chatbot_enabled() || kb_is_chat_page() ) { return; }
 	$profile  = get_page_by_path( 'profile' );
 	$face     = ( $profile && has_post_thumbnail( $profile->ID ) ) ? get_the_post_thumbnail_url( $profile->ID, 'thumbnail' ) : '';
 	$suggests = array(
@@ -587,6 +595,90 @@ function kb_chatbot_settings_page() {
 			<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'options-general.php?page=kb-chatbot&kb_chat_test=1' ), 'kb_chat_test' ) ); ?>" class="button">接続テストを実行</a>
 			<span class="description">（保存済みの設定でVertex AIへ1リクエスト送ります）</span>
 		</p>
+		<?php $kb_chat_pg = get_page_by_path( 'chat' ); if ( $kb_chat_pg ) : ?>
+		<p class="description">全画面のAIチャットページ: <a href="<?php echo esc_url( get_permalink( $kb_chat_pg ) ); ?>" target="_blank"><?php echo esc_url( get_permalink( $kb_chat_pg ) ); ?></a>（有効化後に表示されます）</p>
+		<?php endif; ?>
 	</div>
 	<?php
+}
+
+/* ---------- 全画面AIチャットページ（page-chat.php） ---------- */
+
+/* 専用チャットページの判定（浮遊ウィジェット抑制・専用スクリプト読込に使用） */
+function kb_is_chat_page() {
+	return is_page_template( 'page-chat.php' ) || is_page( 'chat' );
+}
+
+/* 「chat」固定ページを一度だけ自動生成し、page-chat.php テンプレートを割り当てる。
+   /en/chat/ のルーティングは inc/i18n.php（パーマリンク再保存が必要） */
+add_action( 'init', function () {
+	if ( get_option( 'kb_chat_page_seeded' ) ) { return; }
+	$page = get_page_by_path( 'chat' );
+	if ( ! $page ) {
+		$id = wp_insert_post( array(
+			'post_type'    => 'page',
+			'post_status'  => 'publish',
+			'post_title'   => 'AIチャット',
+			'post_name'    => 'chat',
+			'post_content' => '',
+		) );
+		if ( $id && ! is_wp_error( $id ) ) {
+			update_post_meta( $id, '_wp_page_template', 'page-chat.php' );
+		}
+	} else {
+		update_post_meta( $page->ID, '_wp_page_template', 'page-chat.php' );
+	}
+	update_option( 'kb_chat_page_seeded', 1 );
+}, 20 );
+
+/* 大きなキャラアバターのSVG（パーツ分離・CSSでまばたき/口パク/首振り）。
+   likenessは特定せず、ブランド準拠の親しみやすいキャラ。表情パーツは
+   .kbc-eyes / .kbc-mouth-* / .kbc-brows / .kbc-head で個別にアニメーションする */
+function kb_chat_avatar_svg() {
+	return <<<'SVG'
+<div class="kbc-avatar" id="kbcAvatar">
+<svg viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="小林慎之助 AIアバター">
+	<defs>
+		<radialGradient id="kbcHalo" cx="50%" cy="46%" r="55%">
+			<stop offset="0%" stop-color="#C22740" stop-opacity=".26"/>
+			<stop offset="70%" stop-color="#C22740" stop-opacity=".05"/>
+			<stop offset="100%" stop-color="#C22740" stop-opacity="0"/>
+		</radialGradient>
+		<linearGradient id="kbcShirt" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0" stop-color="#C22740"/>
+			<stop offset="1" stop-color="#84192A"/>
+		</linearGradient>
+	</defs>
+	<circle class="kbc-halo" cx="130" cy="120" r="122" fill="url(#kbcHalo)"/>
+	<g class="kbc-sonar"><circle cx="130" cy="116" r="72"/><circle cx="130" cy="116" r="72"/></g>
+	<g class="kbc-think"><circle cx="198" cy="60" r="4"/><circle cx="212" cy="50" r="5"/><circle cx="228" cy="42" r="6"/></g>
+	<path class="kbc-shirt" d="M34 260 C34 202 78 178 130 178 C182 178 226 202 226 260 Z" fill="url(#kbcShirt)"/>
+	<path class="kbc-collar" d="M112 180 L130 202 L148 180 Z"/>
+	<rect class="kbc-skin" x="114" y="150" width="32" height="38" rx="15"/>
+	<g class="kbc-head">
+		<ellipse class="kbc-skin-sh" cx="74" cy="124" rx="9" ry="14"/>
+		<ellipse class="kbc-skin-sh" cx="186" cy="124" rx="9" ry="14"/>
+		<ellipse class="kbc-hair" cx="130" cy="98" rx="66" ry="56"/>
+		<ellipse class="kbc-skin" cx="130" cy="120" rx="58" ry="64"/>
+		<path class="kbc-hair" d="M70 100 C74 60 186 60 190 100 C176 82 150 74 130 76 C110 74 84 82 70 100 Z"/>
+		<g class="kbc-brows">
+			<rect class="kbc-brow" x="97" y="103" width="27" height="6" rx="3"/>
+			<rect class="kbc-brow" x="136" y="103" width="27" height="6" rx="3"/>
+		</g>
+		<g class="kbc-eyes">
+			<g><ellipse class="kbc-eye" cx="109" cy="123" rx="8" ry="10"/><circle class="kbc-eye-hl" cx="111" cy="120" r="2.4"/></g>
+			<g><ellipse class="kbc-eye" cx="151" cy="123" rx="8" ry="10"/><circle class="kbc-eye-hl" cx="153" cy="120" r="2.4"/></g>
+		</g>
+		<path class="kbc-nose" d="M130 126 q5 11 -3 16"/>
+		<ellipse class="kbc-cheek" cx="99" cy="141" rx="9" ry="6"/>
+		<ellipse class="kbc-cheek" cx="161" cy="141" rx="9" ry="6"/>
+		<path class="kbc-mouth kbc-mouth-smile" d="M115 150 q15 13 30 0"/>
+		<g class="kbc-mouth kbc-mouth-open">
+			<ellipse class="kbc-mouth-o" cx="130" cy="152" rx="11" ry="8"/>
+			<ellipse class="kbc-tongue" cx="130" cy="156" rx="6" ry="3.4"/>
+		</g>
+	</g>
+</svg>
+</div>
+SVG;
 }

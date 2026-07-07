@@ -21,6 +21,7 @@
 			<div>
 				<h4>links</h4>
 				<ul class="links">
+					<li><a href="<?php echo esc_url( kb_home( '/chat/' ) ); ?>"><?php echo esc_html( kb_t( 'AIチャット', 'AI Chat' ) ); ?></a></li>
 					<li><a href="<?php echo esc_url( kb_home( '/contact/' ) ); ?>"><?php echo esc_html( kb_t( 'お問い合わせ', 'Contact' ) ); ?></a></li>
 					<li><a href="<?php echo esc_url( kb_home( '/about/' ) ); ?>"><?php echo esc_html( kb_t( 'About（このサイトについて）', 'About this site' ) ); ?></a></li>
 					<li><a href="<?php echo esc_url( kb_home( '/privacy/' ) ); ?>"><?php echo esc_html( kb_t( 'プライバシーポリシー', 'Privacy Policy' ) ); ?></a></li>

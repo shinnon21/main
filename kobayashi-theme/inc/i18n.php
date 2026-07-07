@@ -24,7 +24,7 @@ add_action( 'init', function () {
 	/* トップ */
 	add_rewrite_rule( '^en/?$', 'index.php?kb_lang=en&kb_en_front=1', 'top' );
 	/* 固定ページ */
-	add_rewrite_rule( '^en/(profile|about|privacy|contact|searches|documents)/?$', 'index.php?pagename=$matches[1]&kb_lang=en', 'top' );
+	add_rewrite_rule( '^en/(profile|about|privacy|contact|searches|documents|chat)/?$', 'index.php?pagename=$matches[1]&kb_lang=en', 'top' );
 	/* タクソノミー（CPT詳細のルールより先に定義して先に当てる） */
 	add_rewrite_rule( '^en/works/type/([^/]+)/?$', 'index.php?works_type=$matches[1]&kb_lang=en', 'top' );
 	add_rewrite_rule( '^en/news/type/([^/]+)/?$', 'index.php?news_type=$matches[1]&kb_lang=en', 'top' );
