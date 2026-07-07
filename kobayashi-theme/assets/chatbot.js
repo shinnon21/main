@@ -23,26 +23,62 @@
     try { sessionStorage.setItem(storeKey, JSON.stringify(history.slice(-10))); } catch (e) { /* private mode等は無視 */ }
   };
 
-  /* テキスト→メッセージ要素（エスケープ済みテキストにURLリンクのみ許可） */
-  var addMsg = function (role, text) {
-    var el = document.createElement('div');
-    el.className = 'kb-chat-msg ' + role;
+  /* テキスト中のURLをリンク化して parent に追加（テキストノードのみ＝XSS安全） */
+  var linkify = function (parent, text) {
     /* URL末尾に句読点・括弧類を含めない（「〜（URL）。」のような回答文対策） */
-    var parts = String(text).split(/(https?:\/\/[^\s<>「」（）()、。]+)/g);
-    parts.forEach(function (p, i) {
+    String(text).split(/(https?:\/\/[^\s<>「」（）()、。]+)/g).forEach(function (p, i) {
       if (i % 2 === 1) {
         var a = document.createElement('a');
         a.href = p;
         a.textContent = p.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
         a.rel = 'noopener';
         if (p.indexOf(location.origin + '/') !== 0 && p !== location.origin) { a.target = '_blank'; }
-        el.appendChild(a);
+        parent.appendChild(a);
       } else if (p) {
-        p.split('\n').forEach(function (line, j) {
-          if (j > 0) { el.appendChild(document.createElement('br')); }
-          el.appendChild(document.createTextNode(line));
-        });
+        parent.appendChild(document.createTextNode(p));
       }
+    });
+  };
+
+  /* インライン装飾（**太字**）＋リンク。innerHTMLは使わずノード生成のみ */
+  var appendInline = function (parent, text) {
+    String(text).split(/\*\*([^*]+)\*\*/g).forEach(function (seg, i) {
+      if (seg === '') { return; }
+      if (i % 2 === 1) {
+        var strong = document.createElement('strong');
+        linkify(strong, seg);
+        parent.appendChild(strong);
+      } else {
+        linkify(parent, seg);
+      }
+    });
+  };
+
+  /* 応答を最小Markdown（箇条書き・太字・改行）としてレンダリング。
+     モデルが返す ** や * 記法をそのまま文字表示させないための整形 */
+  var addMsg = function (role, text) {
+    var el = document.createElement('div');
+    el.className = 'kb-chat-msg ' + role;
+    var ul = null, needBr = false;
+    String(text).replace(/\r\n?/g, '\n').split('\n').forEach(function (line) {
+      var bullet = line.match(/^\s*[-*]\s+(.*\S.*)$/); /* 「- 項目」「* 項目」を箇条書きに */
+      if (bullet) {
+        if (!ul) { ul = document.createElement('ul'); el.appendChild(ul); }
+        var li = document.createElement('li');
+        appendInline(li, bullet[1]);
+        ul.appendChild(li);
+        needBr = false;
+        return;
+      }
+      ul = null;
+      if (line.trim() === '') {
+        if (el.childNodes.length) { el.appendChild(document.createElement('br')); }
+        needBr = false;
+        return;
+      }
+      if (needBr) { el.appendChild(document.createElement('br')); }
+      appendInline(el, line);
+      needBr = true;
     });
     body.appendChild(el);
     body.scrollTop = body.scrollHeight;

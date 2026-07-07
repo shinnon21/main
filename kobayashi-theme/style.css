@@ -3,7 +3,7 @@ Theme Name: Kobayashi Portfolio
 Theme URI: https://shinnosuke-kobayashi.jp/
 Author: Shinnosuke Kobayashi
 Description: 「小林慎之助」ポートフォリオサイト用オリジナルテーマ。サイト設計書v1.1・デザインカンプ準拠。カスタム投稿タイプ（実績・コラム・お知らせ・資料）と条件検索を実装。
-Version: 1.20.0
+Version: 1.20.1
 Requires at least: 6.0
 Requires PHP: 8.0
 License: GNU General Public License v2 or later
@@ -445,6 +445,11 @@ footer.site-footer .bottom{border-top:1px solid rgba(255,255,255,.1);padding:20p
 .kb-chat-msg.user{align-self:flex-end;background:var(--crimson);color:#fff;border-bottom-right-radius:4px}
 .kb-chat-msg a{color:var(--crimson);text-decoration:underline;word-break:break-all}
 .kb-chat-msg.user a{color:#fff}
+/* 応答内の最小Markdown（テーマ既定 ul{list-style:none} をチャット内だけ復元） */
+.kb-chat-msg strong{font-weight:700}
+.kb-chat-msg ul{list-style:disc;margin:4px 0 2px;padding-left:20px;display:flex;flex-direction:column;gap:5px}
+.kb-chat-msg li{line-height:1.6}
+.kb-chat-msg.user ul{list-style:disc}
 .kb-chat-suggests{display:flex;flex-wrap:wrap;gap:6px}
 .kb-chat-suggest{font-family:var(--font-jp);font-size:12px;font-weight:500;color:var(--deep);background:#fff;border:1px solid var(--tint);border-radius:999px;padding:6px 13px;cursor:pointer;transition:.2s}
 .kb-chat-suggest:hover{background:var(--tint-light);border-color:var(--crimson)}
