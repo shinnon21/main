@@ -458,8 +458,7 @@ add_action( 'wp_enqueue_scripts', function () {
 
 add_action( 'wp_footer', function () {
 	if ( ! kb_chatbot_enabled() || kb_is_chat_page() ) { return; }
-	$profile  = get_page_by_path( 'profile' );
-	$face     = ( $profile && has_post_thumbnail( $profile->ID ) ) ? get_the_post_thumbnail_url( $profile->ID, 'thumbnail' ) : '';
+	$face = kb_avatar_face_url(); // テーマ同梱の顔クロップ（本人写真）
 	$suggests = array(
 		kb_t( '実績を教えてください', 'Tell me about your work.' ),
 		kb_t( '経歴について聞きたいです', "I'd like to hear about your career." ),
@@ -609,6 +608,12 @@ function kb_is_chat_page() {
 	return is_page_template( 'page-chat.php' ) || is_page( 'chat' );
 }
 
+/* アバター用の顔クロップ画像（テーマ同梱。本人写真を顔中心に正方クロップ済み）。
+   FAB・ヘッダー・全画面ページで共通して本人の顔を確実に表示する */
+function kb_avatar_face_url() {
+	return get_template_directory_uri() . '/assets/img/kb-avatar-face.jpg?v=' . wp_get_theme()->get( 'Version' );
+}
+
 /* 「chat」固定ページを一度だけ自動生成し、page-chat.php テンプレートを割り当てる。
    /en/chat/ のルーティングは inc/i18n.php（パーマリンク再保存が必要） */
 add_action( 'init', function () {
@@ -631,54 +636,21 @@ add_action( 'init', function () {
 	update_option( 'kb_chat_page_seeded', 1 );
 }, 20 );
 
-/* 大きなキャラアバターのSVG（パーツ分離・CSSでまばたき/口パク/首振り）。
-   likenessは特定せず、ブランド準拠の親しみやすいキャラ。表情パーツは
-   .kbc-eyes / .kbc-mouth-* / .kbc-brows / .kbc-head で個別にアニメーションする */
+/* 全画面ページの大きなアバター（本人写真＋周囲/本体の強めアニメーション）。
+   まばたき（肌色まぶた）は常時、is-thinking で首かしげ＋思考ドット、
+   is-talking で大きくうなずき＋ソナー＋波形。全てCSS（style.css）で駆動 */
 function kb_chat_avatar_svg() {
-	return <<<'SVG'
-<div class="kbc-avatar" id="kbcAvatar">
-<svg viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="小林慎之助 AIアバター">
-	<defs>
-		<radialGradient id="kbcHalo" cx="50%" cy="46%" r="55%">
-			<stop offset="0%" stop-color="#C22740" stop-opacity=".26"/>
-			<stop offset="70%" stop-color="#C22740" stop-opacity=".05"/>
-			<stop offset="100%" stop-color="#C22740" stop-opacity="0"/>
-		</radialGradient>
-		<linearGradient id="kbcShirt" x1="0" y1="0" x2="0" y2="1">
-			<stop offset="0" stop-color="#C22740"/>
-			<stop offset="1" stop-color="#84192A"/>
-		</linearGradient>
-	</defs>
-	<circle class="kbc-halo" cx="130" cy="120" r="122" fill="url(#kbcHalo)"/>
-	<g class="kbc-sonar"><circle cx="130" cy="116" r="72"/><circle cx="130" cy="116" r="72"/></g>
-	<g class="kbc-think"><circle cx="198" cy="60" r="4"/><circle cx="212" cy="50" r="5"/><circle cx="228" cy="42" r="6"/></g>
-	<path class="kbc-shirt" d="M34 260 C34 202 78 178 130 178 C182 178 226 202 226 260 Z" fill="url(#kbcShirt)"/>
-	<path class="kbc-collar" d="M112 180 L130 202 L148 180 Z"/>
-	<rect class="kbc-skin" x="114" y="150" width="32" height="38" rx="15"/>
-	<g class="kbc-head">
-		<ellipse class="kbc-skin-sh" cx="74" cy="124" rx="9" ry="14"/>
-		<ellipse class="kbc-skin-sh" cx="186" cy="124" rx="9" ry="14"/>
-		<ellipse class="kbc-hair" cx="130" cy="98" rx="66" ry="56"/>
-		<ellipse class="kbc-skin" cx="130" cy="120" rx="58" ry="64"/>
-		<path class="kbc-hair" d="M70 100 C74 60 186 60 190 100 C176 82 150 74 130 76 C110 74 84 82 70 100 Z"/>
-		<g class="kbc-brows">
-			<rect class="kbc-brow" x="97" y="103" width="27" height="6" rx="3"/>
-			<rect class="kbc-brow" x="136" y="103" width="27" height="6" rx="3"/>
-		</g>
-		<g class="kbc-eyes">
-			<g><ellipse class="kbc-eye" cx="109" cy="123" rx="8" ry="10"/><circle class="kbc-eye-hl" cx="111" cy="120" r="2.4"/></g>
-			<g><ellipse class="kbc-eye" cx="151" cy="123" rx="8" ry="10"/><circle class="kbc-eye-hl" cx="153" cy="120" r="2.4"/></g>
-		</g>
-		<path class="kbc-nose" d="M130 126 q5 11 -3 16"/>
-		<ellipse class="kbc-cheek" cx="99" cy="141" rx="9" ry="6"/>
-		<ellipse class="kbc-cheek" cx="161" cy="141" rx="9" ry="6"/>
-		<path class="kbc-mouth kbc-mouth-smile" d="M115 150 q15 13 30 0"/>
-		<g class="kbc-mouth kbc-mouth-open">
-			<ellipse class="kbc-mouth-o" cx="130" cy="152" rx="11" ry="8"/>
-			<ellipse class="kbc-tongue" cx="130" cy="156" rx="6" ry="3.4"/>
-		</g>
-	</g>
-</svg>
-</div>
-SVG;
+	$src = esc_url( kb_avatar_face_url() );
+	$alt = esc_attr( kb_t( '小林慎之助', 'Shinnosuke Kobayashi' ) );
+	return '<div class="kbc-avatar" id="kbcAvatar">'
+		. '<span class="kbc-halo"></span>'
+		. '<span class="kbc-sonar"><i></i><i></i><i></i></span>'
+		. '<span class="kbc-dash"></span>'
+		. '<span class="kbc-face"><span class="kbc-photo">'
+		. '<img src="' . $src . '" alt="' . $alt . '" width="360" height="360">'
+		. '<span class="kbc-lid kbc-lid-l"></span><span class="kbc-lid kbc-lid-r"></span>'
+		. '</span></span>'
+		. '<span class="kbc-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>'
+		. '<span class="kbc-think" aria-hidden="true"><i></i><i></i><i></i></span>'
+		. '</div>';
 }
