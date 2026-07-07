@@ -3,7 +3,7 @@ Theme Name: Kobayashi Portfolio
 Theme URI: https://shinnosuke-kobayashi.jp/
 Author: Shinnosuke Kobayashi
 Description: 「小林慎之助」ポートフォリオサイト用オリジナルテーマ。サイト設計書v1.1・デザインカンプ準拠。カスタム投稿タイプ（実績・コラム・お知らせ・資料）と条件検索を実装。
-Version: 1.20.1
+Version: 1.20.2
 Requires at least: 6.0
 Requires PHP: 8.0
 License: GNU General Public License v2 or later
@@ -420,7 +420,16 @@ footer.site-footer .bottom{border-top:1px solid rgba(255,255,255,.1);padding:20p
   display:flex;align-items:center;justify-content:center;transition:.25s}
 .kb-chat-fab:hover{transform:translateY(-3px)}
 .kb-chat-fab svg{width:26px;height:26px}
-.kb-chat-fab-badge{position:absolute;top:-4px;right:-4px;background:#fff;color:var(--deep);font-family:var(--font-en);
+/* 顔写真アバターをFABに（縁取りで浮かせる） */
+.kb-chat-fab-face{width:100%;height:100%;border-radius:50%;object-fit:cover;position:relative;z-index:1;border:2px solid #fff}
+/* 注意を引く呼吸ハロー（クリムゾンの波紋。開いている間は停止） */
+.kb-chat-fab-halo{position:absolute;inset:0;border-radius:50%;z-index:0;background:var(--crimson);opacity:0}
+@media (prefers-reduced-motion:no-preference){
+  .kb-chat-fab-halo{animation:kbFabHalo 2.8s ease-out infinite}
+}
+.kb-chat.open .kb-chat-fab-halo{animation:none}
+@keyframes kbFabHalo{0%{transform:scale(1);opacity:.35}70%{transform:scale(1.55);opacity:0}100%{opacity:0}}
+.kb-chat-fab-badge{position:absolute;top:-4px;right:-4px;z-index:2;background:#fff;color:var(--deep);font-family:var(--font-en);
   font-size:9.5px;font-weight:800;letter-spacing:.08em;border:1px solid var(--tint);border-radius:999px;padding:2px 7px;box-shadow:var(--shadow)}
 .kb-chat-panel{position:absolute;right:0;bottom:74px;width:min(374px,calc(100vw - 40px));display:flex;flex-direction:column;
   max-height:calc(100vh - 110px);max-height:calc(100dvh - 110px);
@@ -429,11 +438,41 @@ footer.site-footer .bottom{border-top:1px solid rgba(255,255,255,.1);padding:20p
    display:flex が勝ってしまう。属性セレクタで閉状態を明示的に復元する */
 .kb-chat-panel[hidden]{display:none}
 .kb-chat-head{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);background:linear-gradient(135deg,var(--tint-light),#fff 70%);flex-shrink:0}
-.kb-chat-face{width:34px;height:34px;border-radius:50%;overflow:hidden;flex:none;background:linear-gradient(135deg,var(--deep),var(--crimson));display:flex;align-items:center;justify-content:center;color:#fff}
-.kb-chat-face img{width:100%;height:100%;object-fit:cover}
-.kb-chat-face .init{font-family:var(--font-en);font-size:12px;font-weight:800}
-.kb-chat-title{font-size:13.5px;font-weight:900;line-height:1.3;display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+/* ヘッダーのアバター（“話している”演出の主役） */
+.kb-chat-face{position:relative;width:40px;height:40px;border-radius:50%;flex:none;background:linear-gradient(135deg,var(--deep),var(--crimson));display:flex;align-items:center;justify-content:center;color:#fff}
+.kb-chat-face>img{width:100%;height:100%;object-fit:cover;border-radius:50%;position:relative;z-index:1}
+.kb-chat-face .init{font-family:var(--font-en);font-size:13px;font-weight:800;position:relative;z-index:1}
+/* サイトの .avatar と同系の破線リング */
+.kb-chat-face::after{content:"";position:absolute;inset:-3px;border:1.5px dashed rgba(194,39,64,.45);border-radius:50%}
+/* 応答中に外へ広がるソナーリング（音が出ている＝話している演出） */
+.kb-chat-sonar{position:absolute;inset:0;border-radius:50%;pointer-events:none}
+.kb-chat-sonar::before,.kb-chat-sonar::after{content:"";position:absolute;inset:0;border-radius:50%;border:1.5px solid var(--crimson);opacity:0}
+@media (prefers-reduced-motion:no-preference){
+  .kb-chat.busy .kb-chat-sonar::before{animation:kbSonar 1.6s ease-out infinite}
+  .kb-chat.busy .kb-chat-sonar::after{animation:kbSonar 1.6s ease-out .8s infinite}
+  .kb-chat.busy .kb-chat-face::after{animation:kbRingSpin 7s linear infinite}
+}
+@keyframes kbSonar{0%{transform:scale(1);opacity:.5}100%{transform:scale(2.15);opacity:0}}
+@keyframes kbRingSpin{to{transform:rotate(360deg)}}
+.kb-chat-idwrap{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.kb-chat-title{font-size:13.5px;font-weight:900;line-height:1.25;display:flex;align-items:center;gap:8px}
 .kb-chat-title small{font-family:var(--font-en);font-size:9px;font-weight:800;color:var(--crimson);letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--tint);border-radius:999px;padding:1px 7px;background:#fff}
+/* ステータス（オンライン ⇄ 入力中…）と波形イコライザ */
+.kb-chat-status{font-size:11px;color:var(--gray);line-height:1.2}
+.kb-chat-status .s-on{display:inline-flex;align-items:center;gap:6px}
+.kb-chat-status .s-on::before{content:"";width:7px;height:7px;border-radius:50%;background:#2fa060;box-shadow:0 0 0 3px rgba(47,160,96,.16)}
+.kb-chat-status .s-busy{display:none;align-items:center;gap:7px;color:var(--deep);font-weight:700}
+.kb-chat.busy .s-on{display:none}
+.kb-chat.busy .s-busy{display:inline-flex}
+.kb-chat-eq{display:inline-flex;align-items:flex-end;gap:2px;height:12px}
+.kb-chat-eq i{width:2.5px;height:4px;background:var(--crimson);border-radius:2px}
+@media (prefers-reduced-motion:no-preference){
+  .kb-chat.busy .kb-chat-eq i{animation:kbEq .9s ease-in-out infinite}
+  .kb-chat.busy .kb-chat-eq i:nth-child(2){animation-delay:.15s}
+  .kb-chat.busy .kb-chat-eq i:nth-child(3){animation-delay:.3s}
+  .kb-chat.busy .kb-chat-eq i:nth-child(4){animation-delay:.45s}
+}
+@keyframes kbEq{0%,100%{height:4px}50%{height:12px}}
 .kb-chat-close{border:none;background:none;cursor:pointer;color:var(--gray);display:flex;padding:4px}
 .kb-chat-close svg{width:18px;height:18px}
 .kb-chat-close:hover{color:var(--ink)}
