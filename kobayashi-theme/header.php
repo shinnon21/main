@@ -22,8 +22,9 @@
 				kb_default_nav();
 			}
 			?>
-			<?php /* モバイルの全画面メニュー内のみ表示（検索・SNS・CTA） */ ?>
+			<?php /* モバイルの全画面メニュー内のみ表示（言語切替・検索・SNS・CTA） */ ?>
 			<div class="gnav-extra">
+				<?php kb_lang_switcher(); ?>
 				<form class="search" role="search" method="get" action="<?php echo esc_url( kb_home( '/' ) ); ?>">
 					<button type="submit" aria-label="検索">
 						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5C5C5C" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
@@ -36,7 +37,6 @@
 		</nav>
 
 		<div class="h-right">
-			<?php kb_lang_switcher(); ?>
 			<form class="search" role="search" method="get" action="<?php echo esc_url( kb_home( '/' ) ); ?>">
 				<button type="submit" aria-label="検索">
 					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5C5C5C" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>

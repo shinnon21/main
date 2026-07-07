@@ -31,6 +31,7 @@
 		</div>
 		<div class="bottom">
 			<span class="en">© <?php echo esc_html( date_i18n( 'Y' ) ); ?> Shinnosuke Kobayashi</span>
+			<?php kb_lang_switcher(); ?>
 		</div>
 	</div>
 </footer>

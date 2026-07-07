@@ -488,6 +488,9 @@ add_action( 'wp_footer', function () {
 						<span class="s-busy"><span class="kb-chat-eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span><?php echo esc_html( kb_t( '入力中…', 'Typing…' ) ); ?></span>
 					</span>
 				</span>
+				<a class="kb-chat-expand" href="<?php echo esc_url( kb_home( '/chat/' ) ); ?>" aria-label="<?php echo esc_attr( kb_t( '全画面のAIチャットを開く', 'Open full-screen AI chat' ) ); ?>" title="<?php echo esc_attr( kb_t( '全画面で開く', 'Open full screen' ) ); ?>">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6M14 10l7-7M9 21H3v-6M10 14l-7 7"/></svg>
+				</a>
 				<button type="button" class="kb-chat-close" id="kbChatClose" aria-label="<?php echo esc_attr( kb_t( '閉じる', 'Close' ) ); ?>">
 					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
 				</button>

@@ -19,8 +19,7 @@ $kb_suggests = array(
 <div class="kbc-page">
 	<div class="container kbc-stage">
 		<div class="kbc-hero">
-			<?php echo kb_chat_avatar_svg(); // 自前の安全なSVGマークアップ ?>
-			<p class="kbc-lbl en">AI AVATAR</p>
+			<?php echo kb_chat_avatar_svg(); // Lottieアバター（自前の安全なマークアップ） ?>
 			<h1><?php echo esc_html( kb_t( '小林慎之助と話してみる', 'Chat with Shinnosuke Kobayashi' ) ); ?></h1>
 			<p class="kbc-sub"><?php echo esc_html( kb_t( '本人に代わってAIが、このサイトに掲載されている実績・経歴・お知らせなどをもとにお答えします。掲載のない内容にはお答えできません。', 'An AI answers on his behalf, based on the works, career and news published on this site. Questions beyond it cannot be answered.' ) ); ?></p>
 		</div>

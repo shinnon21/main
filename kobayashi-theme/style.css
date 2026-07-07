@@ -3,7 +3,7 @@ Theme Name: Kobayashi Portfolio
 Theme URI: https://shinnosuke-kobayashi.jp/
 Author: Shinnosuke Kobayashi
 Description: 「小林慎之助」ポートフォリオサイト用オリジナルテーマ。サイト設計書v1.1・デザインカンプ準拠。カスタム投稿タイプ（実績・コラム・お知らせ・資料）と条件検索を実装。
-Version: 1.21.4
+Version: 1.21.5
 Requires at least: 6.0
 Requires PHP: 8.0
 License: GNU General Public License v2 or later
@@ -69,8 +69,8 @@ header.site .container{display:flex;align-items:center;justify-content:space-bet
 .logo .jp{font-size:24px;font-weight:900;letter-spacing:.06em;display:block}
 .logo .sub{font-family:var(--font-en);font-size:9.5px;font-weight:600;color:var(--gray);letter-spacing:.22em;text-transform:uppercase;display:block}
 .logo-img{height:30px;width:auto;display:block}
-nav.gnav ul{display:flex;gap:28px}
-nav.gnav ul a{display:block;text-align:center;font-size:14.5px;font-weight:700;padding:6px 2px;position:relative}
+nav.gnav ul{display:flex;gap:26px}
+nav.gnav ul a{display:block;text-align:center;font-size:14.5px;font-weight:700;padding:6px 2px;position:relative;white-space:nowrap}
 nav.gnav ul a small{display:block;font-family:var(--font-en);font-size:9.5px;font-weight:600;color:var(--crimson);letter-spacing:.15em;text-transform:lowercase;white-space:nowrap}
 nav.gnav ul a::after{content:"";position:absolute;left:0;bottom:-2px;width:0;height:2px;background:var(--crimson);transition:.25s}
 nav.gnav ul a:hover::after,nav.gnav ul .current-menu-item a::after{width:100%}
@@ -458,9 +458,11 @@ footer.site-footer .bottom{border-top:1px solid rgba(255,255,255,.1);padding:20p
   .kb-chat.busy .kb-chat-eq i:nth-child(4){animation-delay:.45s}
 }
 @keyframes kbEq{0%,100%{height:4px}50%{height:12px}}
-.kb-chat-close{border:none;background:none;cursor:pointer;color:var(--gray);display:flex;padding:4px}
+.kb-chat-close,.kb-chat-expand{border:none;background:none;cursor:pointer;color:var(--gray);display:flex;padding:4px;text-decoration:none;flex:none}
 .kb-chat-close svg{width:18px;height:18px}
+.kb-chat-expand svg{width:17px;height:17px}
 .kb-chat-close:hover{color:var(--ink)}
+.kb-chat-expand:hover{color:var(--crimson)}
 .kb-chat-note{font-size:10.5px;color:var(--gray);background:var(--bg);padding:8px 16px;border-bottom:1px solid var(--line);line-height:1.55;flex-shrink:0}
 /* bodyのみ縮小可＝低いビューポート（横向きスマホ等）ではパネルのmax-heightに合わせて縮む */
 .kb-chat-body{height:min(46vh,420px);min-height:0;overflow-y:auto;padding:16px 14px;display:flex;flex-direction:column;gap:10px}
@@ -542,13 +544,24 @@ footer.site-footer .bottom{border-top:1px solid rgba(255,255,255,.1);padding:20p
 /* ============================================================
    responsive
 ============================================================ */
-/* 中間幅: ロゴ（横長化）とナビ・検索が1行に収まるよう詰める */
+/* 中間幅: ロゴ（横長化）とナビ・検索が1行に収まるよう詰める（言語切替はヘッダーから撤去済み） */
 @media (max-width:1200px){
   .logo-img{height:26px}
-  nav.gnav ul{gap:20px}
-  header.site .search{width:150px}
-  .lang-switch{padding:7px 11px;font-size:11px}
+  nav.gnav ul{gap:16px}
+  nav.gnav ul a{font-size:14px}
+  header.site .search{width:132px}
 }
+@media (max-width:1040px){
+  nav.gnav ul{gap:12px}
+  nav.gnav ul a{font-size:13.5px}
+  nav.gnav ul a small{font-size:9px}
+  header.site .search{width:118px}
+  header.site .container{gap:16px}
+}
+/* フッターの言語切替（ヘッダーから移動） */
+footer.site-footer .bottom .lang-switch{background:transparent;color:#d9d4d5;border-color:rgba(255,255,255,.22)}
+footer.site-footer .bottom .lang-switch:hover{border-color:var(--crimson);color:#fff}
+footer.site-footer .bottom .lang-switch .on{color:#fff}
 @media (max-width:960px){
   /* 全画面オーバーレイメニュー（ヒーローと同系の淡いクリムゾングラデ背景）
      header.siteのbackdrop-filterがfixedの基準になるため、bottom:0ではなく
