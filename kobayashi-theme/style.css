@@ -3,7 +3,7 @@ Theme Name: Kobayashi Portfolio
 Theme URI: https://shinnosuke-kobayashi.jp/
 Author: Shinnosuke Kobayashi
 Description: 「小林慎之助」ポートフォリオサイト用オリジナルテーマ。サイト設計書v1.1・デザインカンプ準拠。カスタム投稿タイプ（実績・コラム・お知らせ・資料）と条件検索を実装。
-Version: 1.21.3
+Version: 1.21.4
 Requires at least: 6.0
 Requires PHP: 8.0
 License: GNU General Public License v2 or later
@@ -415,22 +415,22 @@ footer.site-footer .bottom{border-top:1px solid rgba(255,255,255,.1);padding:20p
 
 /* ===== AIチャットボット（右下ウィジェット） ===== */
 .kb-chat{position:fixed;right:20px;bottom:20px;z-index:98;font-family:var(--font-jp)}
-.kb-chat-fab{position:relative;width:58px;height:58px;border-radius:50%;border:none;cursor:pointer;color:#fff;
-  background:linear-gradient(135deg,var(--crimson),var(--deep));box-shadow:0 10px 26px rgba(132,25,42,.35);
-  display:flex;align-items:center;justify-content:center;transition:.25s}
-.kb-chat-fab:hover{transform:translateY(-3px)}
-.kb-chat-fab svg{width:26px;height:26px}
-/* 顔写真アバターをFABに（縁取りで浮かせる） */
-.kb-chat-fab-face{width:100%;height:100%;border-radius:50%;object-fit:cover;position:relative;z-index:1;border:2px solid #fff}
-/* 注意を引く呼吸ハロー（クリムゾンの波紋。開いている間は停止） */
-.kb-chat-fab-halo{position:absolute;inset:0;border-radius:50%;z-index:0;background:var(--crimson);opacity:0}
-@media (prefers-reduced-motion:no-preference){
-  .kb-chat-fab-halo{animation:kbFabHalo 2.8s ease-out infinite}
-}
-.kb-chat.open .kb-chat-fab-halo{animation:none}
-@keyframes kbFabHalo{0%{transform:scale(1);opacity:.35}70%{transform:scale(1.55);opacity:0}100%{opacity:0}}
-.kb-chat-fab-badge{position:absolute;top:-4px;right:-4px;z-index:2;background:#fff;color:var(--deep);font-family:var(--font-en);
-  font-size:9.5px;font-weight:800;letter-spacing:.08em;border:1px solid var(--tint);border-radius:999px;padding:2px 7px;box-shadow:var(--shadow)}
+/* 右下は“アバターがそのままいる”＝丸で囲まない。Lottieアバターが浮かぶ */
+.kb-chat-fab{position:relative;width:82px;height:82px;border:none;background:none;padding:0;cursor:pointer;
+  filter:drop-shadow(0 10px 15px rgba(132,25,42,.26));transition:transform .25s}
+.kb-chat-fab svg{width:28px;height:28px;color:var(--crimson)}
+@media (prefers-reduced-motion:no-preference){.kb-chat-fab{animation:kbFabBob 3.4s ease-in-out infinite}}
+.kb-chat-fab:hover{transform:translateY(-4px);animation:none}
+@keyframes kbFabBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+/* アバター共通ホスト（Lottieセル＋透過ポスターのフォールバック。丸枠なし） */
+.kb-chat-av{position:relative;display:block}
+.kb-fab-av{width:100%;height:100%}
+.kb-head-av{width:48px;height:48px;flex:none}
+.kb-chat-av .kb-av-cell{position:absolute;inset:0;opacity:0;transition:opacity .2s}
+.kb-chat-av .kb-av-cell.on{opacity:1}
+.kb-chat-av .kb-av-cell svg{width:100%!important;height:100%!important;display:block}
+.kb-chat-av .kb-av-poster{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.kb-chat-av.is-ready .kb-av-poster{opacity:0;transition:opacity .25s}
 .kb-chat-panel{position:absolute;right:0;bottom:74px;width:min(374px,calc(100vw - 40px));display:flex;flex-direction:column;
   max-height:calc(100vh - 110px);max-height:calc(100dvh - 110px);
   background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 18px 48px rgba(26,26,26,.22);overflow:hidden}
@@ -438,22 +438,7 @@ footer.site-footer .bottom{border-top:1px solid rgba(255,255,255,.1);padding:20p
    display:flex が勝ってしまう。属性セレクタで閉状態を明示的に復元する */
 .kb-chat-panel[hidden]{display:none}
 .kb-chat-head{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);background:linear-gradient(135deg,var(--tint-light),#fff 70%);flex-shrink:0}
-/* ヘッダーのアバター（“話している”演出の主役） */
-.kb-chat-face{position:relative;width:40px;height:40px;border-radius:50%;flex:none;background:linear-gradient(135deg,var(--deep),var(--crimson));display:flex;align-items:center;justify-content:center;color:#fff}
-.kb-chat-face>img{width:100%;height:100%;object-fit:cover;border-radius:50%;position:relative;z-index:1}
-.kb-chat-face .init{font-family:var(--font-en);font-size:13px;font-weight:800;position:relative;z-index:1}
-/* サイトの .avatar と同系の破線リング */
-.kb-chat-face::after{content:"";position:absolute;inset:-3px;border:1.5px dashed rgba(194,39,64,.45);border-radius:50%}
-/* 応答中に外へ広がるソナーリング（音が出ている＝話している演出） */
-.kb-chat-sonar{position:absolute;inset:0;border-radius:50%;pointer-events:none}
-.kb-chat-sonar::before,.kb-chat-sonar::after{content:"";position:absolute;inset:0;border-radius:50%;border:1.5px solid var(--crimson);opacity:0}
-@media (prefers-reduced-motion:no-preference){
-  .kb-chat.busy .kb-chat-sonar::before{animation:kbSonar 1.6s ease-out infinite}
-  .kb-chat.busy .kb-chat-sonar::after{animation:kbSonar 1.6s ease-out .8s infinite}
-  .kb-chat.busy .kb-chat-face::after{animation:kbRingSpin 7s linear infinite}
-}
-@keyframes kbSonar{0%{transform:scale(1);opacity:.5}100%{transform:scale(2.15);opacity:0}}
-@keyframes kbRingSpin{to{transform:rotate(360deg)}}
+/* ヘッダーのアバター（丸で囲まずLottieアバターを置く。ホストは .kb-head-av） */
 .kb-chat-idwrap{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
 .kb-chat-title{font-size:13.5px;font-weight:900;line-height:1.25;display:flex;align-items:center;gap:8px}
 .kb-chat-title small{font-family:var(--font-en);font-size:9px;font-weight:800;color:var(--crimson);letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--tint);border-radius:999px;padding:1px 7px;background:#fff}
@@ -511,21 +496,31 @@ footer.site-footer .bottom{border-top:1px solid rgba(255,255,255,.1);padding:20p
   .kb-chat-body{height:min(52vh,420px)}
 }
 
-/* ===== AIチャットページ（全画面・本人写真アバター page-chat.php） ===== */
-.kbc-page{position:relative;padding:44px 0 72px;min-height:calc(100vh - 72px);min-height:calc(100svh - 72px);
+/* ===== AIチャットページ（page-chat.php・1画面に収める） ===== */
+/* ページ高＝ビューポート−ヘッダー(72px)で固定。内部のログだけがスクロールする */
+.kbc-page{position:relative;height:calc(100vh - 72px);height:calc(100dvh - 72px);
+  display:flex;flex-direction:column;overflow:hidden;padding:clamp(10px,2.2vh,26px) 0;
   background:radial-gradient(680px 420px at 50% -8%,var(--tint-light),transparent 60%),
              radial-gradient(520px 340px at 92% 108%,rgba(194,39,64,.06),transparent 60%),var(--bg)}
-.kbc-stage{max-width:720px}
-.kbc-hero{text-align:center}
-.kbc-avatar{width:clamp(200px,44vw,324px);aspect-ratio:1;margin:0 auto 8px;position:relative}
-.kbc-lbl{font-size:12px;font-weight:800;letter-spacing:.2em;color:var(--crimson)}
-.kbc-hero h1{font-size:clamp(24px,4vw,32px);font-weight:900;letter-spacing:.02em;margin-top:4px}
-.kbc-sub{font-size:14.5px;color:#4a4a4a;max-width:560px;margin:12px auto 0;line-height:1.85}
-.kbc-chatcard{max-width:640px;margin:26px auto 0;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
-.kbc-log{height:min(42vh,380px);min-height:200px}
-.kbc-note{font-size:11px;color:var(--gray);text-align:center;padding:2px 16px 14px}
-.kbc-prep{text-align:center;padding:44px 28px}
+.kbc-stage{max-width:640px;width:100%;flex:1;min-height:0;display:flex;flex-direction:column}
+.kbc-hero{text-align:center;flex:none}
+.kbc-avatar{width:clamp(104px,17vh,188px);aspect-ratio:1;margin:0 auto 2px;position:relative}
+.kbc-lbl{font-size:11px;font-weight:800;letter-spacing:.2em;color:var(--crimson)}
+.kbc-hero h1{font-size:clamp(19px,3vh,27px);font-weight:900;letter-spacing:.02em;margin-top:2px}
+.kbc-sub{font-size:clamp(12px,1.5vh,14px);color:#4a4a4a;max-width:540px;margin:6px auto 0;line-height:1.7}
+/* カードが残り高さを full で占め、メッセージログ(.kbc-log)だけが内部スクロール */
+.kbc-chatcard{width:100%;max-width:640px;margin:clamp(10px,1.8vh,20px) auto 0;flex:1;min-height:0;
+  display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
+.kbc-log{flex:1;min-height:0;height:auto}
+.kbc-chatcard .kb-chat-form{flex:none}
+.kbc-note{font-size:11px;color:var(--gray);text-align:center;padding:2px 16px 12px;flex:none}
+.kbc-prep{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px 28px}
 .kbc-prep p{font-size:15px;color:#4a4a4a;margin-bottom:22px}
+@media (max-width:600px){
+  /* モバイルは短い縦画面でも収まるよう、サブ説明を隠して要素を詰める */
+  .kbc-sub{display:none}
+  .kbc-avatar{width:clamp(96px,15vh,150px)}
+}
 
 /* --- Lottieアバター（ユーザー提供・通常/考え中/回答中の3ループを状態で切替） --- */
 /* 淡いブランドのハローを背後に敷く */

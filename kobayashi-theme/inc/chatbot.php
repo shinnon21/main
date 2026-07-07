@@ -437,36 +437,37 @@ add_action( 'save_post', function ( $post_id, $post ) {
 /* ---------- フロント（ウィジェット出力＋アセット） ---------- */
 add_action( 'wp_enqueue_scripts', function () {
 	if ( ! kb_chatbot_enabled() ) { return; }
+	$uri = get_template_directory_uri();
+	$ver = wp_get_theme()->get( 'Version' );
+	/* Lottieアバター（浮遊ウィジェットのFAB/ヘッダーも全画面ページも共通で使用。
+	   lottie.min.js はローカル同梱・外部通信なし） */
 	$cfg = array(
 		'endpoint' => rest_url( 'kobayashi/v1/chat' ),
 		'lang'     => kb_is_en() ? 'en' : 'ja',
+		'avatar'   => array(
+			'idle'      => $uri . '/assets/avatar/avatar_idle.json?v=' . $ver,
+			'thinking'  => $uri . '/assets/avatar/avatar_thinking.json?v=' . $ver,
+			'answering' => $uri . '/assets/avatar/avatar_answering.json?v=' . $ver,
+		),
 		'strings'  => array(
 			'error'   => kb_t( 'すみません、回答の取得に失敗しました。時間をおいてお試しください。', 'Sorry, something went wrong. Please try again later.' ),
 			'limited' => kb_t( 'ご利用が集中しています。しばらくしてからお試しください。', 'The assistant is busy right now. Please try again in a while.' ),
 		),
 	);
-	$ver = wp_get_theme()->get( 'Version' );
-	/* 専用ページ（page-chat.php）では全画面チャットのみ。浮遊ウィジェットは出さない。
-	   アバターはLottie（lottie.min.jsをローカル同梱・外部通信なし） */
+	wp_enqueue_script( 'kb-lottie', $uri . '/assets/lottie.min.js', array(), '5.12.2', true );
+	/* 専用ページ（page-chat.php）では全画面チャットのみ。浮遊ウィジェットは出さない */
 	if ( kb_is_chat_page() ) {
-		$uri = get_template_directory_uri();
-		wp_enqueue_script( 'kb-lottie', $uri . '/assets/lottie.min.js', array(), '5.12.2', true );
 		wp_enqueue_script( 'kb-chat-page', $uri . '/assets/chat-page.js', array( 'kb-lottie' ), $ver, true );
-		$cfg['avatar'] = array(
-			'idle'      => $uri . '/assets/avatar/avatar_idle.json?v=' . $ver,
-			'thinking'  => $uri . '/assets/avatar/avatar_thinking.json?v=' . $ver,
-			'answering' => $uri . '/assets/avatar/avatar_answering.json?v=' . $ver,
-		);
 		wp_localize_script( 'kb-chat-page', 'kbChatCfg', $cfg );
 		return;
 	}
-	wp_enqueue_script( 'kb-chatbot', get_template_directory_uri() . '/assets/chatbot.js', array(), $ver, true );
+	wp_enqueue_script( 'kb-chatbot', $uri . '/assets/chatbot.js', array( 'kb-lottie' ), $ver, true );
 	wp_localize_script( 'kb-chatbot', 'kbChatCfg', $cfg );
 } );
 
 add_action( 'wp_footer', function () {
 	if ( ! kb_chatbot_enabled() || kb_is_chat_page() ) { return; }
-	$face = kb_avatar_face_url(); // テーマ同梱の顔クロップ（本人写真）
+	$poster   = esc_url( get_template_directory_uri() . '/assets/img/avatar-poster.png?v=' . wp_get_theme()->get( 'Version' ) );
 	$suggests = array(
 		kb_t( '実績を教えてください', 'Tell me about your work.' ),
 		kb_t( '経歴について聞きたいです', "I'd like to hear about your career." ),
@@ -474,21 +475,12 @@ add_action( 'wp_footer', function () {
 	);
 	?>
 	<div class="kb-chat" id="kbChat">
-		<button type="button" class="kb-chat-fab<?php echo $face ? ' has-face' : ''; ?>" id="kbChatFab" aria-expanded="false" aria-controls="kbChatPanel" aria-label="<?php echo esc_attr( kb_t( '小林慎之助AIに質問する', 'Chat with Shinnosuke Kobayashi AI' ) ); ?>">
-			<span class="kb-chat-fab-halo" aria-hidden="true"></span>
-			<?php if ( $face ) : ?>
-				<img class="kb-chat-fab-face" src="<?php echo esc_url( $face ); ?>" alt="" width="58" height="58">
-			<?php else : ?>
-				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-			<?php endif; ?>
-			<span class="kb-chat-fab-badge">AI</span>
+		<button type="button" class="kb-chat-fab" id="kbChatFab" aria-expanded="false" aria-controls="kbChatPanel" aria-label="<?php echo esc_attr( kb_t( '小林慎之助AIに質問する', 'Chat with Shinnosuke Kobayashi AI' ) ); ?>">
+			<span class="kb-chat-av kb-fab-av" id="kbFabAvatar"><img class="kb-av-poster" src="<?php echo $poster; ?>" alt=""></span>
 		</button>
 		<section class="kb-chat-panel" id="kbChatPanel" role="dialog" aria-label="<?php echo esc_attr( kb_t( '小林慎之助AIアバター', 'Shinnosuke Kobayashi AI avatar' ) ); ?>" hidden>
 			<header class="kb-chat-head">
-				<span class="kb-chat-face">
-					<span class="kb-chat-sonar" aria-hidden="true"></span>
-					<?php if ( $face ) : ?><img src="<?php echo esc_url( $face ); ?>" alt="" width="40" height="40"><?php else : ?><span class="init">SK</span><?php endif; ?>
-				</span>
+				<span class="kb-chat-av kb-head-av" id="kbHeadAvatar"><img class="kb-av-poster" src="<?php echo $poster; ?>" alt=""></span>
 				<span class="kb-chat-idwrap">
 					<span class="kb-chat-title"><?php echo esc_html( kb_t( '小林慎之助', 'Shinnosuke Kobayashi' ) ); ?><small>AI</small></span>
 					<span class="kb-chat-status">

@@ -14,6 +14,32 @@
   var closeBtn = document.getElementById('kbChatClose');
   var suggests = document.getElementById('kbChatSuggests');
 
+  /* --- Lottieアバター（丸で囲まず“アバターがそのままいる”） ---
+     FAB(右下)は常時idle。ヘッダーは会話状態で idle/thinking/answering を切替。
+     lottie未使用時は透過ポスターのまま（setはno-op） */
+  var mountAvatar = function (host, states) {
+    if (!host || !cfg.avatar || typeof window.lottie === 'undefined') { return { set: function () {} }; }
+    var cells = {}, first = null;
+    states.forEach(function (key) {
+      if (!cfg.avatar[key]) { return; }
+      var cell = document.createElement('div');
+      cell.className = 'kb-av-cell';
+      host.appendChild(cell);
+      var an = window.lottie.loadAnimation({ container: cell, renderer: 'svg', loop: true, autoplay: true, path: cfg.avatar[key] });
+      cells[key] = cell;
+      if (!first) { first = key; an.addEventListener('DOMLoaded', function () { host.classList.add('is-ready'); }); }
+    });
+    if (first) { cells[first].classList.add('on'); }
+    return {
+      set: function (key) {
+        if (!cells[key]) { key = first; }
+        Object.keys(cells).forEach(function (k) { cells[k].classList.toggle('on', k === key); });
+      }
+    };
+  };
+  mountAvatar(document.getElementById('kbFabAvatar'), ['idle']);
+  var headAv = null; /* パネル初回オープン時に生成 */
+
   /* 会話履歴（送信APIのコンテキスト用）。タブ内で保持し言語別に分ける */
   var storeKey = 'kbChatHist_' + cfg.lang;
   var history = [];
@@ -94,6 +120,7 @@
     fab.setAttribute('aria-expanded', open ? 'true' : 'false');
     root.classList.toggle('open', open);
     if (open) {
+      if (!headAv) { headAv = mountAvatar(document.getElementById('kbHeadAvatar'), ['idle', 'thinking', 'answering']); }
       body.scrollTop = body.scrollHeight;
       input.focus();
     } else {
@@ -107,12 +134,13 @@
   });
 
   /* 送信 */
-  var pending = false;
+  var pending = false, talkTimer = null;
   var send = function (text) {
     text = String(text || '').trim();
     if (!text || pending) { return; }
     pending = true;
     root.classList.add('busy');
+    if (headAv) { headAv.set('thinking'); }
     if (suggests) { suggests.remove(); suggests = null; }
     addMsg('user', text);
     var sent = history.slice(-10);
@@ -132,6 +160,13 @@
       if (!isError) {
         history.push({ role: 'model', text: reply });
         saveHistory();
+        if (headAv) {
+          headAv.set('answering'); /* 回答を“話している”間だけ answering ループ */
+          clearTimeout(talkTimer);
+          talkTimer = setTimeout(function () { headAv.set('idle'); }, Math.min(6000, Math.max(1500, reply.length * 45)));
+        }
+      } else if (headAv) {
+        headAv.set('idle');
       }
       pending = false;
       root.classList.remove('busy');

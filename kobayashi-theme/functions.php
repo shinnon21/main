@@ -483,6 +483,7 @@ function kb_default_nav() {
 		array( kb_t( '実績', 'Works' ), kb_t( 'works', '実績' ), get_post_type_archive_link( 'works' ) ),
 		array( kb_t( 'コラム', 'Column' ), kb_t( 'column', 'コラム' ), get_post_type_archive_link( 'column' ) ),
 		array( kb_t( 'お知らせ', 'News' ), kb_t( 'news', 'お知らせ' ), get_post_type_archive_link( 'news' ) ),
+		array( kb_t( 'AIチャット', 'AI Chat' ), 'chat', kb_home( '/chat/' ) ),
 		array( kb_t( 'プロフィール', 'Profile' ), kb_t( 'profile', 'プロフィール' ), kb_home( '/profile/' ) ),
 		array( 'About', kb_t( 'about', 'このサイトについて' ), kb_home( '/about/' ) ),
 	);
