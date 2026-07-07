@@ -127,7 +127,14 @@
       fab.focus(); /* dialogを閉じたら起点へフォーカスを返す */
     }
   };
-  fab.addEventListener('click', function () { setOpen(panel.hidden); });
+  /* モバイルでは小窓を開かず、全画面のAIチャットページへ遷移する */
+  var isMobile = function () {
+    return window.matchMedia && window.matchMedia('(max-width: 600px)').matches;
+  };
+  fab.addEventListener('click', function () {
+    if (isMobile() && cfg.chatUrl) { window.location.href = cfg.chatUrl; return; }
+    setOpen(panel.hidden);
+  });
   closeBtn.addEventListener('click', function () { setOpen(false); });
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape' && !panel.hidden) { setOpen(false); }

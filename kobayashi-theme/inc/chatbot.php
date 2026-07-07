@@ -444,6 +444,7 @@ add_action( 'wp_enqueue_scripts', function () {
 	$cfg = array(
 		'endpoint' => rest_url( 'kobayashi/v1/chat' ),
 		'lang'     => kb_is_en() ? 'en' : 'ja',
+		'chatUrl'  => kb_home( '/chat/' ), // モバイルはFABタップでこのページへ遷移
 		'avatar'   => array(
 			'idle'      => $uri . '/assets/avatar/avatar_idle.json?v=' . $ver,
 			'thinking'  => $uri . '/assets/avatar/avatar_thinking.json?v=' . $ver,
