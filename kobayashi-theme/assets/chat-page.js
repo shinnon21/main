@@ -78,11 +78,35 @@
   /* 保存済み履歴を復元 */
   history.forEach(function (h) { addMsg(h.role === 'model' ? 'model' : 'user', h.text); });
 
-  /* アバターの状態（idle / thinking / talking）を切り替える */
+  /* --- Lottieアバター（idle / thinking / answering の3ループを状態で切替） ---
+     lottie.min.js とアバターJSON URL（kbChatCfg.avatar）が揃えば初期化。
+     揃わない場合は静止ポスターのまま（setStateは無害なno-op） */
+  var lot = {};
+  (function initAvatar() {
+    if (!avatar || !cfg.avatar || typeof window.lottie === 'undefined') { return; }
+    Object.keys(cfg.avatar).forEach(function (key) {
+      var cell = document.createElement('div');
+      cell.className = 'kbc-cell';
+      avatar.appendChild(cell);
+      lot[key] = window.lottie.loadAnimation({
+        container: cell, renderer: 'svg', loop: true, autoplay: true, path: cfg.avatar[key]
+      });
+      lot[key]._cell = cell;
+    });
+    if (lot.idle) {
+      lot.idle._cell.classList.add('on');
+      lot.idle.addEventListener('DOMLoaded', function () { avatar.classList.add('is-ready'); });
+    }
+  })();
+
+  /* アバターの状態切替（idle / thinking / answering）。
+     Lottie未使用時は class フォールバック（CSSでポスターのまま） */
   var setState = function (s) {
     if (!avatar) { return; }
-    avatar.classList.toggle('is-thinking', s === 'thinking');
-    avatar.classList.toggle('is-talking', s === 'talking');
+    var key = ( s === 'talking' ) ? 'answering' : s;
+    if (lot[key]) {
+      Object.keys(lot).forEach(function (k) { lot[k]._cell.classList.toggle('on', k === key); });
+    }
   };
 
   var pending = false, talkTimer = null;
