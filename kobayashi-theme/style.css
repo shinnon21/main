@@ -3,7 +3,7 @@ Theme Name: Kobayashi Portfolio
 Theme URI: https://shinnosuke-kobayashi.jp/
 Author: Shinnosuke Kobayashi
 Description: 「小林慎之助」ポートフォリオサイト用オリジナルテーマ。サイト設計書v1.1・デザインカンプ準拠。カスタム投稿タイプ（実績・コラム・お知らせ・資料）と条件検索を実装。
-Version: 1.21.5
+Version: 1.21.6
 Requires at least: 6.0
 Requires PHP: 8.0
 License: GNU General Public License v2 or later
@@ -133,9 +133,12 @@ html.menu-open{overflow:hidden}
 
 /* ===== ticker ===== */
 .ticker{background:var(--deep);color:#fff;overflow:hidden;padding:13px 0}
-.ticker .lane{display:flex;gap:12px;width:max-content;animation:scroll 36s linear infinite}
+/* 継ぎ目なしループ: lane を複製し translateX(-50%)。gap ではなく各チップの
+   margin-right で間隔を作ることで、-50% がちょうど複製1個分＝1周期に一致する
+   （flex gap だと複製境界のギャップ半分ぶん周期がずれてカクつく） */
+.ticker .lane{display:flex;width:max-content;animation:scroll 36s linear infinite}
 .ticker:hover .lane{animation-play-state:paused}
-.ticker a{font-size:13px;font-weight:500;color:#F6D8DD;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:4px 16px;white-space:nowrap;transition:.2s}
+.ticker a{flex:none;font-size:13px;font-weight:500;color:#F6D8DD;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:4px 16px;margin-right:12px;white-space:nowrap;transition:.2s}
 .ticker a:hover{background:var(--crimson);color:#fff;border-color:var(--crimson)}
 @keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 
