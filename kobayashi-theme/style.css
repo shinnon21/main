@@ -3,7 +3,7 @@ Theme Name: Kobayashi Portfolio
 Theme URI: https://shinnosuke-kobayashi.jp/
 Author: Shinnosuke Kobayashi
 Description: 「小林慎之助」ポートフォリオサイト用オリジナルテーマ。サイト設計書v1.1・デザインカンプ準拠。カスタム投稿タイプ（実績・コラム・お知らせ・資料）と条件検索を実装。
-Version: 1.23.0
+Version: 1.23.1
 Requires at least: 6.0
 Requires PHP: 8.0
 License: GNU General Public License v2 or later
@@ -93,29 +93,29 @@ nav.gnav ul a:hover::after,nav.gnav ul .current-menu-item a::after{width:100%}
 html.menu-open{overflow:hidden}
 
 /* ===== hero(top) ===== */
-/* ファーストビュー＝ヘッダー(73px)＋ヒーロー＋ティッカー(約60px)で1画面に収める */
-.hero{position:relative;overflow:hidden;display:flex;align-items:center;padding:64px 0;
+/* ファーストビュー＝ヘッダー(73px)＋ヒーロー＋ティッカー(約60px)で1画面に収める。
+   下パディングを0にし、写真の下端（上半身の切れ目）がヒーロー最下端＝ティッカー上端に接するようにする */
+.hero{position:relative;overflow:hidden;display:flex;align-items:stretch;padding:44px 0 0;
   min-height:calc(100vh - 133px);min-height:min(calc(100svh - 133px),820px);
   cursor:crosshair;touch-action:manipulation}
 .hero a,.hero button{cursor:pointer}
-.hero .container{position:relative;z-index:2;width:100%;display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center}
+.hero .container{position:relative;z-index:2;width:100%;display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center}
 .hero .lbl{font-family:var(--font-en);font-size:13.5px;font-weight:800;color:var(--crimson);letter-spacing:.2em;margin-bottom:18px}
 .hero h1{font-size:clamp(36px,4.9vw,56px);font-weight:900;line-height:1.35;letter-spacing:.03em}
 .hero h1 .u{background:linear-gradient(transparent 68%,var(--tint-light) 68%)}
 .hero .lead{margin-top:22px;font-size:16.5px;color:#4a4a4a;max-width:520px}
 .hero .cta{margin-top:34px;display:flex;gap:14px;flex-wrap:wrap}
-/* ヒーローの本人写真（背景を切り抜いた透過画像＝カード枠なしで背景になじませる。
-   下端を背景へフェード＋背後に淡いクリムゾンのグロー） */
-.hero-photo{position:relative;justify-self:center;align-self:end;width:100%;max-width:440px;
+/* ヒーローの本人写真（背景を切り抜いた透過画像＝カード枠なしで背景になじませる）。
+   セルを全高ストレッチ＋写真を下端そろえ＝上半身の切れ目がヒーロー最下端(=ティッカー上端)に接する。
+   高さは“ヘッダー＋ヒーロー＋ティッカー”が1画面に収まる上限でキャップ（画面が高いほど大きく表示）。
+   幅はカラム幅で頭打ち。頭は絶対に切れず、余りは上の透明余白になる。 */
+.hero-photo{position:relative;justify-self:end;align-self:stretch;width:100%;
   display:flex;justify-content:center;align-items:flex-end}
-/* 高さは“ヘッダー＋ヒーロー＋ティッカー”が1画面に収まる範囲に制限（＝短い画面では
-   写真が縮み、ティッカーがファーストビューに必ず入る）。幅より高さ優先で採寸 */
-.hero-photo img{position:relative;z-index:2;width:auto;height:auto;max-width:100%;
-  max-height:min(calc(100svh - 300px),600px);display:block;
-  -webkit-mask-image:linear-gradient(180deg,#000 80%,transparent 100%);
-          mask-image:linear-gradient(180deg,#000 80%,transparent 100%)}
-.hero-photo::before{content:"";position:absolute;z-index:1;left:2%;right:2%;top:8%;bottom:2%;
-  background:radial-gradient(58% 52% at 50% 44%,rgba(194,39,64,.22),rgba(194,39,64,.05) 60%,transparent 74%);
+.hero-photo img{position:relative;z-index:2;display:block;width:auto;height:auto;max-width:100%;
+  max-height:min(calc(100svh - 185px),780px)}
+/* 背後の淡いクリムゾングロー＝下半身(胴体)側に寄せて“背景から立ち上がる”質感に */
+.hero-photo::before{content:"";position:absolute;z-index:1;left:2%;right:2%;top:34%;bottom:0;
+  background:radial-gradient(62% 56% at 50% 82%,rgba(194,39,64,.22),rgba(194,39,64,.05) 58%,transparent 76%);
   filter:blur(4px)}
 /* 背景格子＝ヒーロー全面（キャッチコピーの背後まで敷く）。操作は.hero側で拾う。
    端に向かって格子をフェードさせ、ヘッダー・ティッカー境界に呼吸をつくる */
@@ -616,7 +616,12 @@ footer.site-footer .bottom .lang-switch .on{color:#fff}
   .hero .lbl{font-size:10.5px;letter-spacing:.08em;margin-bottom:12px}
   .hero .lead{margin-left:auto;margin-right:auto}
   .hero .cta{justify-content:center}
-  .hero-photo{order:-1;max-width:230px;margin:0 auto;align-self:auto}
+  /* モバイルは写真をコピーの上に置くので全高ストレッチを解除し、下端を背景へフェード */
+  .hero-photo{order:-1;max-width:230px;margin:0 auto;align-self:auto;justify-self:center}
+  .hero-photo img{height:auto;width:100%;object-fit:fill;
+    -webkit-mask-image:linear-gradient(180deg,#000 82%,transparent 100%);
+            mask-image:linear-gradient(180deg,#000 82%,transparent 100%)}
+  .hero-photo::before{top:8%;bottom:2%;background:radial-gradient(58% 52% at 50% 44%,rgba(194,39,64,.2),rgba(194,39,64,.05) 60%,transparent 74%)}
   .featured{grid-template-columns:1fr}
   .grid3,.doc-grid{grid-template-columns:repeat(2,1fr)}
   .col-wrap{grid-template-columns:1fr}
