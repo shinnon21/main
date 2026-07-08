@@ -3,7 +3,7 @@ Theme Name: Kobayashi Portfolio
 Theme URI: https://shinnosuke-kobayashi.jp/
 Author: Shinnosuke Kobayashi
 Description: 「小林慎之助」ポートフォリオサイト用オリジナルテーマ。サイト設計書v1.1・デザインカンプ準拠。カスタム投稿タイプ（実績・コラム・お知らせ・資料）と条件検索を実装。
-Version: 1.22.2
+Version: 1.23.0
 Requires at least: 6.0
 Requires PHP: 8.0
 License: GNU General Public License v2 or later
@@ -106,8 +106,12 @@ html.menu-open{overflow:hidden}
 .hero .cta{margin-top:34px;display:flex;gap:14px;flex-wrap:wrap}
 /* ヒーローの本人写真（背景を切り抜いた透過画像＝カード枠なしで背景になじませる。
    下端を背景へフェード＋背後に淡いクリムゾンのグロー） */
-.hero-photo{position:relative;justify-self:center;align-self:end;width:100%;max-width:440px}
-.hero-photo img{position:relative;z-index:2;width:100%;height:auto;display:block;
+.hero-photo{position:relative;justify-self:center;align-self:end;width:100%;max-width:440px;
+  display:flex;justify-content:center;align-items:flex-end}
+/* 高さは“ヘッダー＋ヒーロー＋ティッカー”が1画面に収まる範囲に制限（＝短い画面では
+   写真が縮み、ティッカーがファーストビューに必ず入る）。幅より高さ優先で採寸 */
+.hero-photo img{position:relative;z-index:2;width:auto;height:auto;max-width:100%;
+  max-height:min(calc(100svh - 300px),600px);display:block;
   -webkit-mask-image:linear-gradient(180deg,#000 80%,transparent 100%);
           mask-image:linear-gradient(180deg,#000 80%,transparent 100%)}
 .hero-photo::before{content:"";position:absolute;z-index:1;left:2%;right:2%;top:8%;bottom:2%;
@@ -142,14 +146,14 @@ html.menu-open{overflow:hidden}
 
 /* ===== ticker ===== */
 .ticker{background:var(--deep);color:#fff;overflow:hidden;padding:13px 0}
-/* 継ぎ目なしループ: lane を複製し translateX(-50%)。gap ではなく各チップの
-   margin-right で間隔を作ることで、-50% がちょうど複製1個分＝1周期に一致する
-   （flex gap だと複製境界のギャップ半分ぶん周期がずれてカクつく） */
-.ticker .lane{display:flex;width:max-content;animation:scroll 36s linear infinite}
+/* 継ぎ目なし無限ループ: main.js が元セットをビューポート2倍以上まで複製し、
+   1セット分の実測px(--kb-shift)だけ translateX する（animation は JS が付与）。
+   間隔は gap ではなく各チップの margin-right で作り、採寸(offsetLeft)に含める */
+.ticker .lane{display:flex;width:max-content}
 .ticker:hover .lane{animation-play-state:paused}
 .ticker a{flex:none;font-size:13px;font-weight:500;color:#F6D8DD;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:4px 16px;margin-right:12px;white-space:nowrap;transition:.2s}
 .ticker a:hover{background:var(--crimson);color:#fff;border-color:var(--crimson)}
-@keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes kbTicker{to{transform:translateX(calc(-1 * var(--kb-shift,50%)))}}
 
 /* ===== cards ===== */
 .thumb{position:relative;border-radius:var(--radius) var(--radius) 0 0;overflow:hidden;aspect-ratio:16/9;display:flex;align-items:flex-end;padding:14px;color:#fff}

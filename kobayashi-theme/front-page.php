@@ -16,10 +16,10 @@ get_header();
 				<path d="M-16 -20 C -56 240, 24 480, -16 740"/><path d="M78 -20 C 38 240, 118 480, 78 740"/><path d="M171 -20 C 131 240, 211 480, 171 740"/><path d="M265 -20 C 225 240, 305 480, 265 740"/><path d="M359 -20 C 319 240, 399 480, 359 740"/><path d="M453 -20 C 413 240, 493 480, 453 740"/><path d="M546 -20 C 506 240, 586 480, 546 740"/><path d="M640 -20 C 600 240, 680 480, 640 740"/><path d="M734 -20 C 694 240, 774 480, 734 740"/><path d="M827 -20 C 787 240, 867 480, 827 740"/><path d="M921 -20 C 881 240, 961 480, 921 740"/><path d="M1015 -20 C 975 240, 1055 480, 1015 740"/><path d="M1109 -20 C 1069 240, 1149 480, 1109 740"/><path d="M1202 -20 C 1162 240, 1242 480, 1202 740"/><path d="M1296 -20 C 1256 240, 1336 480, 1296 740"/>
 			</g>
 			<g id="heroLinks">
-				<path d="M717 216 L998 331 L819 461 L538 504" stroke="#C22740" stroke-width="1.6" stroke-opacity=".5" fill="none"/>
+				<path d="M128 187 L358 317 L218 461 L486 216" stroke="#C22740" stroke-width="1.6" stroke-opacity=".5" fill="none"/>
 			</g>
 			<g id="heroDots">
-				<circle cx="717" cy="216" r="7" fill="url(#lg1)"/><circle cx="998" cy="331" r="10" fill="#C22740"/><circle cx="819" cy="461" r="5" fill="#84192A"/><circle cx="538" cy="504" r="6" fill="#C22740" fill-opacity=".55"/><circle cx="1101" cy="144" r="4" fill="#84192A" fill-opacity=".5"/>
+				<circle cx="128" cy="187" r="7" fill="url(#lg1)"/><circle cx="358" cy="317" r="10" fill="#C22740"/><circle cx="218" cy="461" r="5" fill="#84192A"/><circle cx="486" cy="216" r="6" fill="#C22740" fill-opacity=".55"/><circle cx="64" cy="346" r="4" fill="#84192A" fill-opacity=".5"/>
 			</g>
 			<circle id="heroCursor" r="6" fill="#C22740" fill-opacity=".3" style="display:none"/>
 		</svg>

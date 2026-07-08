@@ -2,11 +2,36 @@
 (function () {
   'use strict';
 
-  /* キーワードティッカー：無限ループ用に複製 */
+  /* キーワードティッカー：継ぎ目なし無限ループ。
+     元セット(N件)を「ビューポート幅の2倍以上」を満たす回数だけ複製し、
+     アニメは「1セット分の実測px」ぶんだけ translateX する（＝複製の境目で
+     絵柄が一致するため途切れない・常に画面が埋まる）。
+     フォント確定後に採寸するため fonts.ready / load でも初期化を試みる */
   var lane = document.getElementById('tickerLane');
-  if (lane && !lane.dataset.cloned) {
-    lane.innerHTML += lane.innerHTML;
-    lane.dataset.cloned = '1';
+  if (lane && !lane.dataset.marquee) {
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!reduce) {
+      var initTicker = function () {
+        if (lane.dataset.marquee) { return; }
+        var ticker = lane.parentElement;
+        var n = lane.children.length;
+        if (!n) { return; }
+        var oneSet = lane.scrollWidth || 1;
+        var copies = Math.max(2, Math.ceil((ticker.offsetWidth * 2) / oneSet) + 1);
+        var html = '', i;
+        var setHTML = lane.innerHTML;
+        for (i = 0; i < copies; i++) { html += setHTML; }
+        lane.innerHTML = html;
+        var shift = lane.children[n].offsetLeft; /* 2セット目先頭の位置＝1周期(px) */
+        if (!shift) { return; }
+        lane.style.setProperty('--kb-shift', shift + 'px');
+        lane.style.animation = 'kbTicker ' + Math.max(14, shift / 55) + 's linear infinite';
+        lane.dataset.marquee = '1';
+      };
+      if (document.fonts && document.fonts.ready) { document.fonts.ready.then(initTicker); }
+      else { initTicker(); }
+      window.addEventListener('load', initTicker);
+    }
   }
 
   /* スクロールリビール：主要ブロックがスクロールに応じて浮かび上がる。
@@ -106,10 +131,11 @@
     var VB_H = 720, GRID_SP = 94, MARGIN = 16, C_OFF = 40;
     var vbW = 1280;
     var H_YS = [], V_XS = [], hPaths = [], vPaths = [];
-    /* 初期ポイントの比率座標。横長=コピー右の余白／縦長=コピー下の余白に置く */
+    /* 初期ポイントの比率座標。横長=右カラムに本人写真があるため、ノードは
+       左半分（コピー側）に寄せて人物と重ならないようにする。縦長=コピー下の余白 */
     var SEED_DOTS = [
-      { fx: .56, fy: .30 }, { fx: .78, fy: .46 }, { fx: .64, fy: .64 },
-      { fx: .42, fy: .70 }, { fx: .86, fy: .20 }
+      { fx: .10, fy: .26 }, { fx: .28, fy: .44 }, { fx: .17, fy: .64 },
+      { fx: .38, fy: .30 }, { fx: .05, fy: .48 }
     ];
     var SEED_DOTS_PORTRAIT = [
       { fx: .26, fy: .84 }, { fx: .70, fy: .82 }, { fx: .50, fy: .94 },
