@@ -34,6 +34,9 @@ get_header();
 				<a class="btn ghost" href="<?php echo esc_url( kb_home( '/profile/' ) ); ?>"><?php echo esc_html( kb_t( 'プロフィール', 'Profile' ) ); ?></a>
 			</div>
 		</div>
+		<div class="hero-photo">
+			<img src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/kobayashi-hero.jpg?v=' . wp_get_theme()->get( 'Version' ) ); ?>" alt="<?php echo esc_attr( kb_t( '小林慎之助', 'Shinnosuke Kobayashi' ) ); ?>" width="680" height="850" loading="eager" fetchpriority="high">
+		</div>
 	</div>
 </section>
 
