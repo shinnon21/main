@@ -35,7 +35,7 @@ get_header();
 			</div>
 		</div>
 		<div class="hero-photo">
-			<img src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/kobayashi-hero.webp?v=' . wp_get_theme()->get( 'Version' ) ); ?>" alt="<?php echo esc_attr( kb_t( '小林慎之助', 'Shinnosuke Kobayashi' ) ); ?>" width="700" height="920" loading="eager" fetchpriority="high">
+			<img src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/kobayashi-hero.webp?v=' . wp_get_theme()->get( 'Version' ) ); ?>" alt="<?php echo esc_attr( kb_t( '小林慎之助', 'Shinnosuke Kobayashi' ) ); ?>" width="780" height="1135" loading="eager" fetchpriority="high">
 		</div>
 	</div>
 </section>
