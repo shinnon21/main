@@ -3,7 +3,7 @@ Theme Name: Kobayashi Portfolio
 Theme URI: https://shinnosuke-kobayashi.jp/
 Author: Shinnosuke Kobayashi
 Description: 「小林慎之助」ポートフォリオサイト用オリジナルテーマ。サイト設計書v1.1・デザインカンプ準拠。カスタム投稿タイプ（実績・コラム・お知らせ・資料）と条件検索を実装。
-Version: 1.23.2
+Version: 1.24.0
 Requires at least: 6.0
 Requires PHP: 8.0
 License: GNU General Public License v2 or later
@@ -397,6 +397,25 @@ footer.site-footer .bottom{border-top:1px solid rgba(255,255,255,.1);padding:20p
 .contact-alt{text-align:center;margin-top:24px;font-size:13px;color:var(--gray)}
 .contact-alt .sns-row{justify-content:center;margin-top:14px}
 .contact-alt a{color:var(--crimson);text-decoration:underline}
+/* 送信完了スクリーン（フォーム一式を差し替え・contact.jsが表示） */
+.contact-thanks{text-align:center;padding:52px 32px 60px;min-height:360px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center}
+.contact-thanks .ct-icon{width:84px;height:84px;border-radius:50%;
+  background:radial-gradient(circle at 50% 38%,var(--tint-light),var(--tint));
+  display:grid;place-items:center;margin-bottom:26px;box-shadow:0 12px 30px rgba(194,39,64,.16)}
+.contact-thanks .ct-icon svg{width:40px;height:40px}
+.contact-thanks .ct-icon svg path{stroke-dasharray:24;stroke-dashoffset:24;animation:kbCheck .55s ease .3s forwards}
+.contact-thanks h2{font-size:clamp(23px,3.4vw,31px);font-weight:900;letter-spacing:.03em;color:var(--ink);margin-bottom:16px;outline:none}
+.contact-thanks p{font-size:15.5px;line-height:1.9;color:#4a4a4a;max-width:540px;margin:0 auto}
+.contact-thanks .ct-note{margin-top:14px;font-size:13px;color:var(--gray)}
+.contact-thanks .ct-cta{margin-top:34px;display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.contact-thanks.is-in{animation:kbThanksIn .5s ease both}
+@keyframes kbThanksIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes kbCheck{to{stroke-dashoffset:0}}
+@media (prefers-reduced-motion:reduce){
+  .contact-thanks.is-in{animation:none}
+  .contact-thanks .ct-icon svg path{stroke-dashoffset:0;animation:none}
+}
 
 /* ===== ページネーション（WP標準） ===== */
 .pagination{margin-top:44px}
