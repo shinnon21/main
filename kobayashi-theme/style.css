@@ -3,7 +3,7 @@ Theme Name: Kobayashi Portfolio
 Theme URI: https://shinnosuke-kobayashi.jp/
 Author: Shinnosuke Kobayashi
 Description: 「小林慎之助」ポートフォリオサイト用オリジナルテーマ。サイト設計書v1.1・デザインカンプ準拠。カスタム投稿タイプ（実績・コラム・お知らせ・資料）と条件検索を実装。
-Version: 1.23.1
+Version: 1.23.2
 Requires at least: 6.0
 Requires PHP: 8.0
 License: GNU General Public License v2 or later
@@ -610,18 +610,18 @@ footer.site-footer .bottom .lang-switch .on{color:#fff}
   nav.gnav .gnav-extra .search{display:flex;width:100%;padding:11px 16px}
   .gnav-extra .sns-row{justify-content:flex-start}
   .gnav-extra .btn{justify-content:center}
-  .hero{padding:48px 0 56px}
-  /* モバイルは1カラム。写真はコピーの上に置き、コンパクトに */
-  .hero .container{grid-template-columns:1fr;text-align:center}
+  /* モバイルは1カラム。コピーを上・写真を下に置き、写真の下端(上半身の切れ目)を
+     ティッカー上端に接地＝デスクトップと同じ“立ち姿”に統一。高さ制限は解除し下パディング0 */
+  .hero{padding:40px 0 0;min-height:auto}
+  .hero .container{grid-template-columns:1fr;text-align:center;gap:26px}
   .hero .lbl{font-size:10.5px;letter-spacing:.08em;margin-bottom:12px}
   .hero .lead{margin-left:auto;margin-right:auto}
   .hero .cta{justify-content:center}
-  /* モバイルは写真をコピーの上に置くので全高ストレッチを解除し、下端を背景へフェード */
-  .hero-photo{order:-1;max-width:230px;margin:0 auto;align-self:auto;justify-self:center}
-  .hero-photo img{height:auto;width:100%;object-fit:fill;
-    -webkit-mask-image:linear-gradient(180deg,#000 82%,transparent 100%);
-            mask-image:linear-gradient(180deg,#000 82%,transparent 100%)}
-  .hero-photo::before{top:8%;bottom:2%;background:radial-gradient(58% 52% at 50% 44%,rgba(194,39,64,.2),rgba(194,39,64,.05) 60%,transparent 74%)}
+  /* 写真はコピーの下＝最終行。下パディング0で下端がティッカー上端に接地。フェードは撤去 */
+  .hero-photo{order:0;max-width:300px;margin:0 auto;align-self:end;justify-self:center;align-items:flex-end}
+  .hero-photo img{height:auto;width:100%;max-height:none;
+    -webkit-mask-image:none;mask-image:none}
+  .hero-photo::before{top:30%;bottom:0;background:radial-gradient(60% 54% at 50% 80%,rgba(194,39,64,.2),rgba(194,39,64,.05) 60%,transparent 76%)}
   .featured{grid-template-columns:1fr}
   .grid3,.doc-grid{grid-template-columns:repeat(2,1fr)}
   .col-wrap{grid-template-columns:1fr}
