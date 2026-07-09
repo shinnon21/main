@@ -25,7 +25,7 @@
 | `Shinnosuke_Face.png` | プロフィール顔写真（シードがprofileページのアイキャッチに自動設定。`kb_avatar()` がトップ/著者欄でも流用） |
 | `Cloudflare導入手順.md` | Cloudflare導入によるセキュリティ強化手順（DNS切替・SSL Full(strict)・WAF・レート制限・mod_remoteip・オリジン遮断。**未実施**＝ユーザーのCloudflare/レジストラ操作が必要） |
 | `チャットボット導入手順.md` | AIチャットボット（v1.20）の本番有効化手順（Vertex AI API有効化・VMサービスアカウントへ`roles/aiplatform.user`付与・スコープ`cloud-platform`化＝**VM停止→起動が必要**・管理画面での有効化と接続テスト・コスト目安 約0.2〜0.4円/回。**未実施**＝gcloud操作待ち） |
-| `メール送信設定手順.md` | お問い合わせフォーム送信メールを Google Workspace(Gmail SMTP) 経由にする手順（WP Mail SMTP＋アプリパスワード方式が推奨。GCP直送は不達＝port25ブロック。Google経由でSPF/DKIM/DMARC自動パス。CF7のFrom/To整備・テスト送信・トラブルシュートも記載。**未実施**＝ユーザーのWP管理画面/Workspace操作待ち） |
+| `メール送信設定手順.md` | お問い合わせフォーム送信メールを Google Workspace(Gmail SMTP) 経由にする手順（WP Mail SMTP＋アプリパスワード方式が推奨。GCP直送は不達＝port25ブロック。Google経由でSPF/DKIM/DMARC自動パス。CF7のFrom/To整備・テスト送信・トラブルシュートも記載。**実施済み（2026-07-09）**＝手順A（アプリパスワード / Other SMTP）で設定し `/contact/` から本番テスト送信で受信＆サンクス画面切替を確認。当初「通常パスワード」入力で535 BadCredentialsになり、アプリパスワードに変更して解決） |
 | `deploy/` | GCPデプロイ一式（`gcp-deploy.sh`→`gcp-ssl.sh`の2段階。`seed-content.php`は入稿シード・ローカルE2E検証済み。`seed-pages.php`はAbout/プライバシーポリシー本文の投入用＝本番実行済み 2026-07-03。`seed-en.php`は英語版メタ（実績7件・お知らせ・固定ページのtitle_en/excerpt_en/content_en等）の投入用＝**本番未実行**） |
 
 ## デザイントークン（ブランドガイド準拠・変更禁止）
@@ -60,7 +60,7 @@
 6. ~~カードレイアウト崩壊（余白がおかしい）の修正~~ ✅ 完了（2026-07-03, v1.3）: カード`<a>`内に `kb_skill_chips()` が `<a class="chip">` を出力しアンカーが入れ子 → HTMLパーサーが外側リンクを分割し `.thumb`/`.body` がグリッドの別セルに割れていた。カード内チップを `<span>` 化（`kb_skill_chips( n, false )`）して解消。デザインカンプも `<span class="chip">` が正
 7. ~~OGP・構造化データ~~ ✅ 完了（v1.3）: `inc/seo.php` で meta description／OGP／Twitterカードをフォールバック出力（SEO SIMPLE PACK等の有効時は自動で出力停止）＋ Person／Article JSON-LD
 8. ~~About・プライバシーポリシー本文の投入~~ ✅ 完了（2026-07-03）: 本番VMで `wp eval-file seed-pages.php` 実行済み（raw.githubusercontent.comから取得して実行する手順で対応）
-9. 運用設定（残り）: ~~GA4/GTM設置~~ ✅ ユーザーがWP側で導入済み（2026-07-05）、SiteGuardログインURL変更、BackWPupスケジュール、GCEスナップショット週次、実績アイキャッチ画像の差し込み（ユーザーがWP管理画面から）。**本番WP管理画面での実施待ち（2026-07-04依頼）**: ①サイトのタイトルを「小林慎之助 公式ホームページ」に変更（設定→一般）②CF7のメール送信先/送信元を contact@shinnosuke-kobayashi.jp に変更（導入手順.md §5-5の表が正）＋**メール送信(SMTP)設定が必須**＝GCP直送は不達のため、WP Mail SMTP で Google Workspace(Gmail SMTP) 経由にする（`メール送信設定手順.md` 参照。2026-07-08時点でユーザーはGoogle Workspace運用確認済み・設定未実施）③設定→パーマリンクで「変更を保存」を1クリック（news_type・llms.txt・**/en/** のルーティング登録）④キャッチフレーズ末尾を「〜公式サイトです。」に ⑤英語版コンテンツ投入: VMで `wp eval-file` により raw.githubusercontent.com の `deploy/seed-en.php` を実行（seed-pagesと同じ手順）→ ③のパーマリンク再保存。EN版CF7フォーム（英語の問い合わせフォーム）は未作成＝/en/contact/ は日本語フォームを流用
+9. 運用設定（残り）: ~~GA4/GTM設置~~ ✅ ユーザーがWP側で導入済み（2026-07-05）、SiteGuardログインURL変更、BackWPupスケジュール、GCEスナップショット週次、実績アイキャッチ画像の差し込み（ユーザーがWP管理画面から）。**本番WP管理画面での実施待ち（2026-07-04依頼）**: ①サイトのタイトルを「小林慎之助 公式ホームページ」に変更（設定→一般）~~②CF7のメール送信先/送信元を contact@shinnosuke-kobayashi.jp に変更＋メール送信(SMTP)設定~~ ✅ 完了（2026-07-09）＝WP Mail SMTP＋アプリパスワード(Other SMTP)で Gmail SMTP 経由に設定し、`/contact/` から本番テスト送信で受信＆サンクス画面切替を確認済み（`メール送信設定手順.md`）③設定→パーマリンクで「変更を保存」を1クリック（news_type・llms.txt・**/en/** のルーティング登録）④キャッチフレーズ末尾を「〜公式サイトです。」に ⑤英語版コンテンツ投入: VMで `wp eval-file` により raw.githubusercontent.com の `deploy/seed-en.php` を実行（seed-pagesと同じ手順）→ ③のパーマリンク再保存。EN版CF7フォーム（英語の問い合わせフォーム）は未作成＝/en/contact/ は日本語フォームを流用
 10. Cloudflare導入（`Cloudflare導入手順.md` 作成済み・実施待ち）: DNS切替とダッシュボード設定はユーザー操作。VM側の mod_remoteip／オリジン遮断コマンドは手順書§5参照
 11. AIチャットボット有効化（テーマv1.20実装済み・**GCP設定待ち**）: `チャットボット導入手順.md` の手順1〜4（Vertex AI API有効化→VMサービスアカウントへロール付与→VMスコープ変更＝停止起動→管理画面「設定→AIチャットボット」で接続テスト・有効化）
 12. Phase 2候補: 登壇イベントCPT有効化、スキル辞典
