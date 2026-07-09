@@ -47,6 +47,15 @@ add_action( 'wp_head', function () {
 	echo '<link rel="apple-touch-icon" href="' . esc_url( $img . '/apple-touch-icon.png' ) . '">' . "\n";
 }, 5 );
 
+/* ルート直下 /favicon.ico を配信（Google検索など、<link rel=icon>に加えてルートの
+   favicon.ico を直接取得しにくるクローラー向けフォールバック。Site Icon 未設定時に
+   WordPress が空のアイコンを返す挙動を避け、テーマのマークへリダイレクトする） */
+add_action( 'do_favicon', function () {
+	if ( function_exists( 'has_site_icon' ) && has_site_icon() ) { return; } // Site Icon を優先
+	wp_redirect( get_template_directory_uri() . '/assets/img/favicon-192.png', 302 );
+	exit;
+}, 1 );
+
 /* ---------- カスタム投稿タイプ（設計書 §6.1） ---------- */
 add_action( 'init', function () {
 
