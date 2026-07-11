@@ -3,7 +3,7 @@ Theme Name: Kobayashi Portfolio
 Theme URI: https://shinnosuke-kobayashi.jp/
 Author: Shinnosuke Kobayashi
 Description: 「小林慎之助」ポートフォリオサイト用オリジナルテーマ。サイト設計書v1.1・デザインカンプ準拠。カスタム投稿タイプ（実績・コラム・お知らせ・資料）と条件検索を実装。
-Version: 1.24.3
+Version: 1.24.4
 Requires at least: 6.0
 Requires PHP: 8.0
 License: GNU General Public License v2 or later
@@ -190,7 +190,9 @@ html.menu-open{overflow:hidden}
 .col-wrap{display:grid;grid-template-columns:1fr 320px;gap:40px;align-items:start}
 
 /* ===== article rows ===== */
-.article{display:flex;gap:18px;padding:20px 0;border-bottom:1px solid var(--line);transition:.2s}
+/* 上揃えにしないと a-thumb が align-items:stretch でテキスト高に引き伸ばされ、
+   aspect-ratio(16:10) が無視されてサムネイルの大きさがバラつく */
+.article{display:flex;align-items:flex-start;gap:18px;padding:20px 0;border-bottom:1px solid var(--line);transition:.2s}
 .article:hover h3{color:var(--crimson)}
 .article .a-thumb{flex:0 0 168px;aspect-ratio:16/10;border-radius:8px;overflow:hidden;display:flex;align-items:flex-end;padding:10px;color:#fff;position:relative}
 .article .a-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
