@@ -144,6 +144,23 @@ add_action( 'init', function () {
 
 } );
 
+/* ---------- リライトルールの自動フラッシュ（テーマ更新時に一度だけ） ----------
+   /en/・/llms.txt・news/type・/chat/ などの追加ルートは add_rewrite_rule で
+   登録されるが、WordPress は明示的なフラッシュ（管理画面「パーマリンク設定」
+   の再保存など）がない限り rewrite_rules キャッシュを更新しない。GitHub Actions
+   による自動デプロイは rsync のみで管理画面操作を伴わないため、ルート追加後に
+   手動フラッシュを忘れると /en/ 等が 404 になり Search Console に「見つかりません
+   でした(404)」として検出される。テーマのバージョン変更を検知して soft flush
+   （.htaccess は書き換えず DB の rewrite_rules を再生成）を自動実行し、手動作業
+   なしで全ルートを有効化する。init の全 add_rewrite_rule 登録後に走るよう優先度 99 */
+add_action( 'init', function () {
+	$ver = wp_get_theme()->get( 'Version' );
+	if ( get_option( 'kb_rewrite_version' ) !== $ver ) {
+		flush_rewrite_rules( false );
+		update_option( 'kb_rewrite_version', $ver );
+	}
+}, 99 );
+
 /* ---------- メインクエリ調整（F-01 検索横断・件数） ---------- */
 add_action( 'pre_get_posts', function ( $q ) {
 	if ( is_admin() || ! $q->is_main_query() ) { return; }

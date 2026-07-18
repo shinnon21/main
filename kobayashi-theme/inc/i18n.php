@@ -84,15 +84,43 @@ add_filter( 'language_attributes', function ( $output ) {
 	return kb_is_en() ? 'lang="en"' : $output;
 } );
 
-/* 現在のURLの日英ペア（REQUEST_URIベース） */
+/* このリクエストに実在する /en/ ルートがあるか。
+   i18n の add_rewrite_rule で定義したパターンに一致するページ種別のみ true。
+   author/date アーカイブ・サイト内検索・絞り込み結果・404 など英語版URLが
+   存在しないページで hreflang や言語切替の /en/ リンクを出すと、クローラーが
+   404 を踏み Search Console「見つかりませんでした(404)」の要因になるため、
+   相互参照が成立するページに限って英語版を案内する（ホワイトリスト＝上の
+   add_rewrite_rule 群と対応）。 */
+function kb_has_en_route() {
+	if ( is_404() || is_search() ) { return false; }
+	if ( is_page( 'searches' ) && ! empty( $_GET ) ) { return false; } // 絞り込み結果（noindex）
+	if ( is_front_page() || get_query_var( 'kb_en_front' ) ) { return true; }
+	if ( is_singular( array( 'works', 'column', 'news' ) ) ) { return true; }
+	if ( is_post_type_archive( array( 'works', 'column', 'news' ) ) ) { return true; }
+	if ( is_tax( array( 'works_type', 'news_type', 'skill', 'industry' ) ) ) { return true; }
+	if ( is_page( array( 'profile', 'about', 'privacy', 'contact', 'searches', 'chat' ) ) ) { return true; }
+	return false;
+}
+
+/* 現在のURLの日英ペア。クエリ文字列はパラメータ違いの重複URL・404を避けるため
+   除去する。英語版ルートが無いページ（author/date/検索等）の英語URLは
+   /en/（ENトップ）へフォールバックし、リンク切れを作らない */
 function kb_lang_pair() {
 	$path = isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : '/';
+	$path = strtok( $path, '?' ); // クエリ文字列を除去
 	$ja   = preg_replace( '~^/en(/|$)~', '/', $path );
-	$en   = ( 0 === strpos( $path, '/en/' ) || '/en' === rtrim( $path, '/' ) ) ? $path : '/en' . $path;
+	if ( kb_has_en_route() ) {
+		$en = ( 0 === strpos( $path, '/en/' ) || '/en' === rtrim( $path, '/' ) ) ? $path : '/en' . $path;
+	} else {
+		$en = '/en/';
+	}
 	return array( 'ja' => home_url( $ja ), 'en' => home_url( $en ) );
 }
 add_action( 'wp_head', function () {
-	if ( is_404() ) { return; }
+	/* 英語版が実在するページのみ hreflang を出力（存在しない /en/ を
+	   クローラーに案内して 404 を踏ませない）。相互参照が成立する
+	   ページに限定し Search Console の 404 検出を防ぐ */
+	if ( ! kb_has_en_route() ) { return; }
 	$pair = kb_lang_pair();
 	echo '<link rel="alternate" hreflang="ja" href="' . esc_url( $pair['ja'] ) . '">' . "\n";
 	echo '<link rel="alternate" hreflang="en" href="' . esc_url( $pair['en'] ) . '">' . "\n";
