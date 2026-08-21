@@ -56,6 +56,23 @@ add_action( 'do_favicon', function () {
 	exit;
 }, 1 );
 
+/* ---------- Google AdSense（自動広告） ---------- */
+/* 全ページの <head> に AdSense のスクリプトを出力する。パブリッシャーIDは
+   フィルター `kb_adsense_client` で上書き可能。管理画面・ログイン画面・
+   フィード・プレビューでは出力しない（wp_head はフロントのみで発火）。 */
+if ( ! defined( 'KB_ADSENSE_CLIENT' ) ) {
+	define( 'KB_ADSENSE_CLIENT', 'ca-pub-2082856298686985' );
+}
+
+add_action( 'wp_head', function () {
+	$client = apply_filters( 'kb_adsense_client', KB_ADSENSE_CLIENT );
+	if ( ! $client || is_preview() || is_feed() ) { return; }
+	printf(
+		'<script async src="%s" crossorigin="anonymous"></script>' . "\n",
+		esc_url( 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' . $client )
+	);
+}, 6 );
+
 /* ---------- カスタム投稿タイプ（設計書 §6.1） ---------- */
 add_action( 'init', function () {
 
