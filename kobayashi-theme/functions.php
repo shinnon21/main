@@ -225,6 +225,34 @@ function kb_field( $key, $id = null ) {
 	return get_post_meta( $id, $key, true );
 }
 
+/* ---------- メディア埋め込み（お知らせ・YouTube / Spotify） ----------
+   ACF欄「メディア埋め込み」（media_youtube / media_spotify）にURLまたはIDを入力。
+   IDを抽出して公式の埋め込みURLをテーマ側で組み立てる（任意HTMLは出力しない） */
+function kb_media_id( $raw, $kind ) {
+	$raw = trim( (string) $raw );
+	if ( '' === $raw ) { return ''; }
+	if ( 'youtube' === $kind ) {
+		if ( preg_match( '#(?:youtu\.be/|youtube(?:-nocookie)?\.com/(?:embed/|shorts/|watch\?(?:[^\s"\']*&)?v=))([A-Za-z0-9_-]{11})#', $raw, $m ) ) { return $m[1]; }
+		return preg_match( '/^[A-Za-z0-9_-]{11}$/', $raw ) ? $raw : '';
+	}
+	if ( preg_match( '#open\.spotify\.com/(?:embed/)?episode/([A-Za-z0-9]{22})#', $raw, $m ) ) { return $m[1]; }
+	return preg_match( '/^[A-Za-z0-9]{22}$/', $raw ) ? $raw : '';
+}
+function kb_media_embeds( $id = null ) {
+	$id  = $id ? $id : get_the_ID();
+	$yt  = kb_media_id( kb_field( 'media_youtube', $id ), 'youtube' );
+	$sp  = kb_media_id( kb_field( 'media_spotify', $id ), 'spotify' );
+	if ( ! $yt && ! $sp ) { return; }
+	echo '<div class="media-embeds">';
+	if ( $yt ) {
+		echo '<div class="media-embed yt"><iframe src="' . esc_url( 'https://www.youtube-nocookie.com/embed/' . $yt ) . '" title="YouTube" loading="lazy" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>';
+	}
+	if ( $sp ) {
+		echo '<div class="media-embed sp"><iframe src="' . esc_url( 'https://open.spotify.com/embed/episode/' . $sp ) . '" title="Spotify" height="232" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe></div>';
+	}
+	echo '</div>';
+}
+
 /* ---------- プロフィール編集フィールド ----------
    固定ページ「プロフィール」の入力欄（inc/acf-fields.php で登録）から
    取得し、未入力の項目は下記の初期値で表示する。編集画面にも同じ

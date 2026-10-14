@@ -354,6 +354,33 @@ add_action( 'acf/init', function () {
 		'position' => 'normal',
 	) );
 
+	/* ---------- メディア埋め込み（投稿タイプ: news） ---------- */
+	acf_add_local_field_group( array(
+		'key'    => 'group_kb_news_media',
+		'title'  => 'メディア埋め込み（YouTube / Spotify）',
+		'fields' => array(
+			array(
+				'key'          => 'field_kb_media_youtube',
+				'name'         => 'media_youtube',
+				'label'        => 'YouTube',
+				'type'         => 'text',
+				'instructions' => '動画のURL（youtu.be／youtube.com）または11文字の動画IDを入力。空欄なら非表示',
+			),
+			array(
+				'key'          => 'field_kb_media_spotify',
+				'name'         => 'media_spotify',
+				'label'        => 'Spotify',
+				'type'         => 'text',
+				'instructions' => 'エピソードのURL（open.spotify.com/episode/…）またはIDを入力。空欄なら非表示',
+			),
+		),
+		'location' => array(
+			array( array( 'param' => 'post_type', 'operator' => '==', 'value' => 'news' ) ),
+		),
+		'position'   => 'normal',
+		'menu_order' => 5,
+	) );
+
 	/* ---------- 英語版 実績情報（投稿タイプ: works） ----------
 	   実績詳細の概要グリッドで使用（クライアント名・役割・使用技術）。
 	   空欄なら日本語の値を表示。期間・URL・担当領域は言語共通（担当領域は自動対訳） */

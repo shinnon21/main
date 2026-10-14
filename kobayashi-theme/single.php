@@ -11,6 +11,7 @@ while ( have_posts() ) : the_post();
 				<div class="meta"><?php if ( 'news' === get_post_type() ) { kb_news_type_badge(); } ?><?php kb_dates(); ?></div>
 				<h1><?php kb_the_title(); ?></h1>
 			</header>
+			<?php if ( 'news' === get_post_type() ) { kb_media_embeds(); } ?>
 			<div class="entry-content"><?php kb_the_content(); ?></div>
 		</article>
 		<div class="center-btn"><a class="btn ghost" href="<?php echo esc_url( get_post_type_archive_link( get_post_type() ) ?: home_url( '/' ) ); ?>"><?php echo esc_html( kb_t( '一覧へ戻る', 'Back to list' ) ); ?></a></div>
