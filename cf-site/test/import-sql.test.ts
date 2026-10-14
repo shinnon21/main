@@ -49,3 +49,21 @@ test("block comments are stripped on import and not reported as artifacts", () =
   expect((db.prepare("select content from posts where wp_id=11").get() as any).content).toBe("<p>B</p>\n");
   expect(r.artifacts).toEqual([]);
 });
+
+test("percent-encoded WP slugs (posts and terms) are stored decoded and still link", () => {
+  const e = structuredClone(exp);
+  e.posts = [{ ...exp.posts[0], id: 20, slug: "%e6%97%a5%e6%9c%ac-x", title: "日本", terms: [{ taxonomy: "skill", slug: "%e6%97%a5" }] }];
+  e.terms = [{ taxonomy: "skill", slug: "%e6%97%a5", name: "日", description: "" }];
+  const db = newDb();
+  for (const s of buildImportSql(e).statements) db.exec(s);
+  expect((db.prepare("select slug from posts").get() as any).slug).toBe("日本-x");
+  expect((db.prepare("select slug from terms").get() as any).slug).toBe("日");
+  expect(db.prepare("select count(*) c from post_terms").get()).toEqual({ c: 1 });
+});
+test("malformed percent sequences fall back to the raw slug", () => {
+  const e = structuredClone(exp);
+  e.posts = [{ ...exp.posts[0], id: 21, slug: "100%-off", terms: [] }];
+  const db = newDb();
+  for (const s of buildImportSql(e).statements) db.exec(s);
+  expect((db.prepare("select slug from posts").get() as any).slug).toBe("100%-off");
+});
