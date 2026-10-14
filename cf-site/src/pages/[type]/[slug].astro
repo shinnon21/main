@@ -1,0 +1,16 @@
+---
+import { getEnv } from "../../lib/env.ts";
+import { getPostBySlug } from "../../lib/posts.ts";
+const TYPES = ["works", "column", "news"];
+const { type, slug } = Astro.params;
+if (!type || !slug || !TYPES.includes(type)) return new Response("Not found", { status: 404 });
+const post = await getPostBySlug(getEnv().DB, type, slug);
+if (!post) return new Response("Not found", { status: 404 });
+---
+<html lang="ja">
+  <head><meta charset="utf-8" /><title>{post.title}</title></head>
+  <body>
+    <h1>{post.title}</h1>
+    <div set:html={post.content ?? ""} />
+  </body>
+</html>

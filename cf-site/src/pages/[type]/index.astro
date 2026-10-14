@@ -1,0 +1,17 @@
+---
+import { getEnv } from "../../lib/env.ts";
+import { listPosts } from "../../lib/posts.ts";
+const TYPES = ["works", "column", "news"];
+const { type } = Astro.params;
+if (!type || !TYPES.includes(type)) return new Response("Not found", { status: 404 });
+const posts = await listPosts(getEnv().DB, type);
+---
+<html lang="ja">
+  <head><meta charset="utf-8" /><title>{type}</title></head>
+  <body>
+    <h1>{type}</h1>
+    <ul>
+      {posts.map((p) => <li><a href={`/${type}/${p.slug}/`}>{p.title}</a></li>)}
+    </ul>
+  </body>
+</html>

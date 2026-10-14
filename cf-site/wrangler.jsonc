@@ -1,0 +1,11 @@
+{
+  "name": "kb-site",
+  "main": "@astrojs/cloudflare/entrypoints/server",
+  "compatibility_date": "2025-05-21",
+  "assets": { "directory": "./dist", "binding": "ASSETS" },
+  "d1_databases": [
+    { "binding": "DB", "database_name": "kb-site", "database_id": "REPLACE_AFTER_wrangler_d1_create", "migrations_dir": "migrations" }
+  ],
+  "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "kb-media" }],
+  "kv_namespaces": [{ "binding": "CACHE", "id": "REPLACE_AFTER_wrangler_kv_namespace_create" }]
+}
