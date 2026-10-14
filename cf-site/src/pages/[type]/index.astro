@@ -1,17 +1,11 @@
 ---
+import ArchiveView from "../../components/ArchiveView.astro";
 import { getEnv } from "../../lib/env.ts";
-import { listPosts } from "../../lib/posts.ts";
-const TYPES = ["works", "column", "news"];
+import { listPage } from "../../lib/queries.ts";
+const TITLES = { works: "実績", column: "コラム", news: "お知らせ" } as const;
 const { type } = Astro.params;
-if (!type || !TYPES.includes(type)) return new Response("Not found", { status: 404 });
-const posts = await listPosts(getEnv().DB, type);
+if (!type || !(type in TITLES)) return new Response("Not found", { status: 404 });
+const t = type as keyof typeof TITLES;
+const data = await listPage(getEnv().DB, t, 1);
 ---
-<html lang="ja">
-  <head><meta charset="utf-8" /><title>{type}</title></head>
-  <body>
-    <h1>{type}</h1>
-    <ul>
-      {posts.map((p) => <li><a href={`/${type}/${p.slug}/`}>{p.title}</a></li>)}
-    </ul>
-  </body>
-</html>
+<ArchiveView type={t} data={data} page={1} basePath={`/${t}/`} title={TITLES[t]} crumbs={[{ label: TITLES[t] }]} />

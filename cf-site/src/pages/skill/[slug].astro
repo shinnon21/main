@@ -1,0 +1,10 @@
+---
+import TermArchive from "../../components/TermArchive.astro";
+import { getEnv } from "../../lib/env.ts";
+import { listByTerm, termBySlug } from "../../lib/queries.ts";
+const db = getEnv().DB;
+const term = Astro.params.slug ? await termBySlug(db, "skill", Astro.params.slug) : null;
+if (!term) return new Response("Not found", { status: 404 });
+const data = await listByTerm(db, "skill", term.slug, 1, 10);
+---
+<TermArchive taxonomy="skill" term={term} data={data} />
