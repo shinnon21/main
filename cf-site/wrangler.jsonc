@@ -4,8 +4,8 @@
   "compatibility_date": "2025-05-21",
   "assets": { "directory": "./dist", "binding": "ASSETS" },
   "d1_databases": [
-    { "binding": "DB", "database_name": "kb-site", "database_id": "REPLACE_AFTER_wrangler_d1_create", "migrations_dir": "migrations" }
+    { "binding": "DB", "database_name": "kb-site", "database_id": "72db141f-e9f7-4aa9-a99f-610743c6cb60", "migrations_dir": "migrations" }
   ],
   "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "kb-media" }],
-  "kv_namespaces": [{ "binding": "CACHE", "id": "REPLACE_AFTER_wrangler_kv_namespace_create" }]
+  "kv_namespaces": [{ "binding": "CACHE", "id": "cd751868d0984c1d88a0318bbdbd3c81" }]
 }
