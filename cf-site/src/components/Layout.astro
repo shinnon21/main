@@ -1,0 +1,114 @@
+---
+import "../styles/global.css";
+import SnsLinks from "./SnsLinks.astro";
+import { getEnv } from "../lib/env.ts";
+import { t, type Lang } from "../lib/i18n.ts";
+
+interface Props { title: string; description?: string; lang?: Lang; bodyClass?: string }
+const { title, description, lang = "ja", bodyClass = "" } = Astro.props;
+
+const db = getEnv().DB;
+const setting = async (key: string, fallback: string) => {
+  const r = await db.prepare("SELECT value FROM settings WHERE key=?").bind(key).first<{ value: string }>();
+  try { return r ? (JSON.parse(r.value) as string) || fallback : fallback; } catch { return fallback; }
+};
+const siteName = await setting("blogname", "小林慎之助");
+const siteDesc = await setting("blogdescription", "構想を、社会に実装する。");
+
+const nav: [string, string, string][] = [
+  [t(lang, "実績", "Works"), t(lang, "works", "実績"), "/works/"],
+  [t(lang, "コラム", "Column"), t(lang, "column", "コラム"), "/column/"],
+  [t(lang, "お知らせ", "News"), t(lang, "news", "お知らせ"), "/news/"],
+  [t(lang, "AIチャット", "AI Chat"), "chat", "/chat/"],
+  [t(lang, "プロフィール", "Profile"), t(lang, "profile", "プロフィール"), "/profile/"],
+  ["About", t(lang, "about", "このサイトについて"), "/about/"],
+];
+const year = new Date().getFullYear();
+const searchSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5C5C5C" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>';
+---
+<!DOCTYPE html>
+<html lang={lang}>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+  {description && <meta name="description" content={description} />}
+  <link rel="icon" href="/assets/img/favicon-32.png" sizes="32x32" />
+  <link rel="icon" href="/assets/img/favicon-192.png" sizes="192x192" />
+  <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
+</head>
+<body class={bodyClass}>
+
+<header class="site">
+  <div class="container">
+    <a class="logo" href="/">
+      <img class="logo-img" src="/assets/img/logo-horizontal.svg" alt={siteName} width="575" height="58" />
+    </a>
+
+    <nav class="gnav" id="gnav">
+      <ul>
+        {nav.map(([label, small, href]) => <li><a href={href}>{label}<small>{small}</small></a></li>)}
+      </ul>
+      <div class="gnav-extra">
+        <form class="search" role="search" method="get" action="/">
+          <button type="submit" aria-label="検索" set:html={searchSvg} />
+          <input type="text" name="s" value="" placeholder={t(lang, "フリーワードで検索", "Search")} />
+        </form>
+        <SnsLinks />
+        <a class="btn primary" href="/contact/">{t(lang, "お問い合わせ →", "Contact →")}</a>
+      </div>
+    </nav>
+
+    <div class="h-right">
+      <form class="search" role="search" method="get" action="/">
+        <button type="submit" aria-label="検索" set:html={searchSvg} />
+        <input type="text" name="s" value="" placeholder={t(lang, "フリーワードで検索", "Search")} />
+      </form>
+      <button class="menu-btn" id="menuBtn" aria-label="メニュー" aria-controls="gnav" aria-expanded="false"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<slot />
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="top">
+      <div class="f-logo">
+        <span class="jp">{siteName}</span>
+        <span class="sub">shinnosuke-kobayashi.jp</span>
+        <p>{t(lang, siteDesc, "From political and governmental DX to pharmaceutical supply chain research — the official website of Shinnosuke Kobayashi, an aspiring coordinator who delivers Japanese technology to society.")}</p>
+        <SnsLinks style="icons" />
+      </div>
+      <div>
+        <h4>sitemap</h4>
+        <ul class="links">
+          <li><a href="/works/">{t(lang, "実績", "Works")}</a></li>
+          <li><a href="/column/">{t(lang, "コラム", "Column")}</a></li>
+          <li><a href="/news/">{t(lang, "お知らせ", "News")}</a></li>
+          <li><a href="/profile/">{t(lang, "プロフィール", "Profile")}</a></li>
+          <li><a href="/searches/">{t(lang, "条件から探す", "Advanced search")}</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>links</h4>
+        <ul class="links">
+          <li><a href="/chat/">{t(lang, "AIチャット", "AI Chat")}</a></li>
+          <li><a href="/contact/">{t(lang, "お問い合わせ", "Contact")}</a></li>
+          <li><a href="/about/">{t(lang, "About（このサイトについて）", "About this site")}</a></li>
+          <li><a href="/privacy/">{t(lang, "プライバシーポリシー", "Privacy Policy")}</a></li>
+          <li><a href="https://www.weeave.co.jp/" target="_blank" rel="noopener">{t(lang, "Weeave株式会社 ↗", "Weeave Inc. ↗")}</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="bottom">
+      <span class="en">© {year} Shinnosuke Kobayashi</span>
+    </div>
+  </div>
+</footer>
+<script src="/assets/main.js" defer></script>
+</body>
+</html>
