@@ -70,3 +70,23 @@ test("profileSummary falls back to defaults when meta is empty and uses meta whe
   const set = await profileSummary(db());
   expect(set.name).toBe("小林慎之助");
 });
+
+test("ties on published date fall back to id ASC (matches the WP archive order)", async () => {
+  const q = db((e) => {
+    e.posts[0].date = "2026-07-03 15:21:55"; e.posts[1].date = "2026-07-03 15:21:55";
+    e.posts.push(mk(5, "works", "w5", "2026-07-03 15:21:55"));
+  });
+  const ids = (await listPage(q, "works", 1)).posts.map((p) => p.wp_id);
+  expect(ids).toEqual([5, 10, 11]);
+  expect((await latest(q, "works", 3)).map((p) => p.wp_id)).toEqual([5, 10, 11]);
+});
+
+import { allSkills } from "../src/lib/queries.ts";
+test("allSkills is name-ordered like WP get_terms (ASCII first, ー ignored, then codepoint)", async () => {
+  const names = ["起業", "コミュニティ構築", "コーディネーター", "Weeave", "DX", "GovTech", "下水サーベイランス"];
+  const q = db((e) => {
+    e.terms = names.map((n, i) => ({ taxonomy: "skill", slug: `s${i}`, name: n, description: "" }));
+    e.posts[0].terms = names.map((_, i) => ({ taxonomy: "skill", slug: `s${i}` }));
+  });
+  expect((await allSkills(q)).map((s) => s.name)).toEqual(["DX", "GovTech", "Weeave", "コーディネーター", "コミュニティ構築", "下水サーベイランス", "起業"]);
+});
