@@ -1,11 +1,11 @@
 import type { D1Like } from "./d1.ts";
 
 export interface PostRow {
-  id: number; type: string; slug: string; title: string; title_en: string | null;
+  id: number; wp_id: number; type: string; slug: string; title: string; title_en: string | null; excerpt: string | null; modified_at: string;
   content: string | null; content_en: string | null; thumbnail: string | null; published_at: string;
 }
 
-const COLS = "id,type,slug,title,title_en,content,content_en,thumbnail,published_at";
+const COLS = "id,wp_id,type,slug,title,title_en,excerpt,content,content_en,thumbnail,published_at,modified_at";
 
 export async function listPosts(db: D1Like, type: string, limit = 50): Promise<PostRow[]> {
   const { results } = await db
