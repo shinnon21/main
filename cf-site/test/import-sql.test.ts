@@ -43,3 +43,9 @@ test("terms linked, views and settings stored, rerun is idempotent", () => {
   for (const s of r.statements) db.exec(s);
   expect(db.prepare("select count(*) c from posts").get()).toEqual({ c: 3 });
 });
+
+test("block comments are stripped on import and not reported as artifacts", () => {
+  const { db, r } = load();
+  expect((db.prepare("select content from posts where wp_id=11").get() as any).content).toBe("<p>B</p>\n");
+  expect(r.artifacts).toEqual([]);
+});

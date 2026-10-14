@@ -1,5 +1,5 @@
 import type { WpExport } from "./types.ts";
-import { rewriteUploads, findWpArtifacts } from "./transform.ts";
+import { rewriteUploads, findWpArtifacts, stripBlockComments } from "./transform.ts";
 
 const q = (v: string | number | null): string =>
   v === null ? "NULL" : typeof v === "number" ? String(v) : `'${v.replace(/'/g, "''")}'`;
@@ -14,7 +14,7 @@ export function buildImportSql(exp: WpExport) {
   const skipped: { id: number; reason: string }[] = [];
   const artifacts: { id: number; items: string[] }[] = [];
   const attach = new Map(exp.attachments.map((a) => [a.id, a.path]));
-  const rw = (s: string | null) => (s === null ? null : rewriteUploads(s, exp.site_url));
+  const rw = (s: string | null) => (s === null ? null : stripBlockComments(rewriteUploads(s, exp.site_url)));
 
   for (const t of exp.terms)
     statements.push(`INSERT INTO terms(taxonomy,slug,name,description) VALUES(${q(t.taxonomy)},${q(t.slug)},${q(t.name)},${q(nz(t.description))});`);

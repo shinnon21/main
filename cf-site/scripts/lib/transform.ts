@@ -15,3 +15,7 @@ export function findWpArtifacts(html: string): string[] {
   const re = new RegExp(`\\[(?:${SHORTCODES})\\b[^\\]]*\\]|<!--\\s*/?wp:[^>]*-->`, "g");
   return html.match(re) ?? [];
 }
+
+export function stripBlockComments(html: string): string {
+  return html.replace(/[ \t]*<!--\s*\/?wp:[\s\S]*?-->[ \t]*\n?/g, "");
+}

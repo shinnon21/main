@@ -12,7 +12,7 @@ export const exp: WpExport = {
       thumbnail_id: 100, views: 12,
       meta: { gallery: [1, 2], kpi_results: [{ label: "CV", value: "1.5倍" }], title_en: "EN", content_en: "", _edit_lock: "x" },
       terms: [{ taxonomy: "works_type", slug: "web" }, { taxonomy: "skill", slug: "seo" }] },
-    { ...base, id: 11, type: "works", slug: "site-b", status: "publish", title: "B", thumbnail_id: 999, date: "2026-06-01T00:00:00" },
+    { ...base, id: 11, type: "works", slug: "site-b", status: "publish", title: "B", content: "<!-- wp:paragraph -->\n<p>B</p>\n<!-- /wp:paragraph -->", thumbnail_id: 999, date: "2026-06-01T00:00:00" },
     { ...base, id: 12, type: "column", slug: "draft-col", status: "draft", title: "Draft" },
     { ...base, id: 13, type: "news", slug: "secret", status: "publish", title: "Secret", password_protected: true },
     { ...base, id: 14, type: "page", slug: "profile", status: "publish", title: "Profile", meta: { profile_name: "小林慎之助" } },

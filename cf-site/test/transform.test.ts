@@ -17,3 +17,9 @@ test("detects shortcodes and block comments", () => {
   expect(findWpArtifacts(`a [gallery ids="1"] b <!-- wp:paragraph --> c`)).toEqual([`[gallery ids="1"]`, `<!-- wp:paragraph -->`]);
   expect(findWpArtifacts("plain [text] with brackets in prose?").length).toBe(0);
 });
+
+import { stripBlockComments } from "../scripts/lib/transform.ts";
+test("strips wp block comments but keeps content and normal comments", () => {
+  const html = `<!-- wp:paragraph -->\n<p>a</p>\n<!-- /wp:paragraph -->\n<!-- wp:image {"id":85} -->\n<figure><img src="/media/x.jpg"></figure>\n<!-- /wp:image --><!-- keep me -->`;
+  expect(stripBlockComments(html)).toBe(`<p>a</p>\n<figure><img src="/media/x.jpg"></figure>\n<!-- keep me -->`);
+});
