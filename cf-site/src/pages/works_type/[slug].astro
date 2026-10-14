@@ -4,7 +4,7 @@ import { getEnv } from "../../lib/env.ts";
 import { listByTerm, termBySlug, PER_PAGE } from "../../lib/queries.ts";
 const db = getEnv().DB;
 const term = Astro.params.slug ? await termBySlug(db, "works_type", Astro.params.slug) : null;
-if (!term) return new Response("Not found", { status: 404 });
+if (!term) return Astro.rewrite("/404/");
 const data = await listByTerm(db, "works_type", term.slug, 1, PER_PAGE.works);
 ---
 <ArchiveView type="works" data={data} page={1} basePath={`/works_type/${encodeURIComponent(term.slug)}/`} title={term.name} crumbs={[{ label: "実績", href: "/works/" }, { label: term.name }]} />

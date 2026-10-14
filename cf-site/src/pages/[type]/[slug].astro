@@ -5,8 +5,8 @@ import NewsDetail from "../../components/NewsDetail.astro";
 import { getEnv } from "../../lib/env.ts";
 import { getPostBySlug } from "../../lib/posts.ts";
 const { type, slug } = Astro.params;
-if (!type || !slug || !["works", "column", "news"].includes(type)) return new Response("Not found", { status: 404 });
+if (!type || !slug || !["works", "column", "news"].includes(type)) return Astro.rewrite("/404/");
 const post = await getPostBySlug(getEnv().DB, type, slug);
-if (!post) return new Response("Not found", { status: 404 });
+if (!post) return Astro.rewrite("/404/");
 ---
 {type === "works" ? <WorksDetail post={post} /> : type === "column" ? <ColumnDetail post={post} /> : <NewsDetail post={post} />}

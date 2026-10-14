@@ -4,10 +4,10 @@ import { getEnv } from "../../../lib/env.ts";
 import { listPage } from "../../../lib/queries.ts";
 const TITLES = { works: "実績", column: "コラム", news: "お知らせ" } as const;
 const { type, n } = Astro.params;
-if (!type || !(type in TITLES) || !/^[1-9]\d{0,5}$/.test(n ?? "")) return new Response("Not found", { status: 404 });
+if (!type || !(type in TITLES) || !/^[1-9]\d{0,5}$/.test(n ?? "")) return Astro.rewrite("/404/");
 const t = type as keyof typeof TITLES;
 const page = Number(n);
 const data = await listPage(getEnv().DB, t, page);
-if (page > data.pages) return new Response("Not found", { status: 404 });
+if (page > data.pages) return Astro.rewrite("/404/");
 ---
 <ArchiveView type={t} data={data} page={page} basePath={`/${t}/`} title={TITLES[t]} crumbs={[{ label: TITLES[t] }]} />

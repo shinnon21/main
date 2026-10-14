@@ -4,7 +4,7 @@ import { getEnv } from "../../lib/env.ts";
 import { listPage } from "../../lib/queries.ts";
 const TITLES = { works: "実績", column: "コラム", news: "お知らせ" } as const;
 const { type } = Astro.params;
-if (!type || !(type in TITLES)) return new Response("Not found", { status: 404 });
+if (!type || !(type in TITLES)) return Astro.rewrite("/404/");
 const t = type as keyof typeof TITLES;
 const data = await listPage(getEnv().DB, t, 1);
 ---

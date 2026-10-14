@@ -1,0 +1,18 @@
+---
+import Layout from "../components/Layout.astro";
+import { docTitle } from "../lib/format.ts";
+import { t } from "../lib/i18n.ts";
+const lang = "ja" as const;
+Astro.response.status = 404;
+---
+<Layout title={docTitle(t(lang, "ページが見つかりません", "Page not found"))} lang={lang}>
+<div class="notfound">
+  <div class="code en">404</div>
+  <p>お探しのページは見つかりませんでした。<br />移動または削除された可能性があります。</p>
+  <div class="links">
+    <a class="btn primary" href="/">トップへ戻る</a>
+    <a class="btn ghost" href="/works/">実績一覧</a>
+    <a class="btn ghost" href="/searches/">条件から探す</a>
+  </div>
+</div>
+</Layout>
