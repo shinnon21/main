@@ -65,6 +65,12 @@
 11. AIチャットボット有効化（テーマv1.20実装済み・**GCP設定待ち**）: `チャットボット導入手順.md` の手順1〜4（Vertex AI API有効化→VMサービスアカウントへロール付与→VMスコープ変更＝停止起動→管理画面「設定→AIチャットボット」で接続テスト・有効化）
 12. Phase 2候補: 登壇イベントCPT有効化、スキル辞典
 
+## Cloudflare移行（進行中・2026-10-14〜）
+
+- GCP（WordPress）から Cloudflare ネイティブ（Astro SSR＋Workers＋D1＋R2＋KV＋自作簡易CMS）へ完全移行中。設計書 `docs/superpowers/specs/2026-10-14-cf-foundation-migration-design.md`・実装計画 `docs/superpowers/plans/2026-10-14-cf-foundation-migration.md`。
+- `cf-site/` が新サイト。サブプロジェクト1（基盤とデータ移行）はコード実装済み（ブランチ `cf-migration`）。**本番データの書き出し・Cloudflareリソース作成・DNS切替は未実施**＝現行の公開サイトは引き続き GCP の WordPress。AIチャットは初回移行対象外。
+- 切替完了までは `kobayashi-theme/` と GCP を変更しない（DNS切替・VM停止はサブプロジェクト5）。
+
 ## リポジトリ・CI/CD（2026-07-04〜）
 
 - **GitHub**: git@github.com:shinnon21/main.git（公開。旧Next.jsアプリはクリア済み。個人文書は.gitignoreで除外）
