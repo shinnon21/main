@@ -90,3 +90,25 @@ test("allSkills is name-ordered like WP get_terms (ASCII first, ー ignored, the
   });
   expect((await allSkills(q)).map((s) => s.name)).toEqual(["DX", "GovTech", "Weeave", "コーディネーター", "コミュニティ構築", "下水サーベイランス", "起業"]);
 });
+
+import { isListType, isTaxonomy, loadTermPage } from "../src/lib/queries.ts";
+test("isListType/isTaxonomy reject prototype keys and unknown names", () => {
+  for (const k of ["works", "column", "news"]) expect(isListType(k)).toBe(true);
+  for (const k of ["constructor", "toString", "__proto__", "valueOf", "hasOwnProperty", "foo", ""]) { expect(isListType(k), k).toBe(false); expect(isTaxonomy(k), k).toBe(false); }
+  for (const k of ["works_type", "skill", "industry", "news_type"]) expect(isTaxonomy(k)).toBe(true);
+});
+test("listPage tolerates prototype-key types without throwing a non-numeric LIMIT", async () => {
+  expect((await listPage(db(), "constructor", 1)).posts).toEqual([]);
+});
+test("loadTermPage paginates terms and returns null for missing term or out-of-range page", async () => {
+  const q = db((e) => {
+    e.terms.push({ taxonomy: "skill", slug: "many", name: "Many", description: "" });
+    for (let i = 0; i < 11; i++) e.posts.push({ ...mk(200 + i, "column", `c${i}`, `2026-01-${10 + i}T00:00:00`), terms: [{ taxonomy: "skill", slug: "many" }] } as never);
+  });
+  const p1 = await loadTermPage(q, "skill", "many", 1);
+  expect(p1?.data.pages).toBe(2); expect(p1?.data.posts).toHaveLength(10);
+  expect((await loadTermPage(q, "skill", "many", 2))?.data.posts).toHaveLength(1);
+  expect(await loadTermPage(q, "skill", "many", 3)).toBeNull();
+  expect(await loadTermPage(q, "skill", "nope", 1)).toBeNull();
+  expect(await loadTermPage(q, "bogus", "many", 1)).toBeNull();
+});

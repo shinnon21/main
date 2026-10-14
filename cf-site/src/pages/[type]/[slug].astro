@@ -3,9 +3,10 @@ import WorksDetail from "../../components/WorksDetail.astro";
 import ColumnDetail from "../../components/ColumnDetail.astro";
 import NewsDetail from "../../components/NewsDetail.astro";
 import { getEnv } from "../../lib/env.ts";
+import { isListType } from "../../lib/queries.ts";
 import { getPostBySlug } from "../../lib/posts.ts";
 const { type, slug } = Astro.params;
-if (!type || !slug || !["works", "column", "news"].includes(type)) return Astro.rewrite("/404/");
+if (!type || !slug || !isListType(type)) return Astro.rewrite("/404/");
 const post = await getPostBySlug(getEnv().DB, type, slug);
 if (!post) return Astro.rewrite("/404/");
 ---

@@ -1,0 +1,10 @@
+---
+import TermArchive from "../../../../components/TermArchive.astro";
+import { getEnv } from "../../../../lib/env.ts";
+import { loadTermPage } from "../../../../lib/queries.ts";
+const { slug, n } = Astro.params;
+const page = Number(n);
+const r = slug && /^[1-9]\d{0,5}$/.test(n ?? "") ? await loadTermPage(getEnv().DB, "news_type", slug, page) : null;
+if (!r) return Astro.rewrite("/404/");
+---
+<TermArchive taxonomy="news_type" term={r.term} data={r.data} page={page} />

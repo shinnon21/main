@@ -57,3 +57,10 @@ test("gradientClass keeps the WP theme's wp_id%6 mapping", () => {
   expect(gradientClass(10)).toBe("g5");
   expect(gradientClass(12)).toBe("g1");
 });
+
+test("autop: existing <br> is not doubled; multi-line headings, split opening tags and HTML5 sections stay intact", () => {
+  expect(autop("a<br>\nb")).toBe("<p>a<br>\nb</p>");
+  expect(autop("<h2>\nTitle\n</h2>\nafter")).toBe("<h2>\nTitle\n</h2>\n<p>after</p>");
+  expect(autop('<div\n class="x">\nin\n</div>')).toBe('<div\n class="x">\nin\n</div>');
+  expect(autop("<section>\nx\n</section>\ntail")).toBe("<section>\nx\n</section>\n<p>tail</p>");
+});

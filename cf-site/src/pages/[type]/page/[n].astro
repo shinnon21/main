@@ -1,10 +1,10 @@
 ---
 import ArchiveView from "../../../components/ArchiveView.astro";
 import { getEnv } from "../../../lib/env.ts";
-import { listPage } from "../../../lib/queries.ts";
+import { isListType, listPage } from "../../../lib/queries.ts";
 const TITLES = { works: "実績", column: "コラム", news: "お知らせ" } as const;
 const { type, n } = Astro.params;
-if (!type || !(type in TITLES) || !/^[1-9]\d{0,5}$/.test(n ?? "")) return Astro.rewrite("/404/");
+if (!type || !isListType(type) || !/^[1-9]\d{0,5}$/.test(n ?? "")) return Astro.rewrite("/404/");
 const t = type as keyof typeof TITLES;
 const page = Number(n);
 const data = await listPage(getEnv().DB, t, page);

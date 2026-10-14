@@ -4,6 +4,9 @@ import type { PostRow } from "./posts.ts";
 export interface TermRef { taxonomy: string; slug: string; name: string }
 export interface CardPost extends PostRow { terms: TermRef[]; meta: { period_start?: string; period_end?: string } }
 export const PER_PAGE = { works: 12, column: 10, news: 15 } as const;
+export const TAX_PER_PAGE = { works_type: 12, skill: 10, industry: 10, news_type: 10 } as const;
+export const isListType = (t: string): t is keyof typeof PER_PAGE => Object.hasOwn(PER_PAGE, t);
+export const isTaxonomy = (t: string): t is keyof typeof TAX_PER_PAGE => Object.hasOwn(TAX_PER_PAGE, t);
 
 const COLS = "p.id,p.wp_id,p.type,p.slug,p.title,p.title_en,p.excerpt,p.content,p.content_en,p.thumbnail,p.published_at,p.modified_at";
 const ph = (n: number) => Array(n).fill("?").join(",");
@@ -29,7 +32,7 @@ async function decorate(db: D1Like, posts: PostRow[]): Promise<CardPost[]> {
 }
 
 export async function listPage(db: D1Like, type: string, page: number) {
-  const per = PER_PAGE[type as keyof typeof PER_PAGE] ?? 12;
+  const per = isListType(type) ? PER_PAGE[type] : 12;
   const total = (await one<{ c: number }>(db, "SELECT COUNT(*) c FROM posts p WHERE p.type=? AND p.status='publish'", type))?.c ?? 0;
   const posts = await rows<PostRow>(db,
     `SELECT ${COLS} FROM posts p WHERE p.type=? AND p.status='publish' ORDER BY p.published_at DESC, p.wp_id ASC LIMIT ? OFFSET ?`, type, per, (Math.max(1, page) - 1) * per);
@@ -94,4 +97,12 @@ export async function profileSummary(db: D1Like) {
   const m = p ? await rows<{ key: string; value: string }>(db, "SELECT key,value FROM post_meta WHERE post_id=? AND key IN ('profile_kana','profile_name','profile_role')", p.id) : [];
   const get = (k: string, d: string) => { const v = parse(m.find((x) => x.key === k)?.value ?? '""').trim(); return v || d; };
   return { kana: get("profile_kana", PROFILE_DEFAULTS.kana), name: get("profile_name", PROFILE_DEFAULTS.name), role: get("profile_role", PROFILE_DEFAULTS.role), avatar: p?.thumbnail ?? null };
+}
+
+export async function loadTermPage(db: D1Like, taxonomy: string, slug: string, page: number) {
+  if (!isTaxonomy(taxonomy) || !Number.isInteger(page) || page < 1) return null;
+  const term = await termBySlug(db, taxonomy, slug);
+  if (!term) return null;
+  const data = await listByTerm(db, taxonomy, term.slug, page, TAX_PER_PAGE[taxonomy]);
+  return page > data.pages ? null : { term, data };
 }

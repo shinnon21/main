@@ -15,3 +15,8 @@ test("page 1 redirects to the list root", () => {
   expect(n(u("/works/page/1/"))).toEqual({ status: 301, location: "/works/" });
   expect(n(u("/works/page/2/"))).toBeNull();
 });
+test("taxonomy page 1 redirects to the term root", () => {
+  expect(n(u("/skill/dx/page/1/"))).toEqual({ status: 301, location: "/skill/dx/" });
+  expect(n(u("/works_type/%E8%B5%B7/page/1/?a=1"))).toEqual({ status: 301, location: "/works_type/%E8%B5%B7/?a=1" });
+  expect(n(u("/skill/dx/page/2/"))).toBeNull();
+});

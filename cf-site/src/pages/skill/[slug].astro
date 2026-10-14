@@ -1,10 +1,8 @@
 ---
 import TermArchive from "../../components/TermArchive.astro";
 import { getEnv } from "../../lib/env.ts";
-import { listByTerm, termBySlug } from "../../lib/queries.ts";
-const db = getEnv().DB;
-const term = Astro.params.slug ? await termBySlug(db, "skill", Astro.params.slug) : null;
-if (!term) return Astro.rewrite("/404/");
-const data = await listByTerm(db, "skill", term.slug, 1, 10);
+import { loadTermPage } from "../../lib/queries.ts";
+const r = Astro.params.slug ? await loadTermPage(getEnv().DB, "skill", Astro.params.slug, 1) : null;
+if (!r) return Astro.rewrite("/404/");
 ---
-<TermArchive taxonomy="skill" term={term} data={data} />
+<TermArchive taxonomy="skill" term={r.term} data={r.data} page={1} />

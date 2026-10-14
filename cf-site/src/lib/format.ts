@@ -11,19 +11,31 @@ export function formatDate(utc: string): string {
   return `${d.getUTCFullYear()}.${p(d.getUTCMonth() + 1)}.${p(d.getUTCDate())}`;
 }
 
-const CONTAINERS = "ul|ol|table|blockquote|figure|div|pre|dl|iframe|script|style|p";
-const BLOCK_START = new RegExp(`^\\s*<(?:h[1-6]|hr|${CONTAINERS})\\b`, "i");
+const CONTAINERS = "h[1-6]|ul|ol|table|blockquote|figure|figcaption|div|pre|dl|iframe|script|style|p|section|article|aside|details|nav|header|footer|main";
+const BLOCK_START = new RegExp(`^\\s*<(?:hr|${CONTAINERS})\\b`, "i");
 const delta = (line: string): number => {
   const open = (line.match(new RegExp(`<(?:${CONTAINERS})\\b[^>]*[^/]>|<(?:${CONTAINERS})>`, "gi")) ?? []).length;
   const close = (line.match(new RegExp(`</(?:${CONTAINERS})>`, "gi")) ?? []).length;
   return open - close;
 };
+const ENDS_WITH_BR = /<br\s*\/?>$/i;
 export function autop(html: string): string {
+  // 開始タグが改行で分割されている行（"<div" / ' class="x">'）は1つの論理行にまとめる
+  const lines: string[] = [];
+  for (const l of html.replace(/\r\n?/g, "\n").split("\n")) {
+    const prev = lines[lines.length - 1];
+    if (prev !== undefined && /<[a-z][^>]*$/i.test(prev)) lines[lines.length - 1] = prev + "\n" + l;
+    else lines.push(l);
+  }
   const out: string[] = [];
   let buf: string[] = [];
   let depth = 0;
-  const flush = () => { if (buf.length) { out.push(`<p>${buf.join("<br>\n")}</p>`); buf = []; } };
-  for (const raw of html.replace(/\r\n?/g, "\n").split("\n")) {
+  const flush = () => {
+    if (!buf.length) return;
+    out.push("<p>" + buf.map((l, i) => (i === 0 ? l : (ENDS_WITH_BR.test(buf[i - 1]) ? "\n" : "<br>\n") + l)).join("") + "</p>");
+    buf = [];
+  };
+  for (const raw of lines) {
     if (depth > 0) { out.push(raw); depth += delta(raw); continue; }
     if (raw.trim() === "") { flush(); continue; }
     if (BLOCK_START.test(raw)) { flush(); out.push(raw); depth = Math.max(0, delta(raw)); continue; }

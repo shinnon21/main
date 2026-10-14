@@ -8,8 +8,8 @@ import { getEnv } from "../lib/env.ts";
 import { ranking, type CardPost } from "../lib/queries.ts";
 import { docTitle, hrefFor } from "../lib/format.ts";
 import { t, type Lang } from "../lib/i18n.ts";
-interface Props { taxonomy: string; term: { slug: string; name: string }; data: { posts: CardPost[]; total: number; pages: number }; lang?: Lang }
-const { taxonomy, term, data, lang = "ja" } = Astro.props;
+interface Props { page?: number; taxonomy: string; term: { slug: string; name: string }; data: { posts: CardPost[]; total: number; pages: number }; lang?: Lang }
+const { page = 1, taxonomy, term, data, lang = "ja" } = Astro.props;
 const rank = await ranking(getEnv().DB, 5);
 ---
 <Layout title={docTitle(`# ${term.name}`)} lang={lang}>
@@ -20,7 +20,7 @@ const rank = await ranking(getEnv().DB, 5);
         {data.posts.length > 0 ? (
           <>
             {data.posts.map((p) => <ColumnCard post={p} lang={lang} />)}
-            <Pagination basePath={hrefFor(taxonomy, term.slug)} current={1} total={data.pages} />
+            <Pagination basePath={hrefFor(taxonomy, term.slug)} current={page} total={data.pages} />
           </>
         ) : <p>{t(lang, "該当するコンテンツはまだありません。", "No content yet.")}</p>}
       </div>
