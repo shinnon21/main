@@ -1,0 +1,21 @@
+{
+  "name": "cf-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "wrangler dev",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "astro": "^7.3.8",
+    "@astrojs/cloudflare": "^14.3.4"
+  },
+  "devDependencies": {
+    "wrangler": "^4.151.0",
+    "vitest": "^5.0.4",
+    "typescript": "^7.0.2",
+    "@types/node": "^24.0.0"
+  }
+}
