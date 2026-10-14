@@ -6,6 +6,8 @@ const q = (v: string | number | null): string =>
 const decodeSlug = (s: string): string => { try { return decodeURIComponent(s); } catch { return s; } };
 const nz = (s: unknown): string | null => (typeof s === "string" && s.trim() !== "" ? s : null);
 const EN_KEYS = new Set(["title_en", "excerpt_en", "content_en"]);
+const rwDeep = (v: unknown, site: string): unknown =>
+  typeof v === "string" ? rewriteUploads(v, site) : Array.isArray(v) ? v.map((x) => rwDeep(x, site)) : v && typeof v === "object" ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, rwDeep(x, site)])) : v;
 
 export function buildImportSql(exp: WpExport) {
   const statements: string[] = [
@@ -34,7 +36,7 @@ export function buildImportSql(exp: WpExport) {
     );
     for (const [k, v] of Object.entries(m)) {
       if (k.startsWith("_") || EN_KEYS.has(k) || v === null || v === "") continue;
-      statements.push(`INSERT INTO post_meta(post_id,key,value) VALUES((SELECT id FROM posts WHERE wp_id=${p.id}),${q(k)},${q(JSON.stringify(v))});`);
+      statements.push(`INSERT INTO post_meta(post_id,key,value) VALUES((SELECT id FROM posts WHERE wp_id=${p.id}),${q(k)},${q(JSON.stringify(rwDeep(v, exp.site_url)))});`);
     }
     for (const t of p.terms)
       statements.push(`INSERT OR IGNORE INTO post_terms(post_id,term_id) VALUES((SELECT id FROM posts WHERE wp_id=${p.id}),(SELECT id FROM terms WHERE taxonomy=${q(t.taxonomy)} AND slug=${q(decodeSlug(t.slug))}));`);

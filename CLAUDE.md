@@ -68,7 +68,9 @@
 ## Cloudflare移行（進行中・2026-10-14〜）
 
 - GCP（WordPress）から Cloudflare ネイティブ（Astro SSR＋Workers＋D1＋R2＋KV＋自作簡易CMS）へ完全移行中。設計書 `docs/superpowers/specs/2026-10-14-cf-foundation-migration-design.md`・実装計画 `docs/superpowers/plans/2026-10-14-cf-foundation-migration.md`。
-- `cf-site/` が新サイト。サブプロジェクト1（基盤とデータ移行）はコード実装済み（ブランチ `cf-migration`）。**本番データの書き出し・Cloudflareリソース作成・DNS切替は未実施**＝現行の公開サイトは引き続き GCP の WordPress。AIチャットは初回移行対象外。
+- `cf-site/` が新サイト（ブランチ `cf-migration`）。サブプロジェクト1（基盤とデータ移行）は完了: 本番WPの全公開記事を個人CFアカウント（hello@shinnosuke-kobayashi.jp・Account ID `5ab6d2a7…`）の D1 `kb-site`・R2 `kb-media`・KV `CACHE` に投入済み、確認用URL `https://kb-site.curly-wave-c49f.workers.dev` にデプロイ済み（最小の一覧/詳細のみ。トップ/固定ページ/英語版/フォーム/デザインは未実装＝サブプロジェクト2以降）。**独自ドメインは未切替で、公開サイトは引き続き GCP の WordPress**。AIチャットは初回移行対象外。
+- 再取込: `cf-site/scripts/`（`wp-export.php`→`import.ts`→`wrangler d1 execute`→`sync-media.ts`）。**`import.ts` の出力は全テーブルを DELETE する＝CMS稼働後・PV蓄積後は再実行禁止（サブプロジェクト3でガードを入れる）**。VMスナップショット `pre-cf-migration-20261014`。
+- GitHub Actions `cf-deploy.yml` は Secrets（`CLOUDFLARE_API_TOKEN`/`CLOUDFLARE_ACCOUNT_ID`）登録まで失敗する。
 - 切替完了までは `kobayashi-theme/` と GCP を変更しない（DNS切替・VM停止はサブプロジェクト5）。
 
 ## リポジトリ・CI/CD（2026-07-04〜）

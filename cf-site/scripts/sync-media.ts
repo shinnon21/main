@@ -1,7 +1,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { join } from "node:path";
-import { mediaKey, originalsOnly } from "./lib/media.ts";
+import { mediaKey, originalsOnly, sniffContentType } from "./lib/media.ts";
 import type { WpExport } from "./lib/types.ts";
 
 // usage: node scripts/sync-media.ts <export.json> --local|--remote [uploadsDir] [bucket]
@@ -19,7 +19,9 @@ for (const p of wanted) {
   const key = mediaKey(p);
   const src = join(dir, key);
   if (!existsSync(src)) { missing.push(key); continue; }
-  execFileSync("npx", ["wrangler", "r2", "object", "put", `${bucket}/${key}`, "--file", src, "--content-type", mimeOf.get(p) ?? "application/octet-stream", flag], { stdio: "inherit" });
+  const ct = sniffContentType(readFileSync(src), key);
+  if (ct !== mimeOf.get(p)) console.warn(`content-type: ${key} WP=${mimeOf.get(p)} sniffed=${ct}`);
+  execFileSync("npx", ["wrangler", "r2", "object", "put", `${bucket}/${key}`, "--file", src, "--content-type", ct, flag], { stdio: "inherit" });
   uploaded++;
 }
 console.log(`uploaded=${uploaded} expected=${wanted.length} missing=${missing.length}`);

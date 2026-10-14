@@ -67,3 +67,16 @@ test("malformed percent sequences fall back to the raw slug", () => {
   for (const s of buildImportSql(e).statements) db.exec(s);
   expect((db.prepare("select slug from posts").get() as any).slug).toBe("100%-off");
 });
+
+test("absolute WP upload URLs inside meta values are rewritten too (nested)", () => {
+  const e = structuredClone(exp);
+  e.posts = [{ ...exp.posts[0], id: 30, slug: "m", terms: [], meta: {
+    ssp_meta_image: "https://shinnosuke-kobayashi.jp/wp-content/uploads/2026/07/Weeave.jpeg",
+    gallery_urls: ["http://shinnosuke-kobayashi.jp/wp-content/uploads/2026/07/a-300x200.jpg", "https://other.example/x.png"],
+  } }];
+  const db = newDb();
+  for (const s of buildImportSql(e).statements) db.exec(s);
+  const v = (k: string) => JSON.parse((db.prepare("select value from post_meta where key=?").get(k) as any).value);
+  expect(v("ssp_meta_image")).toBe("/media/2026/07/Weeave.jpeg");
+  expect(v("gallery_urls")).toEqual(["/media/2026/07/a.jpg", "https://other.example/x.png"]);
+});
