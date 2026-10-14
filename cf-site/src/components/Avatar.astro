@@ -1,0 +1,7 @@
+---
+import { mediaSrc } from "../lib/format.ts";
+interface Props { src: string | null; alt?: string }
+const { src, alt = "" } = Astro.props;
+const url = mediaSrc(src);
+---
+<div class="avatar">{url ? <img src={url} alt={alt} loading="lazy" decoding="async" /> : <span class="init">SK</span>}</div>

@@ -1,0 +1,158 @@
+---
+import Layout from "../components/Layout.astro";
+import HeroNet from "../components/HeroNet.astro";
+import WorksCard from "../components/WorksCard.astro";
+import ColumnCard from "../components/ColumnCard.astro";
+import SideRanking from "../components/SideRanking.astro";
+import Thumb from "../components/Thumb.astro";
+import Chips from "../components/Chips.astro";
+import Avatar from "../components/Avatar.astro";
+import { getEnv } from "../lib/env.ts";
+import { featuredWorks, latest, topSkills, ranking, profileSummary } from "../lib/queries.ts";
+import { docTitle, formatDate, hrefFor } from "../lib/format.ts";
+import { t } from "../lib/i18n.ts";
+
+const lang = "ja" as const;
+const db = getEnv().DB;
+const [skills, featured, news, cols, rank, prof] = await Promise.all([
+  topSkills(db, 14), featuredWorks(db, 4), latest(db, "news", 3), latest(db, "column", 4), ranking(db, 5), profileSummary(db),
+]);
+const badge = (p: { terms: { taxonomy: string; name: string }[] }, tax: string) => p.terms.find((x) => x.taxonomy === tax)?.name;
+const [main, ...rest] = featured;
+---
+<Layout title={docTitle(null)} description={t(lang, "政治・行政のDX支援から、医薬品サプライチェーンの研究まで。「日本の技術を社会に届けるコーディネーター」を志す、小林慎之助の公式サイトです。", "")} lang={lang}>
+
+<!-- 1. ヒーロー -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-visual" aria-hidden="true">
+    <HeroNet />
+  </div>
+  <div class="container">
+    <div>
+      <p class="lbl">POLITICS × TECHNOLOGY × SOCIAL DESIGN</p>
+      <h1>構想を、<br><span class="u">社会に実装する。</span></h1>
+      <p class="lead">政治・行政のDX支援から、医薬品サプライチェーンの研究まで。「日本の技術を社会に届けるコーディネーター」を志す、小林慎之助の公式サイトです。</p>
+      <div class="cta">
+        <a class="btn primary" href="/works/">実績を見る →</a>
+        <a class="btn ghost" href="/profile/">プロフィール</a>
+      </div>
+    </div>
+    <div class="hero-photo">
+      <img src="/assets/img/kobayashi-hero.webp" alt="小林慎之助" width="780" height="1135" loading="eager" fetchpriority="high" />
+    </div>
+  </div>
+</section>
+
+<!-- 2. キーワードティッカー -->
+{skills.length > 0 && (
+  <div class="ticker">
+    <div class="lane" id="tickerLane">
+      {skills.map((s) => <a href={hrefFor("skill", s.slug)}># {s.name}</a>)}
+    </div>
+  </div>
+)}
+
+<!-- 3. 主な実績 -->
+{main && (
+  <section class="sec">
+    <div class="container">
+      <div class="sec-head">
+        <div class="l"><p class="lbl">selected works</p><h2>主な実績</h2></div>
+        <a class="more" href="/works/">実績一覧を見る →</a>
+      </div>
+      <div class="featured">
+        <a class="card main" href={hrefFor("works", main.slug)}>
+          <Thumb post={main} />
+          <div class="body">
+            <div class="meta">
+              {badge(main, "works_type") && <span class="badge accent">{badge(main, "works_type")}</span>}
+              {main.meta.period_start && <span>{main.meta.period_start} – {main.meta.period_end || t(lang, "現在", "Present")}</span>}
+            </div>
+            <h3>{main.title}</h3>
+            {main.excerpt && <p class="desc">{main.excerpt}</p>}
+            <Chips terms={main.terms} limit={3} linked={false} />
+          </div>
+        </a>
+        <div class="f-side">
+          {rest.map((p) => (
+            <a class="card" href={hrefFor("works", p.slug)}>
+              <Thumb post={p} />
+              <div class="body"><div class="meta">{badge(p, "works_type") && <span class="badge accent">{badge(p, "works_type")}</span>}</div><h3>{p.title}</h3></div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+)}
+
+<!-- 4. お知らせ -->
+{news.length > 0 && (
+  <section class="sec" style="padding-top:0">
+    <div class="container">
+      <div class="sec-head">
+        <div class="l"><p class="lbl">news</p><h2>お知らせ</h2></div>
+        <a class="more" href="/news/">お知らせ一覧へ →</a>
+      </div>
+      <div class="news-list">
+        {news.map((n) => (
+          <a class="news-item" href={hrefFor("news", n.slug)}>
+            <span class="d">{formatDate(n.published_at)}</span>
+            {badge(n, "news_type") && <span class="badge">{badge(n, "news_type")}</span>}
+            <span class="t">{n.title}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+)}
+
+<!-- 5. 新着コラム＋ランキング -->
+{cols.length > 0 && (
+  <section class="sec" style="background:#fff">
+    <div class="container col-wrap">
+      <div>
+        <div class="sec-head">
+          <div class="l"><p class="lbl">column</p><h2>新着コラム</h2></div>
+          <a class="more" href="/column/">コラム一覧へ →</a>
+        </div>
+        {cols.map((c) => <ColumnCard post={c} lang={lang} />)}
+      </div>
+      <aside><SideRanking items={rank} lang={lang} /></aside>
+    </div>
+  </section>
+)}
+
+<!-- 6. プロフィールダイジェスト -->
+<section class="sec">
+  <div class="container">
+    <div class="prof">
+      <Avatar src={prof.avatar} alt="小林慎之助" />
+      <div>
+        <p class="kana">{prof.kana}</p>
+        <h2>{prof.name}</h2>
+        <p class="role">{prof.role}</p>
+        <p>筑波大学で経営工学を学びながら、政治・行政・企業のDXと社会課題の解決に取り組む学生起業家。データドリブンな戦略立案とコミュニティ構築を強みに、「構想で終わらせず、現場で使われる仕組みとして社会に実装する」ことにこだわり続けています。</p>
+        <div class="p-cta">
+          <a class="btn primary" href="/profile/">プロフィール詳細 →</a>
+          <a class="btn ghost" href="/profile/#research">研究テーマを見る</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 7. お問い合わせCTA -->
+<section class="sec" style="padding-top:0">
+  <div class="container">
+    <div class="contact-cta">
+      <p class="lbl">contact</p>
+      <h2>お仕事のご相談・ご連絡</h2>
+      <p>DX支援・データ分析・事業開発のご相談、取材・登壇のご依頼、協業のお声がけなど、お問い合わせフォームからお気軽にご連絡ください。</p>
+      <a class="btn white" href="/contact/">お問い合わせ →</a>
+    </div>
+  </div>
+</section>
+
+</Layout>
