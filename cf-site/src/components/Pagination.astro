@@ -1,0 +1,17 @@
+---
+import { paginationModel } from "../lib/format.ts";
+interface Props { basePath: string; current: number; total: number }
+const { basePath, current, total } = Astro.props;
+const items = paginationModel(current, total);
+const href = (n: number) => (n === 1 ? basePath : `${basePath}page/${n}/`);
+---
+{items.length > 0 && (
+  <div class="pagination"><div class="nav-links">
+    {items.map((i) =>
+      i.kind === "current" ? <span aria-current="page" class="page-numbers current">{i.n}</span>
+      : i.kind === "dots" ? <span class="page-numbers dots">…</span>
+      : i.kind === "prev" ? <a class="prev page-numbers" href={href(i.n!)}>‹</a>
+      : i.kind === "next" ? <a class="next page-numbers" href={href(i.n!)}>›</a>
+      : <a class="page-numbers" href={href(i.n!)}>{i.n}</a>)}
+  </div></div>
+)}

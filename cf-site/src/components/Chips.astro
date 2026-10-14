@@ -1,0 +1,14 @@
+---
+import type { TermRef } from "../lib/queries.ts";
+import { hrefFor } from "../lib/format.ts";
+interface Props { terms: TermRef[]; limit?: number; linked?: boolean }
+const { terms, limit = 3, linked = true } = Astro.props;
+const skills = terms.filter((t) => t.taxonomy === "skill").slice(0, limit);
+---
+{skills.length > 0 && (
+  <div class="tags">
+    {skills.map((t) => linked
+      ? <a class="chip" href={hrefFor("skill", t.slug)}># {t.name}</a>
+      : <span class="chip"># {t.name}</span>)}
+  </div>
+)}

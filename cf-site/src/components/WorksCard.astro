@@ -1,0 +1,21 @@
+---
+import type { CardPost } from "../lib/queries.ts";
+import { hrefFor } from "../lib/format.ts";
+import { t, type Lang } from "../lib/i18n.ts";
+import Thumb from "./Thumb.astro";
+import Chips from "./Chips.astro";
+interface Props { post: CardPost; lang?: Lang }
+const { post, lang = "ja" } = Astro.props;
+const type = post.terms.find((x) => x.taxonomy === "works_type");
+---
+<a class="card" href={hrefFor("works", post.slug)}>
+  <Thumb post={post} />
+  <div class="body">
+    <div class="meta">
+      {type && <span class="badge accent">{type.name}</span>}
+      {post.meta.period_start && <span>{post.meta.period_start} – {post.meta.period_end || t(lang, "現在", "Present")}</span>}
+    </div>
+    <h3>{post.title}</h3>
+    <Chips terms={post.terms} limit={3} linked={false} />
+  </div>
+</a>

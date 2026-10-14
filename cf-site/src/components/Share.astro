@@ -1,0 +1,14 @@
+---
+import { t, type Lang } from "../lib/i18n.ts";
+interface Props { url: string; title: string; lang?: Lang }
+const { url, title, lang = "ja" } = Astro.props;
+const u = encodeURIComponent(url);
+const ti = encodeURIComponent(title);
+---
+<div class="share">
+  <span class="s-lbl">SHARE</span>
+  <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${u}`} target="_blank" rel="noopener">LinkedIn</a>
+  <a href={`https://www.facebook.com/sharer/sharer.php?u=${u}`} target="_blank" rel="noopener">Facebook</a>
+  <a href={`https://x.com/intent/tweet?url=${u}&text=${ti}`} target="_blank" rel="noopener">X</a>
+  <button type="button" class="js-copy-url" data-copied={t(lang, "コピーしました", "Copied!")}>{t(lang, "URLコピー", "Copy URL")}</button>
+</div>

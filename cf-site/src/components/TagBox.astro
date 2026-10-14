@@ -1,0 +1,13 @@
+---
+import type { TermRef } from "../lib/queries.ts";
+import { hrefFor } from "../lib/format.ts";
+import { t, type Lang } from "../lib/i18n.ts";
+interface Props { skills: TermRef[]; lang?: Lang }
+const { skills, lang = "ja" } = Astro.props;
+---
+{skills.length > 0 && (
+  <div class="side-box">
+    <div class="sb-head"><span class="lbl">tags</span><h3>{t(lang, "タグから探す", "Browse by tag")}</h3></div>
+    {skills.map((s) => <a class="chip" href={hrefFor("skill", s.slug)}># {s.name}</a>)}
+  </div>
+)}

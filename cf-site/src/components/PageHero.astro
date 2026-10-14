@@ -1,0 +1,11 @@
+---
+interface Props { label: string; title: string; crumbs?: { label: string; href?: string }[] }
+const { label, title, crumbs = [] } = Astro.props;
+---
+<div class="page-mv" data-en={label}>
+  <div class="container">
+    <p class="lbl">{label}</p>
+    <h1>{title}</h1>
+    <nav class="breadcrumbs" aria-label="パンくず"><a href="/">top</a>{crumbs.map((c) => <Fragment><span class="sep">›</span>{c.href ? <a href={c.href}>{c.label}</a> : <span>{c.label}</span>}</Fragment>)}</nav>
+  </div>
+</div>
