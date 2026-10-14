@@ -1,0 +1,57 @@
+---
+import Layout from "./Layout.astro";
+import Crumbs from "./Crumbs.astro";
+import Dates from "./Dates.astro";
+import Chips from "./Chips.astro";
+import Share from "./Share.astro";
+import Avatar from "./Avatar.astro";
+import ColumnCard from "./ColumnCard.astro";
+import { getEnv } from "../lib/env.ts";
+import { postTerms, profileSummary, relatedByTerm } from "../lib/queries.ts";
+import type { getPostBySlug } from "../lib/posts.ts";
+import { SITE_URL, autop, docTitle, hrefFor, mediaSrc } from "../lib/format.ts";
+import { t, type Lang } from "../lib/i18n.ts";
+type Post = NonNullable<Awaited<ReturnType<typeof getPostBySlug>>>;
+interface Props { post: Post; lang?: Lang }
+const { post, lang = "ja" } = Astro.props;
+const db = getEnv().DB;
+const [terms, related, prof] = await Promise.all([postTerms(db, post.id), relatedByTerm(db, post, "skill", 3), profileSummary(db)]);
+const thumb = mediaSrc(post.thumbnail);
+---
+<Layout title={docTitle(post.title)} lang={lang}>
+<div class="sec">
+  <div class="container" style="max-width:900px">
+    <Crumbs items={[{ label: t(lang, "コラム", "Column"), href: "/column/" }, { label: post.title }]} />
+
+    <article class="entry-wrap" style="margin-top:18px;max-width:none">
+      <header class="entry-head">
+        <div class="meta"><Dates published={post.published_at} modified={post.modified_at} lang={lang} /><span class="badge accent" style="font-size:10px">{t(lang, "コラム", "Column")}</span></div>
+        <h1>{post.title}</h1>
+        <Chips terms={terms} limit={6} />
+      </header>
+
+      {thumb && <div class="entry-thumb"><img src={thumb} alt="" /></div>}
+
+      <div class="entry-content" set:html={autop(post.content ?? "")} />
+
+      <Share url={SITE_URL + hrefFor("column", post.slug)} title={post.title} lang={lang} />
+
+      <div class="author-box">
+        <Avatar src={prof.avatar} alt={prof.name} />
+        <div>
+          <div class="n">{prof.name}</div>
+          <div class="r">{prof.role}</div>
+          <p>{t(lang, "政治・行政DXと社会実装をテーマに、実務と研究の両面から得た知見を発信しています。", "Writing on political and governmental DX and social implementation, drawing on insights from both practice and research.")}<a href="/profile/" style="color:var(--crimson)">{t(lang, "プロフィールを見る →", "View profile →")}</a></p>
+        </div>
+      </div>
+    </article>
+
+    {related.length > 0 && (
+      <section style="margin-top:56px">
+        <div class="sec-head"><div class="l"><p class="lbl">related</p><h2>{t(lang, "関連記事", "Related Articles")}</h2></div></div>
+        {related.map((p) => <ColumnCard post={p} lang={lang} />)}
+      </section>
+    )}
+  </div>
+</div>
+</Layout>

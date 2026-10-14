@@ -1,0 +1,88 @@
+---
+import Layout from "./Layout.astro";
+import Crumbs from "./Crumbs.astro";
+import Dates from "./Dates.astro";
+import Chips from "./Chips.astro";
+import Share from "./Share.astro";
+import WorksCard from "./WorksCard.astro";
+import { getEnv } from "../lib/env.ts";
+import { postTerms, relatedByTerm } from "../lib/queries.ts";
+import type { getPostBySlug } from "../lib/posts.ts";
+import { SITE_URL, autop, docTitle, hrefFor, mediaSrc } from "../lib/format.ts";
+import { t, type Lang } from "../lib/i18n.ts";
+type Post = NonNullable<Awaited<ReturnType<typeof getPostBySlug>>>;
+interface Props { post: Post; lang?: Lang }
+const { post, lang = "ja" } = Astro.props;
+const db = getEnv().DB;
+const terms = await postTerms(db, post.id);
+const related = await relatedByTerm(db, post, "works_type", 3);
+const m = post.meta;
+const str = (k: string) => (typeof m[k] === "string" ? (m[k] as string).trim() : "");
+const client = str("client_name"), role = str("role"), tech = str("tech_stack"), url = str("site_url");
+const scope = Array.isArray(m.scope) ? (m.scope as string[]) : typeof m.scope === "string" && m.scope ? [m.scope] : [];
+const inds = terms.filter((x) => x.taxonomy === "industry").map((x) => x.name);
+const type = terms.find((x) => x.taxonomy === "works_type");
+const kpis = (Array.isArray(m.kpi_results) ? m.kpi_results : []) as { label?: string; value?: string }[];
+const period = str("period_start");
+const sep = t(lang, "／", " / ");
+const thumb = mediaSrc(post.thumbnail);
+const withTerms = { ...post, terms, meta: {} } as never;
+---
+<Layout title={docTitle(post.title)} description={post.excerpt ?? undefined} lang={lang}>
+<div class="sec">
+  <div class="container" style="max-width:900px">
+    <Crumbs items={[{ label: t(lang, "実績", "Works"), href: "/works/" }, { label: post.title }]} />
+
+    <article class="entry-wrap" style="margin-top:18px;max-width:none">
+      <header class="entry-head">
+        <div class="meta">{type && <span class="badge accent">{type.name}</span>}<Dates published={post.published_at} modified={post.modified_at} lang={lang} /></div>
+        <h1>{post.title}</h1>
+        {post.excerpt && <p class="standfirst">{post.excerpt}</p>}
+        <Chips terms={terms} limit={6} />
+      </header>
+
+      {thumb && <div class="entry-thumb"><img src={thumb} alt="" /></div>}
+
+      {(client || role || tech || scope.length || url || period || inds.length) && (
+        <dl class="ov">
+          {client && <div class="ov-item"><dt>{t(lang, "クライアント", "Client")}</dt><dd>{client}</dd></div>}
+          {inds.length > 0 && <div class="ov-item"><dt>{t(lang, "業界", "Industry")}</dt><dd>{inds.join(sep)}</dd></div>}
+          {period && <div class="ov-item"><dt>{t(lang, "期間", "Period")}</dt><dd><span>{period} – {str("period_end") || t(lang, "現在", "Present")}</span></dd></div>}
+          {role && <div class="ov-item"><dt>{t(lang, "役割", "Role")}</dt><dd>{role}</dd></div>}
+          {scope.length > 0 && <div class="ov-item"><dt>{t(lang, "担当領域", "Scope")}</dt><dd>{scope.join(sep)}</dd></div>}
+          {tech && <div class="ov-item"><dt>{t(lang, "使用技術", "Tech & Tools")}</dt><dd>{tech}</dd></div>}
+          {url && <div class="ov-item"><dt>{t(lang, "ウェブサイト", "Website")}</dt><dd><a class="ov-link" href={url} target="_blank" rel="noopener">{url.replace(/^https?:\/\/(www\.)?|\/$/g, "")} ↗</a></dd></div>}
+        </dl>
+      )}
+
+      <div class="entry-content" set:html={autop(post.content ?? "")} />
+
+      {kpis.some((k) => k.value) && (
+        <>
+          <div class="blk-head"><span class="en">outcome</span><h2>{t(lang, "数値で見る成果", "Key Results")}</h2></div>
+          <div class="kpi-grid">
+            {kpis.filter((k) => k.value).map((k) => <div class="kpi"><div class="v">{k.value}</div><div class="l">{k.label}</div></div>)}
+          </div>
+        </>
+      )}
+
+      <Share url={SITE_URL + hrefFor("works", post.slug)} title={post.title} lang={lang} />
+
+      <div class="entry-cta">
+        <p class="lbl">contact</p>
+        <h2>{t(lang, "この実績について相談する", "Discuss this project")}</h2>
+        <p>{t(lang, "ご相談・詳細のご質問はお気軽にどうぞ。", "Questions and consultation requests are always welcome.")}</p>
+        <a class="btn primary" href="/contact/">{t(lang, "お問い合わせフォームへ →", "Go to contact form →")}</a>
+        <a class="btn ghost" href="/profile/">{t(lang, "プロフィールを見る", "View profile")}</a>
+      </div>
+    </article>
+
+    {related.length > 0 && (
+      <section style="margin-top:56px">
+        <div class="sec-head"><div class="l"><p class="lbl">related</p><h2>{t(lang, "関連実績", "Related Works")}</h2></div></div>
+        <div class="grid3">{related.map((p) => <WorksCard post={p} lang={lang} />)}</div>
+      </section>
+    )}
+  </div>
+</div>
+</Layout>

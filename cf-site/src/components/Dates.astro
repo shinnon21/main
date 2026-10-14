@@ -1,0 +1,9 @@
+---
+import { formatDate } from "../lib/format.ts";
+import { t, type Lang } from "../lib/i18n.ts";
+interface Props { published: string; modified: string; lang?: Lang }
+const { published, modified, lang = "ja" } = Astro.props;
+const pub = formatDate(published);
+const mod = formatDate(modified);
+---
+{mod !== pub && <span>{t(lang, "更新日 ", "Updated ")}{mod}</span>}<span>{t(lang, "公開日 ", "Published ")}{pub}</span>
