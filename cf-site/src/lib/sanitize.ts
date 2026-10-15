@@ -1,7 +1,9 @@
-import { FilterXSS, safeAttrValue as defaultSafeAttrValue } from "xss";
+import xss from "xss";
+
+const { FilterXSS, safeAttrValue: defaultSafeAttrValue } = xss as unknown as { FilterXSS: typeof import("xss").FilterXSS; safeAttrValue: typeof import("xss").safeAttrValue };
 
 const TAGS = "h1 h2 h3 h4 h5 h6 p br hr ul ol li blockquote pre code strong em u s a img figure figcaption table thead tbody tr th td iframe".split(" ");
-const COMMON = ["class"];
+const COMMON = ["class", "style", "dir"];
 const wl: Record<string, string[]> = {};
 for (const t of TAGS) wl[t] = [...COMMON];
 wl.a = ["href", "title", "target", "rel", ...COMMON];
@@ -17,6 +19,8 @@ const squash = (v: string) => v.replace(new RegExp("[\\u0000-\\u0020\\u00a0\\u16
 
 const filter: FilterXSS = new FilterXSS({
   whiteList: wl,
+  // style は見た目の寸法・揃えだけ許可（position/background/url() 等は cssfilter が除去）
+  css: { whiteList: { width: true, height: true, "max-width": true, "text-align": true } },
   stripIgnoreTag: true,
   stripIgnoreTagBody: ["script", "style"],
   allowCommentTag: false,

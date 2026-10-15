@@ -1,4 +1,5 @@
 ---
+import { sanitizeHtml } from "../lib/sanitize.ts";
 import Layout from "./Layout.astro";
 import Crumbs from "./Crumbs.astro";
 import Dates from "./Dates.astro";
@@ -39,7 +40,7 @@ const sd = await articleSeo(db, { lang, type: "column", slug: post.slug, title, 
 
       {thumb && <div class="entry-thumb"><img src={thumb} alt="" /></div>}
 
-      <div class="entry-content" set:html={autop(body)} />
+      <div class="entry-content" set:html={autop(sanitizeHtml(body))} />
 
       <Share url={SITE_URL + l(lang, hrefFor("column", post.slug))} title={title} lang={lang} />
 

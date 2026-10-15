@@ -5,6 +5,7 @@ import Dates from "./Dates.astro";
 import { getEnv } from "../lib/env.ts";
 import { postTerms } from "../lib/queries.ts";
 import type { getPostBySlug } from "../lib/posts.ts";
+import { sanitizeHtml } from "../lib/sanitize.ts";
 import { autop, docTitle, mediaEmbedIds } from "../lib/format.ts";
 import { t, type Lang } from "../lib/i18n.ts";
 import { articleSeo } from "../lib/seo-data.ts";
@@ -38,7 +39,7 @@ const { yt, sp } = mediaEmbedIds(post.meta.media_youtube, post.meta.media_spotif
           {sp && <div class="media-embed sp"><iframe src={`https://open.spotify.com/embed/episode/${sp}`} title="Spotify" height="232" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe></div>}
         </div>
       )}
-      <div class="entry-content" set:html={autop(body)} />
+      <div class="entry-content" set:html={autop(sanitizeHtml(body))} />
     </article>
     <div class="center-btn"><a class="btn ghost" href={l(lang, "/news/")}>{t(lang, "一覧へ戻る", "Back to list")}</a></div>
   </div>

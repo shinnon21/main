@@ -39,3 +39,10 @@ test("empty and non-string input are safe", () => { expect(s("")).toBe(""); expe
 test("empty alt stays a valid empty-alt image (serialized as boolean attribute)", () => {
   expect(s('<img src="/media/a.jpg" alt="">')).toMatch(/^<img src="\/media\/a\.jpg" alt>$/);
 });
+
+test("style attribute: only harmless sizing/alignment properties survive", () => {
+  expect(s('<img src="/media/a.jpg" alt="x" style="width:840px;height:auto">')).toMatch(/style="width:\s*840px;\s*height:\s*auto;?"/);
+  expect(s('<p style="text-align:center">c</p>')).toMatch(/text-align:\s*center/);
+  for (const evil of ['<p style="background:url(javascript:alert(1))">x</p>', '<p style="position:fixed;top:0;left:0;width:100%;height:100%">x</p>', '<p style="width:expression(alert(1))">x</p>', '<p style="behavior:url(x.htc)">x</p>'])
+    expect(s(evil), evil).not.toMatch(/javascript|position|expression|behavior|url\(/i);
+});

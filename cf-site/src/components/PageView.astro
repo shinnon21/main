@@ -2,6 +2,7 @@
 import Layout from "./Layout.astro";
 import PageHero from "./PageHero.astro";
 import type { getPostBySlug } from "../lib/posts.ts";
+import { sanitizeHtml } from "../lib/sanitize.ts";
 import { autop, docTitle } from "../lib/format.ts";
 import type { Lang } from "../lib/i18n.ts";
 import { pick } from "../lib/l10n.ts";
@@ -19,7 +20,7 @@ const desc = o.description ?? metaDescription({ lang, kind: "post", excerpt: pic
   <div class="sec">
     <div class="container" style="max-width:820px">
       <article class="entry-wrap" style="max-width:none">
-        <div class="entry-content" set:html={autop(body)} />
+        <div class="entry-content" set:html={autop(sanitizeHtml(body))} />
       </article>
     </div>
   </div>
