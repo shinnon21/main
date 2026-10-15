@@ -8,7 +8,7 @@ import Thumb from "../components/Thumb.astro";
 import Chips from "../components/Chips.astro";
 import Avatar from "../components/Avatar.astro";
 import { getEnv } from "../lib/env.ts";
-import { featuredWorks, latest, topSkills, ranking, profileSummary } from "../lib/queries.ts";
+import { featuredWorks, latest, topSkills, ranking, profileSummary, workClients } from "../lib/queries.ts";
 import { docTitle, formatDate, hrefFor } from "../lib/format.ts";
 import { t } from "../lib/i18n.ts";
 import { metaDescription, websiteLd } from "../lib/seo.ts";
@@ -18,8 +18,8 @@ import { newsTypeName, pick, termName } from "../lib/l10n.ts";
 
 const lang = Astro.locals.lang ?? "ja";
 const db = getEnv().DB;
-const [skills, featured, news, cols, rank, prof] = await Promise.all([
-  topSkills(db, 14), featuredWorks(db, 4), latest(db, "news", 3), latest(db, "column", 4), ranking(db, 5), profileSummary(db, lang),
+const [skills, featured, news, cols, rank, prof, clients] = await Promise.all([
+  topSkills(db, 14), featuredWorks(db, 4), latest(db, "news", 3), latest(db, "column", 4), ranking(db, 5), profileSummary(db, lang), workClients(db, lang, 12),
 ]);
 const badge = (p: { terms: { taxonomy: string; name: string }[] }, tax: string) => { const n = p.terms.find((x) => x.taxonomy === tax)?.name; return n ? (tax === "news_type" ? newsTypeName(lang, n) : termName(lang, n)) : undefined; };
 const ttl = (p: { title: string; title_en: string | null }) => pick(lang, p.title, p.title_en);
@@ -40,7 +40,7 @@ const ld = [websiteLd({ lang, name: t(lang, "小林慎之助", "Shinnosuke Kobay
   <div class="container">
     <div>
       <p class="lbl">POLITICS × TECHNOLOGY × SOCIAL DESIGN</p>
-      <h1 set:html={t(lang, "構想を、<br><span class=\"u\">社会に実装する。</span>", "Vision,<br><span class=\"u\">implemented in society.</span>")} />
+      <h1 set:html={t(lang, "<span class=\"ln\">構想を、</span><span class=\"ln u\">社会に実装する。</span>", "<span class=\"ln\">Vision,</span><span class=\"ln u\">implemented in society.</span>")} />
       <p class="lead">{t(lang, JA_DESC, EN_DESC)}</p>
       <div class="cta">
         <a class="btn primary" href={l(lang, "/works/")}>{t(lang, "実績を見る →", "View works →")}</a>
@@ -96,9 +96,22 @@ const ld = [websiteLd({ lang, name: t(lang, "小林慎之助", "Shinnosuke Kobay
   </section>
 )}
 
+<!-- 3b. 関わった組織（実績データから生成） -->
+{clients.length > 0 && (
+  <section class="trust" aria-label={t(lang, "関わった組織", "Organizations")}>
+    <div class="container">
+      <p class="lbl">trusted by</p>
+      <ul class="trust-row">
+        {clients.map((c) => <li>{c}</li>)}
+      </ul>
+      <p class="trust-note">{t(lang, "実績でご一緒した組織・団体", "Organizations I have worked with")}</p>
+    </div>
+  </section>
+)}
+
 <!-- 4. お知らせ -->
 {news.length > 0 && (
-  <section class="sec" style="padding-top:0">
+  <section class="sec">
     <div class="container">
       <div class="sec-head">
         <div class="l"><p class="lbl">news</p><h2>{t(lang, "お知らせ", "News")}</h2></div>

@@ -1,0 +1,88 @@
+/* ============================================================
+   Refresh v1（2026-10）— 見た目と動きの現代化。ブランドカラー・トークンは変更しない。
+   global.css の後に読み込み、上書きで当てる（戻すときはこのファイルのimportを外すだけ）。
+   方針: 余白を広く・見出しを大きく／ヒーローは引き算／枠と影を減らし細い線で区切る／動きは控えめで上質
+============================================================ */
+:root{--r-sm:8px;--r-md:14px;--r-lg:24px;--ease:cubic-bezier(.2,.65,.3,1)}
+
+/* ===== ヒーロー（モバイルの既存レイアウトは触らない） ===== */
+@media (min-width:601px){
+  .container{max-width:1240px;padding:0 40px}
+  .hero h1{font-size:clamp(40px,5vw,72px);line-height:1.16;letter-spacing:.005em}
+  .hero .lead{font-size:17px;line-height:2;color:#555;max-width:500px;margin-top:28px}
+  .hero .lbl{font-size:12px;letter-spacing:.26em;color:var(--gray);margin-bottom:28px}
+  .hero .cta{margin-top:44px}
+}
+.hero h1 .ln{display:block}
+.hero h1 .u{background:none;color:var(--crimson)}
+/* 背景の格子は線を薄く・点は目立たなく（ゆっくり動くのは既存のまま） */
+#heroWaves{stroke-opacity:.07;stroke-width:1}
+#heroLinks{opacity:.3}
+#heroDots{opacity:.5}
+.hero-photo::before{background:radial-gradient(62% 56% at 50% 82%,rgba(194,39,64,.14),rgba(194,39,64,.03) 58%,transparent 76%)}
+@media (prefers-reduced-motion:no-preference){
+  /* 見出しは行ごとに時間差で現れる */
+  .hero h1{opacity:1;animation:none}
+  .hero h1 .ln{opacity:0;animation:kbUp .95s var(--ease) forwards}
+  .hero h1 .ln:nth-child(1){animation-delay:.14s}
+  .hero h1 .ln:nth-child(2){animation-delay:.34s}
+  .hero .lbl{animation-duration:.9s}
+  .hero .lead{animation-delay:.6s;animation-duration:.9s}
+  .hero .cta{animation-delay:.78s;animation-duration:.9s}
+}
+
+/* ===== ボタン（ピル→角を少し丸めた長方形） ===== */
+.btn{border-radius:var(--r-sm);padding:16px 32px;font-size:15px;letter-spacing:.04em}
+.btn.sm{padding:9px 18px;border-radius:6px}
+
+/* ===== ティッカー（濃色帯→細い線で区切った淡い帯。高さは既存と同じ59pxを維持＝モバイル1画面計算を壊さない） ===== */
+.ticker{background:transparent;color:var(--gray);height:59px;display:flex;align-items:center;padding:0;
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.ticker a{background:none;border:none;border-radius:0;padding:0;margin-right:40px;font-size:13.5px;font-weight:500;color:var(--gray);letter-spacing:.06em}
+.ticker a:hover{background:none;color:var(--crimson)}
+
+/* ===== セクション見出し（大きく・余白広く） ===== */
+@media (min-width:601px){
+  .sec{padding:104px 0}
+  .sec-head{margin-bottom:56px}
+  .sec-head .l .lbl{display:block;font-size:12.5px;letter-spacing:.26em;margin-bottom:12px}
+  .sec-head .l h2{font-size:clamp(32px,3.6vw,52px);line-height:1.25;letter-spacing:.01em;margin-top:0}
+}
+
+/* ===== カード（影を減らし細い線と余白で。ホバーは画像がわずかに拡大） ===== */
+.card{box-shadow:none;border:1px solid var(--line);border-radius:var(--r-md);transition:transform .55s var(--ease),border-color .3s,box-shadow .55s var(--ease)}
+.card:hover{transform:translateY(-4px);border-color:var(--tint);box-shadow:0 28px 48px -28px rgba(132,25,42,.28)}
+.thumb{border-radius:0}
+.thumb img{transition:transform 1.1s var(--ease)}
+.card:hover .thumb img,.article:hover .a-thumb img{transform:scale(1.045)}
+.article .a-thumb img{transition:transform 1.1s var(--ease)}
+.featured{gap:32px}
+.featured .main h3{font-size:26px;line-height:1.5}
+.f-side .thumb{border-radius:0}
+.more{letter-spacing:.04em}
+.more:hover{border-color:var(--crimson)}
+
+/* ===== お知らせ（枠なしの罫線リスト） ===== */
+.news-list{background:transparent;box-shadow:none;border-radius:0;padding:0;border-top:1.5px solid var(--ink)}
+.news-item{padding:26px 0;font-size:16px}
+
+/* ===== 関わった組織（実績データから生成。静かな1帯） ===== */
+.trust{background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:60px 0}
+.trust .lbl{font-family:var(--font-en);font-size:12px;font-weight:800;letter-spacing:.26em;text-transform:lowercase;color:var(--crimson);margin-bottom:24px}
+.trust-row{display:flex;flex-wrap:wrap;gap:14px 0}
+.trust-row li{font-size:clamp(15px,1.5vw,19px);font-weight:700;color:var(--ink);line-height:1.6;padding:2px 28px 2px 0;margin-right:28px;border-right:1px solid var(--line)}
+.trust-row li:last-child{border-right:none;margin-right:0}
+.trust-note{margin-top:22px;font-size:13px;color:var(--gray)}
+
+/* ===== プロフィール／お問い合わせ ===== */
+.prof{box-shadow:none;border:1px solid var(--line);border-radius:var(--r-lg)}
+@media (min-width:601px){
+  .prof{padding:64px;gap:64px}
+  .contact-cta{padding:120px 24px}
+  .contact-cta h2{font-size:clamp(30px,3.6vw,48px);line-height:1.3}
+}
+.contact-cta{border-radius:var(--r-lg)}
+
+/* ===== スクロールリビール（距離と時間をゆったり。上の.cardのtransitionに負けないよう最後に置く） ===== */
+.js-reveal,.card.js-reveal{opacity:0;transform:translateY(30px);transition:opacity .95s var(--ease),transform .95s var(--ease)}
+.js-reveal.in,.card.js-reveal.in{opacity:1;transform:none}
