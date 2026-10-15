@@ -8,16 +8,17 @@ import { profileFull } from "../lib/queries.ts";
 import { parseCareer, parseSkills, profileLines } from "../lib/profile.ts";
 import { autop, docTitle } from "../lib/format.ts";
 import { t } from "../lib/i18n.ts";
+import { l } from "../lib/lang.ts";
 
-const lang = "ja" as const;
-const p = await profileFull(getEnv().DB);
+const lang = Astro.locals.lang ?? "ja";
+const p = await profileFull(getEnv().DB, lang);
 const career = parseCareer(p.career);
 const skills = parseSkills(p.skills);
 const activities = profileLines(p.activities);
 const paras = (s: string) => s.split(/\r\n|\r|\n/);
 ---
-<Layout title={docTitle(t(lang, "プロフィール", "Profile"))} lang={lang}>
-  <PageHero label="profile" title={t(lang, "プロフィール", "Profile")} crumbs={[{ label: t(lang, "プロフィール", "Profile") }]} />
+<Layout title={docTitle(t(lang, "プロフィール", "Profile"), lang)} lang={lang}>
+  <PageHero label="profile" title={t(lang, "プロフィール", "Profile")} crumbs={[{ label: t(lang, "プロフィール", "Profile") }]} lang={lang} />
   <div class="sec">
     <div class="container" style="max-width:900px">
 
@@ -81,7 +82,7 @@ const paras = (s: string) => s.split(/\r\n|\r|\n/);
         <p class="lbl">contact</p>
         <h2>{t(lang, "お問い合わせ・ご相談", "Contact & Inquiries")}</h2>
         <p>{t(lang, "案件のご相談、取材・登壇のご依頼、協業のお声がけなど、お気軽にご連絡ください。", "For project inquiries, interview and speaking requests, or collaboration proposals — please feel free to reach out.")}</p>
-        <a class="btn white" href="/contact/">{t(lang, "お問い合わせ →", "Contact →")}</a>
+        <a class="btn white" href={l(lang, "/contact/")}>{t(lang, "お問い合わせ →", "Contact →")}</a>
       </div>
 
     </div>

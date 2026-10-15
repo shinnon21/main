@@ -2,7 +2,10 @@
 import ArchiveView from "../../../components/ArchiveView.astro";
 import { getEnv } from "../../../lib/env.ts";
 import { isListType, listPage } from "../../../lib/queries.ts";
-const TITLES = { works: "実績", column: "コラム", news: "お知らせ" } as const;
+import { t as tr } from "../../../lib/i18n.ts";
+import { l } from "../../../lib/lang.ts";
+const lang = Astro.locals.lang ?? "ja";
+const TITLES = { works: tr(lang, "実績", "Works"), column: tr(lang, "コラム", "Column"), news: tr(lang, "お知らせ", "News") } as const;
 const { type, n } = Astro.params;
 if (!type || !isListType(type) || !/^[1-9]\d{0,5}$/.test(n ?? "")) return Astro.rewrite("/404/");
 const t = type as keyof typeof TITLES;
@@ -10,4 +13,4 @@ const page = Number(n);
 const data = await listPage(getEnv().DB, t, page);
 if (page > data.pages) return Astro.rewrite("/404/");
 ---
-<ArchiveView type={t} data={data} page={page} basePath={`/${t}/`} title={TITLES[t]} crumbs={[{ label: TITLES[t] }]} />
+<ArchiveView type={t} data={data} page={page} basePath={l(lang, `/${t}/`)} title={TITLES[t]} crumbs={[{ label: TITLES[t] }]} />

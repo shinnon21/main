@@ -2,17 +2,18 @@
 import Layout from "../components/Layout.astro";
 import { docTitle } from "../lib/format.ts";
 import { t } from "../lib/i18n.ts";
-const lang = "ja" as const;
+import { l } from "../lib/lang.ts";
+const lang = Astro.locals.lang ?? "ja";
 Astro.response.status = 404;
 ---
-<Layout title={docTitle(t(lang, "ページが見つかりません", "Page not found"))} lang={lang}>
+<Layout title={docTitle(t(lang, "ページが見つかりません", "Page not found"), lang)} lang={lang} pair={false}>
 <div class="notfound">
   <div class="code en">404</div>
-  <p>お探しのページは見つかりませんでした。<br />移動または削除された可能性があります。</p>
+  <p set:html={t(lang, "お探しのページは見つかりませんでした。<br />移動または削除された可能性があります。", "The page you are looking for could not be found.<br />It may have been moved or deleted.")} />
   <div class="links">
-    <a class="btn primary" href="/">トップへ戻る</a>
-    <a class="btn ghost" href="/works/">実績一覧</a>
-    <a class="btn ghost" href="/searches/">条件から探す</a>
+    <a class="btn primary" href={l(lang, "/")}>{t(lang, "トップへ戻る", "Back to top")}</a>
+    <a class="btn ghost" href={l(lang, "/works/")}>{t(lang, "実績一覧", "Works")}</a>
+    <a class="btn ghost" href={l(lang, "/searches/")}>{t(lang, "条件から探す", "Advanced search")}</a>
   </div>
 </div>
 </Layout>

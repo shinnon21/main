@@ -11,16 +11,21 @@ import { getEnv } from "../lib/env.ts";
 import { featuredWorks, latest, topSkills, ranking, profileSummary } from "../lib/queries.ts";
 import { docTitle, formatDate, hrefFor } from "../lib/format.ts";
 import { t } from "../lib/i18n.ts";
+import { l } from "../lib/lang.ts";
+import { newsTypeName, pick, termName } from "../lib/l10n.ts";
 
-const lang = "ja" as const;
+const lang = Astro.locals.lang ?? "ja";
 const db = getEnv().DB;
 const [skills, featured, news, cols, rank, prof] = await Promise.all([
-  topSkills(db, 14), featuredWorks(db, 4), latest(db, "news", 3), latest(db, "column", 4), ranking(db, 5), profileSummary(db),
+  topSkills(db, 14), featuredWorks(db, 4), latest(db, "news", 3), latest(db, "column", 4), ranking(db, 5), profileSummary(db, lang),
 ]);
-const badge = (p: { terms: { taxonomy: string; name: string }[] }, tax: string) => p.terms.find((x) => x.taxonomy === tax)?.name;
+const badge = (p: { terms: { taxonomy: string; name: string }[] }, tax: string) => { const n = p.terms.find((x) => x.taxonomy === tax)?.name; return n ? (tax === "news_type" ? newsTypeName(lang, n) : termName(lang, n)) : undefined; };
+const ttl = (p: { title: string; title_en: string | null }) => pick(lang, p.title, p.title_en);
+const JA_DESC = "政治・行政のDX支援から、医薬品サプライチェーンの研究まで。「日本の技術を社会に届けるコーディネーター」を志す、小林慎之助の公式サイトです。";
+const EN_DESC = "From DX support for politics and government to research on pharmaceutical supply chains — the official website of Shinnosuke Kobayashi, an aspiring coordinator who delivers Japanese technology to society.";
 const [main, ...rest] = featured;
 ---
-<Layout title={docTitle(null)} description={t(lang, "政治・行政のDX支援から、医薬品サプライチェーンの研究まで。「日本の技術を社会に届けるコーディネーター」を志す、小林慎之助の公式サイトです。", "")} lang={lang}>
+<Layout title={docTitle(null, lang)} description={t(lang, JA_DESC, EN_DESC)} lang={lang}>
 
 <!-- 1. ヒーロー -->
 <section class="hero">
@@ -31,15 +36,15 @@ const [main, ...rest] = featured;
   <div class="container">
     <div>
       <p class="lbl">POLITICS × TECHNOLOGY × SOCIAL DESIGN</p>
-      <h1>構想を、<br><span class="u">社会に実装する。</span></h1>
-      <p class="lead">政治・行政のDX支援から、医薬品サプライチェーンの研究まで。「日本の技術を社会に届けるコーディネーター」を志す、小林慎之助の公式サイトです。</p>
+      <h1 set:html={t(lang, "構想を、<br><span class=\"u\">社会に実装する。</span>", "Vision,<br><span class=\"u\">implemented in society.</span>")} />
+      <p class="lead">{t(lang, JA_DESC, EN_DESC)}</p>
       <div class="cta">
-        <a class="btn primary" href="/works/">実績を見る →</a>
-        <a class="btn ghost" href="/profile/">プロフィール</a>
+        <a class="btn primary" href={l(lang, "/works/")}>{t(lang, "実績を見る →", "View works →")}</a>
+        <a class="btn ghost" href={l(lang, "/profile/")}>{t(lang, "プロフィール", "Profile")}</a>
       </div>
     </div>
     <div class="hero-photo">
-      <img src="/assets/img/kobayashi-hero.webp" alt="小林慎之助" width="780" height="1135" loading="eager" fetchpriority="high" />
+      <img src="/assets/img/kobayashi-hero.webp" alt={t(lang, "小林慎之助", "Shinnosuke Kobayashi")} width="780" height="1135" loading="eager" fetchpriority="high" />
     </div>
   </div>
 </section>
@@ -48,7 +53,7 @@ const [main, ...rest] = featured;
 {skills.length > 0 && (
   <div class="ticker">
     <div class="lane" id="tickerLane">
-      {skills.map((s) => <a href={hrefFor("skill", s.slug)}># {s.name}</a>)}
+      {skills.map((s) => <a href={l(lang, hrefFor("skill", s.slug))}># {termName(lang, s.name)}</a>)}
     </div>
   </div>
 )}
@@ -58,27 +63,27 @@ const [main, ...rest] = featured;
   <section class="sec">
     <div class="container">
       <div class="sec-head">
-        <div class="l"><p class="lbl">selected works</p><h2>主な実績</h2></div>
-        <a class="more" href="/works/">実績一覧を見る →</a>
+        <div class="l"><p class="lbl">selected works</p><h2>{t(lang, "主な実績", "Selected Works")}</h2></div>
+        <a class="more" href={l(lang, "/works/")}>{t(lang, "実績一覧を見る →", "All works →")}</a>
       </div>
       <div class="featured">
-        <a class="card main" href={hrefFor("works", main.slug)}>
-          <Thumb post={main} />
+        <a class="card main" href={l(lang, hrefFor("works", main.slug))}>
+          <Thumb post={main} lang={lang} />
           <div class="body">
             <div class="meta">
               {badge(main, "works_type") && <span class="badge accent">{badge(main, "works_type")}</span>}
               {main.meta.period_start && <span>{main.meta.period_start} – {main.meta.period_end || t(lang, "現在", "Present")}</span>}
             </div>
-            <h3>{main.title}</h3>
-            {main.excerpt && <p class="desc">{main.excerpt}</p>}
-            <Chips terms={main.terms} limit={3} linked={false} />
+            <h3>{ttl(main)}</h3>
+            {pick(lang, main.excerpt, main.excerpt_en) && <p class="desc">{pick(lang, main.excerpt, main.excerpt_en)}</p>}
+            <Chips terms={main.terms} limit={3} linked={false} lang={lang} />
           </div>
         </a>
         <div class="f-side">
           {rest.map((p) => (
-            <a class="card" href={hrefFor("works", p.slug)}>
-              <Thumb post={p} />
-              <div class="body"><div class="meta">{badge(p, "works_type") && <span class="badge accent">{badge(p, "works_type")}</span>}</div><h3>{p.title}</h3></div>
+            <a class="card" href={l(lang, hrefFor("works", p.slug))}>
+              <Thumb post={p} lang={lang} />
+              <div class="body"><div class="meta">{badge(p, "works_type") && <span class="badge accent">{badge(p, "works_type")}</span>}</div><h3>{ttl(p)}</h3></div>
             </a>
           ))}
         </div>
@@ -92,15 +97,15 @@ const [main, ...rest] = featured;
   <section class="sec" style="padding-top:0">
     <div class="container">
       <div class="sec-head">
-        <div class="l"><p class="lbl">news</p><h2>お知らせ</h2></div>
-        <a class="more" href="/news/">お知らせ一覧へ →</a>
+        <div class="l"><p class="lbl">news</p><h2>{t(lang, "お知らせ", "News")}</h2></div>
+        <a class="more" href={l(lang, "/news/")}>{t(lang, "お知らせ一覧へ →", "All news →")}</a>
       </div>
       <div class="news-list">
         {news.map((n) => (
-          <a class="news-item" href={hrefFor("news", n.slug)}>
+          <a class="news-item" href={l(lang, hrefFor("news", n.slug))}>
             <span class="d">{formatDate(n.published_at)}</span>
             {badge(n, "news_type") && <span class="badge">{badge(n, "news_type")}</span>}
-            <span class="t">{n.title}</span>
+            <span class="t">{ttl(n)}</span>
           </a>
         ))}
       </div>
@@ -114,8 +119,8 @@ const [main, ...rest] = featured;
     <div class="container col-wrap">
       <div>
         <div class="sec-head">
-          <div class="l"><p class="lbl">column</p><h2>新着コラム</h2></div>
-          <a class="more" href="/column/">コラム一覧へ →</a>
+          <div class="l"><p class="lbl">column</p><h2>{t(lang, "新着コラム", "Latest Columns")}</h2></div>
+          <a class="more" href={l(lang, "/column/")}>{t(lang, "コラム一覧へ →", "All columns →")}</a>
         </div>
         {cols.map((c) => <ColumnCard post={c} lang={lang} />)}
       </div>
@@ -128,15 +133,15 @@ const [main, ...rest] = featured;
 <section class="sec">
   <div class="container">
     <div class="prof">
-      <Avatar src={prof.avatar} alt="小林慎之助" />
+      <Avatar src={prof.avatar} alt={prof.name} />
       <div>
         <p class="kana">{prof.kana}</p>
         <h2>{prof.name}</h2>
         <p class="role">{prof.role}</p>
-        <p>筑波大学で経営工学を学びながら、政治・行政・企業のDXと社会課題の解決に取り組む学生起業家。データドリブンな戦略立案とコミュニティ構築を強みに、「構想で終わらせず、現場で使われる仕組みとして社会に実装する」ことにこだわり続けています。</p>
+        <p>{t(lang, "筑波大学で経営工学を学びながら、政治・行政・企業のDXと社会課題の解決に取り組む学生起業家。データドリブンな戦略立案とコミュニティ構築を強みに、「構想で終わらせず、現場で使われる仕組みとして社会に実装する」ことにこだわり続けています。", "A student entrepreneur studying management science and engineering at the University of Tsukuba while working on DX and social challenges across politics, government, and business. With strengths in data-driven strategy and community building, I am committed to implementing ideas as systems that actually work in the field — not leaving them as concepts.")}</p>
         <div class="p-cta">
-          <a class="btn primary" href="/profile/">プロフィール詳細 →</a>
-          <a class="btn ghost" href="/profile/#research">研究テーマを見る</a>
+          <a class="btn primary" href={l(lang, "/profile/")}>{t(lang, "プロフィール詳細 →", "Full profile →")}</a>
+          <a class="btn ghost" href={l(lang, "/profile/#research")}>{t(lang, "研究テーマを見る", "Research theme")}</a>
         </div>
       </div>
     </div>
@@ -148,9 +153,9 @@ const [main, ...rest] = featured;
   <div class="container">
     <div class="contact-cta">
       <p class="lbl">contact</p>
-      <h2>お仕事のご相談・ご連絡</h2>
-      <p>DX支援・データ分析・事業開発のご相談、取材・登壇のご依頼、協業のお声がけなど、お問い合わせフォームからお気軽にご連絡ください。</p>
-      <a class="btn white" href="/contact/">お問い合わせ →</a>
+      <h2>{t(lang, "お仕事のご相談・ご連絡", "Work Inquiries")}</h2>
+      <p>{t(lang, "DX支援・データ分析・事業開発のご相談、取材・登壇のご依頼、協業のお声がけなど、お問い合わせフォームからお気軽にご連絡ください。", "For consulting on DX, data analysis, or business development, interview and speaking requests, or collaboration proposals — feel free to reach out via the contact form.")}</p>
+      <a class="btn white" href={l(lang, "/contact/")}>{t(lang, "お問い合わせ →", "Contact →")}</a>
     </div>
   </div>
 </section>

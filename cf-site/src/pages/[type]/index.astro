@@ -4,7 +4,10 @@ import PageView from "../../components/PageView.astro";
 import { getEnv } from "../../lib/env.ts";
 import { getPostBySlug } from "../../lib/posts.ts";
 import { isListType, listPage } from "../../lib/queries.ts";
-const TITLES = { works: "実績", column: "コラム", news: "お知らせ" } as const;
+import { t } from "../../lib/i18n.ts";
+import { l } from "../../lib/lang.ts";
+const lang = Astro.locals.lang ?? "ja";
+const TITLES = { works: t(lang, "実績", "Works"), column: t(lang, "コラム", "Column"), news: t(lang, "お知らせ", "News") } as const;
 // 1階層の固定ページ（/about/ 等）もこのルートで解決する。contact/chat/searches/profile は専用ルート（または未実装＝404）
 const RESERVED = new Set(["contact", "chat", "searches", "profile"]);
 const { type } = Astro.params;
@@ -15,4 +18,4 @@ const page = !list && !RESERVED.has(type) ? await getPostBySlug(db, "page", type
 if (!list && !page) return Astro.rewrite("/404/");
 const data = list ? await listPage(db, type, 1) : null;
 ---
-{list && data ? <ArchiveView type={type} data={data} page={1} basePath={`/${type}/`} title={TITLES[type]} crumbs={[{ label: TITLES[type] }]} /> : page && <PageView post={page} />}
+{list && data ? <ArchiveView type={type} data={data} page={1} basePath={l(lang, `/${type}/`)} title={TITLES[type]} crumbs={[{ label: TITLES[type] }]} /> : page && <PageView post={page} />}
