@@ -65,7 +65,9 @@
 11. AIチャットボット有効化（テーマv1.20実装済み・**GCP設定待ち**）: `チャットボット導入手順.md` の手順1〜4（Vertex AI API有効化→VMサービスアカウントへロール付与→VMスコープ変更＝停止起動→管理画面「設定→AIチャットボット」で接続テスト・有効化）
 12. Phase 2候補: 登壇イベントCPT有効化、スキル辞典
 
-## Cloudflare移行（進行中・2026-10-14〜）
+## Cloudflare移行（2026-10-15 本番切替完了・2026-10-14〜）
+
+- **【最新】2026-10-15 20:00頃、本番ドメイン `shinnosuke-kobayashi.jp`（と `www`→apex 301）を Cloudflare の新サイト（Worker `kb-site`）へ切替済み。以下の「公開サイトは引き続き GCP」等の記述は切替前の経緯で、現在は古い。** 切替手順・ロールバック・DNS控えは `Cloudflare切替手順.md`。Access（`/admin*`・hello@のみ・ワンタイムPIN）／Turnstile／メール送信（Cloudflare Email Service。Workers Paid契約）／GA4 `G-605F8JC1XR`・AdSense（本番ドメインのみ出力、`src/lib/tracking.ts`）設定済み。`wrangler.jsonc` の `routes`（custom_domain）でドメイン管理。**workers.dev は `routes` 設定により無効（確認用URLは廃止）。** 切替時点のGCP VM `wp-portfolio` は**停止せず稼働中（ロールバック用）。約2週間（〜2026-10-29目安）様子を見て問題なければ停止**。スナップショット `pre-cf-migration-20261014`・`pre-cutover-20261015` を保持。DMARCは `p=none`（Google側DKIM未設定のため `reject` にしない）。Search Console: sitemap再送信済み（130ページ検出）。残: `cf-migration`→main マージ（`cf-deploy.yml` はmain pushで本番デプロイ）、`.github/workflows/deploy.yml`（WPテーマ）無効化、`/feed/`（RSS）は新サイトに無い（404）、`/chat/` は新サイトで404（AIチャット対象外）。
 
 - GCP（WordPress）から Cloudflare ネイティブ（Astro SSR＋Workers＋D1＋R2＋KV＋自作簡易CMS）へ完全移行中。設計書 `docs/superpowers/specs/2026-10-14-cf-foundation-migration-design.md`・実装計画 `docs/superpowers/plans/2026-10-14-cf-foundation-migration.md`。
 - `cf-site/` が新サイト（ブランチ `cf-migration`）。サブプロジェクト1（基盤とデータ移行）は完了: 本番WPの全公開記事を個人CFアカウント（hello@shinnosuke-kobayashi.jp・Account ID `5ab6d2a7…`）の D1 `kb-site`・R2 `kb-media`・KV `CACHE` に投入済み、確認用URL `https://kb-site.curly-wave-c49f.workers.dev` にデプロイ済み（最小の一覧/詳細のみ。トップ/固定ページ/英語版/フォーム/デザインは未実装＝サブプロジェクト2以降）。**独自ドメインは未切替で、公開サイトは引き続き GCP の WordPress**。AIチャットは初回移行対象外。
