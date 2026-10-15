@@ -80,3 +80,28 @@ test("absolute WP upload URLs inside meta values are rewritten too (nested)", ()
   expect(v("ssp_meta_image")).toBe("/media/2026/07/Weeave.jpeg");
   expect(v("gallery_urls")).toEqual(["/media/2026/07/a.jpg", "https://other.example/x.png"]);
 });
+
+// --- 3c: import guard ---
+test("guard: by default the first statement refuses to run once the CMS has been used; nothing is deleted", () => {
+  const db = newDb(); const base = buildImportSql(exp);
+  for (const s of base.statements) db.exec(s);
+  db.prepare("insert into settings(key,value) values('cms_initialized','\"1\"')").run();
+  const before = (db.prepare("select count(*) c from posts").get() as any).c;
+  const again = buildImportSql(exp).statements;
+  expect(again[0]).toMatch(/cms_initialized/);
+  let threw = false;
+  for (const s of again) { try { db.exec(s); } catch { threw = true; break; } }
+  expect(threw).toBe(true);
+  expect((db.prepare("select count(*) c from posts").get() as any).c).toBe(before);
+  expect((db.prepare("select count(*) c from settings where key='cms_initialized'").get() as any).c).toBe(1);
+});
+test("guard: without the sentinel the import runs normally; --force omits the guard", () => {
+  const db = newDb();
+  for (const s of buildImportSql(exp).statements) db.exec(s);
+  expect((db.prepare("select count(*) c from posts").get() as any).c).toBe(3);
+  const forced = buildImportSql(exp, { force: true }).statements;
+  expect(forced[0]).not.toMatch(/cms_initialized/);
+  db.prepare("insert into settings(key,value) values('cms_initialized','\"1\"')").run();
+  for (const s of forced) db.exec(s);
+  expect((db.prepare("select count(*) c from settings where key='cms_initialized'").get() as any).c).toBe(0);
+});

@@ -20,7 +20,17 @@ async function body(req: Request): Promise<unknown> {
 }
 const STATUSES = ["draft", "publish", "trash"];
 
+/** 成功した変更系リクエストのあと、サイトが「CMSで管理されている」印を付ける（取り込みスクリプトの上書き防止ガードが参照する） */
 export async function handleAdminApi(req: Request, ctx: ApiCtx): Promise<Response> {
+  const res = await route(req, ctx);
+  const m = req.method.toUpperCase();
+  if (m !== "GET" && m !== "HEAD" && res.status < 300) {
+    await ctx.db.prepare("INSERT OR IGNORE INTO settings(key,value) VALUES('cms_initialized','\"1\"')").bind().run().catch(() => {});
+  }
+  return res;
+}
+
+async function route(req: Request, ctx: ApiCtx): Promise<Response> {
   try {
     const url = new URL(req.url);
     const path = url.pathname.replace(/^\/admin\/api/, "") || "/";

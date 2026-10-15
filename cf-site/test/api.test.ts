@@ -71,3 +71,12 @@ test("unexpected errors are 500 without leaking details", async () => {
   const res = await handleAdminApi(new Request(`${ORIGIN}/admin/api/terms`), { db: broken, email: "me@x", nowUtc: "x" });
   expect(res.status).toBe(500); expect(JSON.stringify(await res.json())).not.toMatch(/secret/);
 });
+
+test("any successful CMS mutation marks the site as CMS-managed (so the import script refuses to overwrite it); reads and failed requests do not", async () => {
+  const db = setup(); const marked = () => (db as any).prepare ? 0 : 0;
+  const has = async () => !!(await db.prepare("SELECT 1 x FROM settings WHERE key='cms_initialized'").bind().first());
+  await call(db, "GET", "/posts"); expect(await has()).toBe(false);
+  expect((await call(db, "POST", "/posts", post({ title: "" }))).status).toBe(400); expect(await has()).toBe(false);
+  expect((await call(db, "POST", "/posts", post())).status).toBe(201); expect(await has()).toBe(true);
+  void marked;
+});
