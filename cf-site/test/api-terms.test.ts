@@ -47,3 +47,21 @@ test("delete: refused with usage info while a post uses the term; allowed when u
   expect(s.raw.prepare("select count(*) c from terms where id=?").get(created.id)).toEqual({ c: 0 });
   expect((await call(s, "DELETE", `/terms/${created.id}`)).status).toBe(404);
 });
+
+test("dot-only slugs are rejected and dot-only names get a fallback slug", async () => {
+  const s = setup();
+  expect((await call(s, "POST", "/terms", { taxonomy: "skill", name: "x", slug: ".." })).status).toBe(400);
+  expect((await call(s, "POST", "/terms", { taxonomy: "skill", name: "x", slug: "." })).status).toBe(400);
+  expect(termSlugFromName("..")).toMatch(/^term-/);
+});
+test("delete is a single guarded statement: nothing is deleted if the term became used", async () => {
+  const s = setup();
+  const created = await (await call(s, "POST", "/terms", { taxonomy: "skill", name: "競合" })).json() as any;
+  const realPrepare = s.db.prepare.bind(s.db);
+  // 件数確認のあとに記事が付いた状況を再現: 使用数の確認のあと・削除の直前に記事が付く
+  let injected = false;
+  (s.db as any).prepare = (sql: string) => { const st = realPrepare(sql); if (!injected && /^DELETE FROM terms/.test(sql)) { injected = true; s.raw.exec(`insert into post_terms(post_id,term_id) select id,${created.id} from posts limit 1`); } return st; };
+  const r = await call(s, "DELETE", `/terms/${created.id}`);
+  expect(r.status).toBe(409);
+  expect(s.raw.prepare("select count(*) c from post_terms where term_id=?").get(created.id)).toEqual({ c: 1 });
+});

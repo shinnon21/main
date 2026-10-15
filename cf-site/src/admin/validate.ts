@@ -8,6 +8,7 @@ export function validateSlug(slug: string): string | null {
   if (typeof slug !== "string" || slug.length < 1) return "slug is required";
   if (slug.length > 200) return "slug is too long";
   if (/[\s/?#%]/.test(slug)) return "slug contains forbidden characters";
+  if (/^\.+$/.test(slug)) return "slug cannot consist only of dots";
   if (RESERVED.has(slug)) return "slug is reserved";
   return null;
 }

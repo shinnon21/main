@@ -33,3 +33,11 @@ test("export does not mark the CMS as initialized (read-only)", async () => {
   const s = setup(); await get(s);
   expect(s.raw.prepare("select count(*) c from settings where key='cms_initialized'").get()).toEqual({ c: 0 });
 });
+
+test("export includes PV counts and revisions (which cannot be rebuilt)", async () => {
+  const s = setup();
+  s.raw.exec("insert or replace into views(post_id,count) select id,5 from posts limit 1");
+  s.raw.exec("insert into revisions(post_id,saved_at,saved_by,snapshot) select id,'t','me','{}' from posts limit 1");
+  const d = await (await get(s)).json() as any;
+  expect(d.views).toHaveLength(1); expect(d.revisions).toHaveLength(1);
+});

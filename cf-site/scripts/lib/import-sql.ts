@@ -10,7 +10,7 @@ const rwDeep = (v: unknown, site: string): unknown =>
   typeof v === "string" ? rewriteUploads(v, site) : Array.isArray(v) ? v.map((x) => rwDeep(x, site)) : v && typeof v === "object" ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, rwDeep(x, site)])) : v;
 
 /** CMSで一度でも編集すると `settings.cms_initialized` が付く。この文は印があれば必ずエラーで止まり、以降の DELETE を実行させない */
-const GUARD_SQL = "SELECT CASE WHEN EXISTS(SELECT 1 FROM settings WHERE key='cms_initialized') THEN json('REFUSING TO IMPORT: the CMS has been used (cms_initialized is set). Re-run with --force only if you really want to overwrite all content.') ELSE 1 END;";
+export const GUARD_SQL = "SELECT CASE WHEN EXISTS(SELECT 1 FROM settings WHERE key='cms_initialized') THEN json('REFUSING TO IMPORT: the CMS has been used (cms_initialized is set). Re-run with --force only if you really want to overwrite all content.') ELSE 1 END;";
 
 export function buildImportSql(exp: WpExport, opts: { force?: boolean } = {}) {
   const statements: string[] = [

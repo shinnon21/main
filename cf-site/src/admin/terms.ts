@@ -16,6 +16,7 @@ const name = (v: unknown): string => {
 /** 名前からURL用スラッグを作る（日本語は保持・ASCIIは小文字・空白はハイフン・URL予約文字は除去） */
 export function termSlugFromName(n: string): string {
   const s = n.trim().toLowerCase().replace(/\s+/g, "-").replace(/[/?#%\\]/g, "").replace(/^-+|-+$/g, "");
+  if (/^\.+$/.test(s)) return `term-${Date.now().toString(36)}`;
   return s || `term-${Date.now().toString(36)}`;
 }
 
@@ -34,7 +35,8 @@ export async function createTerm(db: D1Like, raw: unknown) {
   const err = validateSlug(slug);
   if (err) return bad(err);
   if (await db.prepare("SELECT 1 x FROM terms WHERE taxonomy=? AND slug=?").bind(r.taxonomy, slug).first()) throw new HttpError(409, "slug already exists");
-  await db.prepare("INSERT INTO terms(taxonomy,slug,name) VALUES(?,?,?)").bind(r.taxonomy, slug, n).run();
+  try { await db.prepare("INSERT INTO terms(taxonomy,slug,name) VALUES(?,?,?)").bind(r.taxonomy, slug, n).run(); }
+  catch (e) { if (/UNIQUE/i.test(String(e))) throw new HttpError(409, "slug already exists"); throw e; }
   const row = await db.prepare("SELECT id,taxonomy,slug,name FROM terms WHERE taxonomy=? AND slug=?").bind(r.taxonomy, slug).first();
   return row as { id: number; taxonomy: string; slug: string; name: string };
 }
@@ -49,8 +51,9 @@ export async function renameTerm(db: D1Like, id: number, raw: unknown): Promise<
 /** 使用中なら削除せず件数を返す */
 export async function deleteTerm(db: D1Like, id: number): Promise<{ ok: true } | { inUse: number }> {
   if (!(await db.prepare("SELECT 1 x FROM terms WHERE id=?").bind(id).first())) throw new HttpError(404, "not found");
+  // 使用中でなければ削除、を1文で行う（確認と削除の間に記事が付いても、CASCADEで割当が黙って消えない）
+  await db.prepare("DELETE FROM terms WHERE id=? AND NOT EXISTS(SELECT 1 FROM post_terms WHERE term_id=?)").bind(id, id).run();
+  if (!(await db.prepare("SELECT 1 x FROM terms WHERE id=?").bind(id).first())) return { ok: true };
   const c = (await db.prepare("SELECT COUNT(*) c FROM post_terms WHERE term_id=?").bind(id).first<{ c: number }>())?.c ?? 0;
-  if (c > 0) return { inUse: c };
-  await db.prepare("DELETE FROM terms WHERE id=?").bind(id).run();
-  return { ok: true };
+  return { inUse: c };
 }
