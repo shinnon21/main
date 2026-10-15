@@ -1,0 +1,40 @@
+---
+import AdminLayout from "../../../admin/AdminLayout.astro";
+import { getEnv } from "../../../lib/env.ts";
+import { recentAudit } from "../../../mcp/audit.ts";
+const env = getEnv();
+const rows = await recentAudit(env.DB, 100);
+const origin = (env.SITE_ORIGIN || "https://shinnosuke-kobayashi.jp").replace(/\/+$/, "");
+---
+<AdminLayout title="Claude連携">
+  <h1>Claude連携</h1>
+  <p style="color:#6a6a6a">Claudeから記事を下書き作成・編集できるようにする設定です。公開・削除・サイト設定の変更はできません（公開は管理画面で行います）。</p>
+
+  <section class="card">
+    <h2 style="margin-top:0">接続のしかた</h2>
+    <ol>
+      <li>Claude の「設定 → コネクタ → カスタムコネクタを追加」に、次のURLを入力します。<br /><code id="mcpUrl">{origin}/mcp</code></li>
+      <li>ログイン画面（Cloudflare Access）で、管理者のメールアドレスにワンタイムPINが届きます。入力して進みます。</li>
+      <li>同意画面で「許可する」を押すと接続されます。</li>
+    </ol>
+    <p style="color:#6a6a6a">Claude Code の場合: <code>claude mcp add --transport http kobayashi-hp {origin}/mcp</code></p>
+  </section>
+
+  <section class="card">
+    <h2 style="margin-top:0">接続中のClaude</h2>
+    <div id="mcpMsg" role="status" aria-live="polite" style="min-height:22px;font-weight:600"></div>
+    <table class="list"><thead><tr><th>クライアント</th><th>接続日時</th><th>有効期限</th><th></th></tr></thead><tbody id="grantsBody"><tr><td colspan="4">読み込み中…</td></tr></tbody></table>
+    <p style="color:#6a6a6a">取り消すと、そのClaudeは再度の承認が済むまで操作できなくなります。</p>
+  </section>
+
+  <section class="card">
+    <h2 style="margin-top:0">操作の記録（直近100件）</h2>
+    <table class="list"><thead><tr><th>日時 (UTC)</th><th>ユーザー</th><th>クライアント</th><th>ツール</th><th>対象</th><th>結果</th></tr></thead><tbody>
+      {rows.map((r) => <tr><td>{r.at.slice(0, 19)}</td><td>{r.email}</td><td>{r.client}</td><td>{r.tool}</td><td>{r.target}</td><td><span class={`badge ${r.ok ? "publish" : "trash"}`}>{r.ok ? "成功" : "失敗"}</span></td></tr>)}
+      {rows.length === 0 && <tr><td colspan="6">まだ操作はありません。</td></tr>}
+    </tbody></table>
+  </section>
+</AdminLayout>
+<script>
+  import "../../../admin/client/mcp.ts";
+</script>

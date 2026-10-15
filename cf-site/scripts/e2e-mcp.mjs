@@ -60,8 +60,13 @@ await c.close();
 // 5) 接続管理API
 r = await fetch(`${base}/admin/mcp/api/grants`); const gl = await r.json();
 ok(r.status === 200 && gl.grants.length >= 1, "grants API lists the connection");
-r = await fetch(`${base}/admin/mcp/api/revoke`, { method: "POST", headers: { Origin: base, "Content-Type": "application/json" }, body: JSON.stringify({ id: gl.grants[0].id }) });
-ok(r.status === 200, "revoke succeeds");
+// 過去の実行で残った接続も含め、一覧の全接続を取り消す（取り消し対象の取り違えによる不安定さを避ける）
+let allRevoked = true;
+for (const g of gl.grants) {
+  r = await fetch(`${base}/admin/mcp/api/revoke`, { method: "POST", headers: { Origin: base, "Content-Type": "application/json" }, body: JSON.stringify({ id: g.id }) });
+  if (r.status !== 200) allRevoked = false;
+}
+ok(allRevoked, `revoke succeeds for all ${gl.grants.length} grant(s)`);
 r = await fetch(`${base}/mcp`, { method: "POST", headers: { Authorization: `Bearer ${tok.access_token}`, "Content-Type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "ping" }) });
 ok(r.status === 401, `revoked token is refused (got ${r.status})`);
 // 認可コードの再利用は拒否される（注意: 再利用するとライブラリは発行済みトークンも失効させるため、最後に行う）
