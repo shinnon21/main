@@ -2,8 +2,15 @@ import type { D1Like } from "../lib/d1.ts";
 import { createPost, getAdminPost, listAdminPosts, listRevisions, restoreRevision, setStatus, updatePost } from "./store.ts";
 import { HttpError, type PostStatus } from "./types.ts";
 import { cleanPostInput, utcToJstLocal } from "./validate.ts";
+import { MAX_BYTES, deleteMediaRow, findUsage, getMedia, insertMedia, listMedia, makeKey, setAlt, validateUpload } from "./media.ts";
 
-export interface ApiCtx { db: D1Like; email: string; nowUtc: string }
+export interface R2Like {
+  put(key: string, body: ArrayBuffer | Uint8Array, opts: { httpMetadata: { contentType: string } }): Promise<unknown>;
+  delete(key: string): Promise<void>;
+}
+export interface ApiCtx { db: D1Like; email: string; nowUtc: string; media?: R2Like }
+
+const rand6 = () => Array.from(crypto.getRandomValues(new Uint8Array(6)), (b) => (b % 36).toString(36)).join("");
 
 const json = (data: unknown, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
@@ -19,15 +26,51 @@ export async function handleAdminApi(req: Request, ctx: ApiCtx): Promise<Respons
     const path = url.pathname.replace(/^\/admin\/api/, "") || "/";
     const method = req.method.toUpperCase();
 
+    const isUpload = method === "POST" && path === "/media";
     if (method !== "GET" && method !== "HEAD") {
       if (req.headers.get("Origin") !== url.origin) throw new HttpError(403, "bad origin");
-      // 本文を持つメソッドはJSONのみ受け付ける（フォームPOST等によるCSRFを拒否）
-      if ((method === "POST" || method === "PUT" || method === "PATCH") && !/^application\/json(\s*;|$)/i.test(req.headers.get("Content-Type") ?? "")) {
+      if (isUpload) {
+        // バイナリ送信のため JSON 必須ではなく、カスタムヘッダー（クロスオリジンからは事前確認なしに付けられない）を必須にする
+        if (req.headers.get("X-Kb-Admin") !== "1") throw new HttpError(403, "missing admin header");
+      } else if ((method === "POST" || method === "PUT" || method === "PATCH") && !/^application\/json(\s*;|$)/i.test(req.headers.get("Content-Type") ?? "")) {
+        // 本文を持つメソッドはJSONのみ受け付ける（フォームPOST等によるCSRFを拒否）
         throw new HttpError(415, "content-type must be application/json");
       }
     }
 
     const { db, email, nowUtc } = ctx;
+    const mm = path.match(/^\/media(?:\/(\d+))?$/);
+    if (mm) {
+      if (!ctx.media) throw new HttpError(503, "media storage is not configured");
+      const id = mm[1] ? Number(mm[1]) : null;
+      if (id === null) {
+        if (method === "GET") return json({ media: await listMedia(db, { q: url.searchParams.get("q") ?? undefined, offset: Math.max(0, Number(url.searchParams.get("offset")) || 0) }) });
+        if (method === "POST") {
+          const declared = Number(req.headers.get("Content-Length"));
+          if (declared > MAX_BYTES) throw new HttpError(413, "file too large (max 10MB)");
+          const bytes = new Uint8Array(await req.arrayBuffer());
+          const { type } = validateUpload(bytes, req.headers.get("Content-Type") ?? "");
+          let name = "image";
+          try { name = decodeURIComponent(req.headers.get("X-Filename") ?? "") || "image"; } catch { /* 不正なエンコードは既定名 */ }
+          const key = makeKey(name, type, new Date(), rand6());
+          await ctx.media.put(key, bytes, { httpMetadata: { contentType: type } });
+          try { const { id: newId } = await insertMedia(db, { key, content_type: type, size: bytes.length, uploaded_by: email, now: nowUtc }); return json({ id: newId, key, url: `/media/${key}`, alt: "", content_type: type, size: bytes.length }, 201); }
+          catch (e) { await ctx.media.delete(key); throw e; }
+        }
+        throw new HttpError(405, "method not allowed");
+      }
+      const row = await getMedia(db, id);
+      if (!row) throw new HttpError(404, "not found");
+      if (method === "PUT") { await setAlt(db, id, String(((await body(req)) as { alt?: unknown })?.alt ?? "")); return json({ ok: true }); }
+      if (method === "DELETE") {
+        const usage = await findUsage(db, row.key);
+        if (usage.length) return json({ error: "in use", usage }, 409);
+        await ctx.media.delete(row.key);
+        await deleteMediaRow(db, id);
+        return new Response(null, { status: 204 });
+      }
+      throw new HttpError(405, "method not allowed");
+    }
     if (path === "/posts") {
       if (method === "GET") return json({ posts: await listAdminPosts(db, { type: url.searchParams.get("type") ?? undefined, status: url.searchParams.get("status") ?? undefined, q: url.searchParams.get("q") ?? undefined }) });
       if (method === "POST") { const { id } = await createPost(db, cleanPostInput(await body(req)), email, nowUtc); return json({ id }, 201); }

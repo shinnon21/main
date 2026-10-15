@@ -4,7 +4,11 @@ import type { D1Like } from "./d1.ts";
 
 export interface KbEnv {
   DB: D1Like;
-  MEDIA: { get(key: string): Promise<{ body: ReadableStream; httpEtag: string; httpMetadata?: { contentType?: string } } | null> };
+  MEDIA: {
+    get(key: string): Promise<{ body: ReadableStream; httpEtag: string; httpMetadata?: { contentType?: string } } | null>;
+    put(key: string, body: ArrayBuffer | Uint8Array, opts: { httpMetadata: { contentType: string } }): Promise<unknown>;
+    delete(key: string): Promise<void>;
+  };
   CACHE: unknown;
   ACCESS_TEAM_DOMAIN?: string;
   ACCESS_AUD?: string;
