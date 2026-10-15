@@ -16,3 +16,8 @@ export function normalizeRequest(url: URL): { status: 301; location: string } | 
   if (p1) return { status: 301, location: `${prefix}/${p1[1]}/${search}` };
   return null;
 }
+
+/** www.本番ドメイン は常に本番ドメイン（wwwなし）へ301。パスとクエリは保持（現行WordPressと同じ挙動） */
+export function wwwRedirect(url: URL): string | null {
+  return url.hostname === "www.shinnosuke-kobayashi.jp" ? `https://shinnosuke-kobayashi.jp${url.pathname}${url.search}` : null;
+}

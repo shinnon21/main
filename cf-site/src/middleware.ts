@@ -1,5 +1,5 @@
 import { defineMiddleware } from "astro:middleware";
-import { normalizeRequest } from "./lib/redirects.ts";
+import { normalizeRequest, wwwRedirect } from "./lib/redirects.ts";
 import { resolveLang } from "./lib/lang.ts";
 import { isStagingHost } from "./lib/seo.ts";
 import { authorize } from "./admin/access.ts";
@@ -16,6 +16,9 @@ const guard = async (host: string, res: Response | Promise<Response>) => {
 };
 
 export const onRequest = defineMiddleware(async (ctx, next) => {
+  // www は管理画面を含め最初にwwwなしへ転送（Accessの保護対象ホストと一致させる）
+  const www = wwwRedirect(ctx.url);
+  if (www) return ctx.redirect(www, 301);
   // 管理画面: Access認証（fail closed）。言語・URL正規化は適用しない。
   // /admin に解決しうるあらゆる綴り（%エンコード・//・大文字）を classifyPath で検出し、/en/admin… は存在しない（404）
   const kind = classifyRequest(ctx.request.url);

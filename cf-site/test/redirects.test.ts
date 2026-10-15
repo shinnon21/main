@@ -37,3 +37,11 @@ test("legacy WP sitemap URLs and favicon.ico redirect to the new locations", () 
   expect(n(u("/favicon.ico"))).toEqual({ status: 301, location: "/assets/img/favicon-192.png" });
   for (const p of ["/sitemap.xml", "/robots.txt", "/llms.txt"]) expect(n(u(p)), p).toBeNull();
 });
+
+import { wwwRedirect } from "../src/lib/redirects.ts";
+test("www host is redirected (301) to the apex with path and query preserved; other hosts are untouched", () => {
+  expect(wwwRedirect(new URL("https://www.shinnosuke-kobayashi.jp/works/a/?x=1"))).toBe("https://shinnosuke-kobayashi.jp/works/a/?x=1");
+  expect(wwwRedirect(new URL("https://www.shinnosuke-kobayashi.jp/admin/"))).toBe("https://shinnosuke-kobayashi.jp/admin/");
+  expect(wwwRedirect(new URL("https://www.shinnosuke-kobayashi.jp/en/"))).toBe("https://shinnosuke-kobayashi.jp/en/");
+  for (const u of ["https://shinnosuke-kobayashi.jp/", "https://kb-site.curly-wave-c49f.workers.dev/", "https://www.evil.example/"]) expect(wwwRedirect(new URL(u))).toBeNull();
+});
