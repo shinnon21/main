@@ -2,26 +2,31 @@
 import "../styles/global.css";
 import SnsLinks from "./SnsLinks.astro";
 import { getEnv } from "../lib/env.ts";
+import LangSwitch from "./LangSwitch.astro";
 import { t, type Lang } from "../lib/i18n.ts";
+import { altPair, l } from "../lib/lang.ts";
 
-interface Props { title: string; description?: string; lang?: Lang; bodyClass?: string }
-const { title, description, lang = "ja", bodyClass = "" } = Astro.props;
+interface Props { title: string; description?: string; lang?: Lang; bodyClass?: string; pair?: boolean }
+const { title, description, bodyClass = "", pair = true } = Astro.props;
+const lang: Lang = Astro.props.lang ?? Astro.locals.lang ?? "ja";
+const alt = pair ? altPair(Astro.locals.path ?? "/") : { ja: "/", en: "/en/" };
 
 const db = getEnv().DB;
 const setting = async (key: string, fallback: string) => {
   const r = await db.prepare("SELECT value FROM settings WHERE key=?").bind(key).first<{ value: string }>();
   try { return r ? (JSON.parse(r.value) as string) || fallback : fallback; } catch { return fallback; }
 };
-const siteName = await setting("blogname", "小林慎之助");
+const siteNameJa = await setting("blogname", "小林慎之助");
+const siteName = t(lang, siteNameJa, "Shinnosuke Kobayashi");
 const siteDesc = await setting("blogdescription", "構想を、社会に実装する。");
 
 const nav: [string, string, string][] = [
-  [t(lang, "実績", "Works"), t(lang, "works", "実績"), "/works/"],
-  [t(lang, "コラム", "Column"), t(lang, "column", "コラム"), "/column/"],
-  [t(lang, "お知らせ", "News"), t(lang, "news", "お知らせ"), "/news/"],
-  [t(lang, "AIチャット", "AI Chat"), "chat", "/chat/"],
-  [t(lang, "プロフィール", "Profile"), t(lang, "profile", "プロフィール"), "/profile/"],
-  ["About", t(lang, "about", "このサイトについて"), "/about/"],
+  [t(lang, "実績", "Works"), t(lang, "works", "実績"), l(lang, "/works/")],
+  [t(lang, "コラム", "Column"), t(lang, "column", "コラム"), l(lang, "/column/")],
+  [t(lang, "お知らせ", "News"), t(lang, "news", "お知らせ"), l(lang, "/news/")],
+  [t(lang, "AIチャット", "AI Chat"), "chat", l(lang, "/chat/")],
+  [t(lang, "プロフィール", "Profile"), t(lang, "profile", "プロフィール"), l(lang, "/profile/")],
+  ["About", t(lang, "about", "このサイトについて"), l(lang, "/about/")],
 ];
 const year = new Date().getFullYear();
 const searchSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5C5C5C" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>';
@@ -33,6 +38,9 @@ const searchSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" s
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{title}</title>
   {description && <meta name="description" content={description} />}
+  {pair && <link rel="alternate" hreflang="ja" href={alt.ja} />}
+  {pair && <link rel="alternate" hreflang="en" href={alt.en} />}
+  {pair && <link rel="alternate" hreflang="x-default" href={alt.ja} />}
   <link rel="icon" href="/assets/img/favicon-32.png" sizes="32x32" />
   <link rel="icon" href="/assets/img/favicon-192.png" sizes="192x192" />
   <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png" />
@@ -44,7 +52,7 @@ const searchSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" s
 
 <header class="site">
   <div class="container">
-    <a class="logo" href="/">
+    <a class="logo" href={l(lang, "/")}>
       <img class="logo-img" src="/assets/img/logo-horizontal.svg" alt={siteName} width="575" height="58" />
     </a>
 
@@ -53,17 +61,18 @@ const searchSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" s
         {nav.map(([label, small, href]) => <li><a href={href}>{label}<small>{small}</small></a></li>)}
       </ul>
       <div class="gnav-extra">
-        <form class="search" role="search" method="get" action="/">
+        <LangSwitch lang={lang} ja={alt.ja} en={alt.en} />
+        <form class="search" role="search" method="get" action={l(lang, "/")}>
           <button type="submit" aria-label="検索" set:html={searchSvg} />
           <input type="text" name="s" value="" placeholder={t(lang, "フリーワードで検索", "Search")} />
         </form>
         <SnsLinks />
-        <a class="btn primary" href="/contact/">{t(lang, "お問い合わせ →", "Contact →")}</a>
+        <a class="btn primary" href={l(lang, "/contact/")}>{t(lang, "お問い合わせ →", "Contact →")}</a>
       </div>
     </nav>
 
     <div class="h-right">
-      <form class="search" role="search" method="get" action="/">
+      <form class="search" role="search" method="get" action={l(lang, "/")}>
         <button type="submit" aria-label="検索" set:html={searchSvg} />
         <input type="text" name="s" value="" placeholder={t(lang, "フリーワードで検索", "Search")} />
       </form>
@@ -86,26 +95,27 @@ const searchSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" s
       <div>
         <h4>sitemap</h4>
         <ul class="links">
-          <li><a href="/works/">{t(lang, "実績", "Works")}</a></li>
-          <li><a href="/column/">{t(lang, "コラム", "Column")}</a></li>
-          <li><a href="/news/">{t(lang, "お知らせ", "News")}</a></li>
-          <li><a href="/profile/">{t(lang, "プロフィール", "Profile")}</a></li>
-          <li><a href="/searches/">{t(lang, "条件から探す", "Advanced search")}</a></li>
+          <li><a href={l(lang, "/works/")}>{t(lang, "実績", "Works")}</a></li>
+          <li><a href={l(lang, "/column/")}>{t(lang, "コラム", "Column")}</a></li>
+          <li><a href={l(lang, "/news/")}>{t(lang, "お知らせ", "News")}</a></li>
+          <li><a href={l(lang, "/profile/")}>{t(lang, "プロフィール", "Profile")}</a></li>
+          <li><a href={l(lang, "/searches/")}>{t(lang, "条件から探す", "Advanced search")}</a></li>
         </ul>
       </div>
       <div>
         <h4>links</h4>
         <ul class="links">
-          <li><a href="/chat/">{t(lang, "AIチャット", "AI Chat")}</a></li>
-          <li><a href="/contact/">{t(lang, "お問い合わせ", "Contact")}</a></li>
-          <li><a href="/about/">{t(lang, "About（このサイトについて）", "About this site")}</a></li>
-          <li><a href="/privacy/">{t(lang, "プライバシーポリシー", "Privacy Policy")}</a></li>
+          <li><a href={l(lang, "/chat/")}>{t(lang, "AIチャット", "AI Chat")}</a></li>
+          <li><a href={l(lang, "/contact/")}>{t(lang, "お問い合わせ", "Contact")}</a></li>
+          <li><a href={l(lang, "/about/")}>{t(lang, "About（このサイトについて）", "About this site")}</a></li>
+          <li><a href={l(lang, "/privacy/")}>{t(lang, "プライバシーポリシー", "Privacy Policy")}</a></li>
           <li><a href="https://www.weeave.co.jp/" target="_blank" rel="noopener">{t(lang, "Weeave株式会社 ↗", "Weeave Inc. ↗")}</a></li>
         </ul>
       </div>
     </div>
     <div class="bottom">
       <span class="en">© {year} Shinnosuke Kobayashi</span>
+      <LangSwitch lang={lang} ja={alt.ja} en={alt.en} />
     </div>
   </div>
 </footer>

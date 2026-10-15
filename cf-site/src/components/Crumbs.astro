@@ -1,5 +1,7 @@
 ---
-interface Props { items: { label: string; href?: string }[] }
-const { items } = Astro.props;
+import { l } from "../lib/lang.ts";
+import type { Lang } from "../lib/i18n.ts";
+interface Props { items: { label: string; href?: string }[]; lang?: Lang }
+const { items, lang = Astro.locals.lang ?? "ja" } = Astro.props;
 ---
-<nav class="breadcrumbs" aria-label="パンくず"><a href="/">top</a>{items.map((c) => <Fragment><span class="sep">›</span>{c.href ? <a href={c.href}>{c.label}</a> : <span>{c.label}</span>}</Fragment>)}</nav>
+<nav class="breadcrumbs" aria-label="パンくず"><a href={l(lang, "/")}>top</a>{items.map((c) => <Fragment><span class="sep">›</span>{c.href ? <a href={c.href}>{c.label}</a> : <span>{c.label}</span>}</Fragment>)}</nav>

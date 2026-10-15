@@ -1,0 +1,8 @@
+---
+import type { Lang } from "../lib/i18n.ts";
+interface Props { lang: Lang; ja: string; en: string }
+const { lang, ja, en } = Astro.props;
+---
+{lang === "en"
+  ? <a class="lang-switch" href={ja} hreflang="ja" rel="alternate"><span class="on">EN</span><span class="sep">/</span><span>日本語</span></a>
+  : <a class="lang-switch" href={en} hreflang="en" rel="alternate"><span class="on">JA</span><span class="sep">/</span><span>English</span></a>}
