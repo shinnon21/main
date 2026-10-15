@@ -3,6 +3,7 @@ import { createPost, getAdminPost, listAdminPosts, listRevisions, restoreRevisio
 import { HttpError, type PostStatus } from "./types.ts";
 import { cleanPostInput, utcToJstLocal } from "./validate.ts";
 import { cleanSettings, readSettings, saveSettings } from "./settings.ts";
+import { backupFilename, buildBackup } from "./backup.ts";
 import { cleanProfile, readProfile, saveProfile } from "./profile.ts";
 import { createTerm, deleteTerm, listTerms, renameTerm } from "./terms.ts";
 import { MAX_BYTES, deleteMediaRow, findUsage, getMedia, insertMedia, listMedia, makeKey, setAlt, validateUpload } from "./media.ts";
@@ -116,6 +117,11 @@ async function route(req: Request, ctx: ApiCtx): Promise<Response> {
       if (method === "GET") return json({ posts: await listAdminPosts(db, { type: url.searchParams.get("type") ?? undefined, status: url.searchParams.get("status") ?? undefined, q: url.searchParams.get("q") ?? undefined }) });
       if (method === "POST") { const { id } = await createPost(db, cleanPostInput(await body(req)), email, nowUtc); return json({ id }, 201); }
       throw new HttpError(405, "method not allowed");
+    }
+    if (path === "/export") {
+      if (method !== "GET") throw new HttpError(405, "method not allowed");
+      const data = await buildBackup(db, nowUtc, { contacts: url.searchParams.get("contacts") === "1" });
+      return new Response(JSON.stringify(data), { headers: { "Content-Type": "application/json; charset=utf-8", "Content-Disposition": `attachment; filename="${backupFilename(nowUtc)}"`, "Cache-Control": "no-store" } });
     }
     if (path === "/settings") {
       if (method === "GET") return json(await readSettings(db));

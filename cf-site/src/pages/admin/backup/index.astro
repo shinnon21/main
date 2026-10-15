@@ -1,0 +1,17 @@
+---
+import AdminLayout from "../../../admin/AdminLayout.astro";
+---
+<AdminLayout title="バックアップ">
+  <h1>バックアップ</h1>
+  <div class="card">
+    <p>実績・コラム・お知らせ・固定ページ・分類・設定・メディア一覧を JSON ファイルとして書き出します。</p>
+    <ul style="color:#6a6a6a">
+      <li>画像ファイルそのもの（R2）は含まれません。メディア一覧のみです。</li>
+      <li>問い合わせには個人情報が含まれるため、チェックしたときだけ含めます。取り扱いにご注意ください。</li>
+    </ul>
+    <form method="get" action="/admin/api/export">
+      <label><input type="checkbox" name="contacts" value="1" /> お問い合わせの内容も含める</label>
+      <div class="bar" style="margin-top:14px"><button class="btn primary" type="submit">書き出す（JSONをダウンロード）</button></div>
+    </form>
+  </div>
+</AdminLayout>
