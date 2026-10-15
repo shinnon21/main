@@ -9,7 +9,7 @@ import { l } from "../../lib/lang.ts";
 const lang = Astro.locals.lang ?? "ja";
 const TITLES = { works: t(lang, "実績", "Works"), column: t(lang, "コラム", "Column"), news: t(lang, "お知らせ", "News") } as const;
 // 1階層の固定ページ（/about/ 等）もこのルートで解決する。contact/chat/searches/profile は専用ルート（または未実装＝404）
-const RESERVED = new Set(["contact", "chat", "searches", "profile"]);
+const RESERVED = new Set(["contact", "chat", "searches", "profile", "admin"]);
 const { type } = Astro.params;
 if (!type) return Astro.rewrite("/404/");
 const db = getEnv().DB;

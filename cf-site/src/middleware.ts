@@ -2,6 +2,9 @@ import { defineMiddleware } from "astro:middleware";
 import { normalizeRequest } from "./lib/redirects.ts";
 import { resolveLang } from "./lib/lang.ts";
 import { isStagingHost } from "./lib/seo.ts";
+import { authorize } from "./admin/access.ts";
+import { adminHeaders, isAdminPath } from "./admin/guard.ts";
+import { getEnv } from "./lib/env.ts";
 
 // 確認用ホスト（*.workers.dev・localhost）は検索エンジンに載せない
 const guard = async (host: string, res: Response | Promise<Response>) => {
@@ -12,7 +15,14 @@ const guard = async (host: string, res: Response | Promise<Response>) => {
   return out;
 };
 
-export const onRequest = defineMiddleware((ctx, next) => {
+export const onRequest = defineMiddleware(async (ctx, next) => {
+  // 管理画面: Access認証（fail closed）。言語・URL正規化は適用しない
+  if (isAdminPath(ctx.url.pathname)) {
+    const a = await authorize(ctx.request, getEnv());
+    if (!a.ok) return adminHeaders(new Response(a.message, { status: a.status }));
+    ctx.locals.adminEmail = a.email;
+    return guard(ctx.url.host, adminHeaders(await next()));
+  }
   const r = normalizeRequest(ctx.url);
   if (r) return guard(ctx.url.host, ctx.redirect(r.location, r.status));
   const { lang, path } = resolveLang(ctx.url.pathname);
