@@ -16,14 +16,14 @@ test("isBot: crawlers, monitors, HTTP libraries and empty UAs are bots; real bro
   for (const ua of ["Googlebot/2.1", "Mozilla/5.0 (compatible; bingbot/2.0)", "AhrefsBot", "facebookexternalhit/1.1", "Slackbot-LinkExpanding", "curl/8.0", "python-requests/2.31", "Go-http-client/1.1", "HeadlessChrome/120", "Lighthouse", "UptimeRobot/2.0", "ClaudeBot", "GPTBot", "Twitterbot/1.0", "", "x"]) expect(isBot(ua), ua).toBe(true);
   for (const ua of [UA, "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"]) expect(isBot(ua), ua).toBe(false);
 });
-test("recordView creates the row, then increments; the same visitor is counted once per 30 minutes; other visitors and posts count separately", async () => {
+test("recordView creates the row, then increments; the same IP is counted once per 30 minutes whatever its User-Agent; other IPs and posts count separately", async () => {
   const s = setup(); const id = pid(s.raw, 11);
   const rv = (ip: string, ua = UA, post = id) => recordView({ db: s.db, kv: s.kv, postId: post, ip, ua, salt: "s" });
   expect(count(s.raw, 11)).toBe(0);
   expect(await rv("203.0.113.1")).toBe(true); expect(count(s.raw, 11)).toBe(1);
   expect(await rv("203.0.113.1")).toBe(false); expect(count(s.raw, 11)).toBe(1);
   expect(await rv("203.0.113.2")).toBe(true); expect(count(s.raw, 11)).toBe(2);
-  expect(await rv("203.0.113.1", UA + " X")).toBe(true); expect(count(s.raw, 11)).toBe(3);
+  expect(await rv("203.0.113.1", UA + " X")).toBe(false); expect(count(s.raw, 11)).toBe(2); // UAを変えても同じ訪問者として扱う（水増し対策）
   expect(await rv("203.0.113.1", UA, pid(s.raw, 10))).toBe(true); expect(count(s.raw, 10)).toBe(12 + 1);
 });
 test("bots are never counted; KV failure counts nothing and never throws", async () => {
@@ -52,4 +52,18 @@ test("counted views feed the popularity ranking", async () => {
   const s = setup();
   for (let i = 0; i < 30; i++) await recordView({ db: s.db, kv: s.kv, postId: pid(s.raw, 11), ip: `203.0.113.${i}`, ua: UA, salt: "s" });
   expect((await ranking(s.db, 5))[0].slug).toBe("site-b");
+});
+
+test("rotating the User-Agent string cannot inflate a post's count (dedupe is by IP /64 only)", async () => {
+  const s = setup(); const id = pid(s.raw, 11);
+  for (let i = 0; i < 50; i++) await recordView({ db: s.db, kv: s.kv, postId: id, ip: "203.0.113.50", ua: `${UA} rotate-${i}`, salt: "s" });
+  expect(count(s.raw, 11)).toBe(1);
+});
+test("per-IP daily cap: one address can only add a limited number of views across posts per day (fails closed on KV errors)", async () => {
+  const s = setup();
+  const ids = [10, 11, 14].map((w) => pid(s.raw, w));
+  const results: boolean[] = [];
+  for (const id of ids) results.push(await recordView({ db: s.db, kv: s.kv, postId: id, ip: "203.0.113.60", ua: UA, salt: "s", maxPerIpPerDay: 2 }));
+  expect(results).toEqual([true, true, false]);
+  expect(await recordView({ db: s.db, kv: s.kv, postId: ids[0], ip: "203.0.113.61", ua: UA, salt: "s", maxPerIpPerDay: 2 })).toBe(true);
 });
