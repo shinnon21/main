@@ -3,7 +3,7 @@ import { normalizeRequest } from "./lib/redirects.ts";
 import { resolveLang } from "./lib/lang.ts";
 import { isStagingHost } from "./lib/seo.ts";
 import { authorize } from "./admin/access.ts";
-import { adminHeaders, classifyPath } from "./admin/guard.ts";
+import { adminHeaders, classifyRequest } from "./admin/guard.ts";
 import { getEnv } from "./lib/env.ts";
 
 // 確認用ホスト（*.workers.dev・localhost）は検索エンジンに載せない
@@ -18,7 +18,7 @@ const guard = async (host: string, res: Response | Promise<Response>) => {
 export const onRequest = defineMiddleware(async (ctx, next) => {
   // 管理画面: Access認証（fail closed）。言語・URL正規化は適用しない。
   // /admin に解決しうるあらゆる綴り（%エンコード・//・大文字）を classifyPath で検出し、/en/admin… は存在しない（404）
-  const kind = classifyPath(ctx.url.pathname);
+  const kind = classifyRequest(ctx.request.url);
   if (kind === "blocked") return adminHeaders(new Response("Not found", { status: 404 }));
   if (kind === "admin") {
     const a = await authorize(ctx.request, getEnv());
