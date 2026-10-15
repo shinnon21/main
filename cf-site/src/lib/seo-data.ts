@@ -17,18 +17,21 @@ export const ogImage = (thumbnail: string | null) => {
 };
 
 import { l } from "./lang.ts";
-import { articleLd, breadcrumbLd, metaDescription } from "./seo.ts";
+import { articleLd, breadcrumbLd, metaDescription, sspOverrides } from "./seo.ts";
+import { docTitle } from "./format.ts";
 
 /** 実績・コラム・お知らせ詳細の description / OGP画像 / JSON-LD（Article + BreadcrumbList）をまとめて作る */
 export async function articleSeo(db: D1Like, i: {
   lang: Lang; type: "works" | "column" | "news"; slug: string; title: string; excerpt: string; body: string;
-  thumbnail: string | null; published: string; modified: string; listLabel: string;
+  thumbnail: string | null; published: string; modified: string; listLabel: string; meta?: Record<string, unknown>;
 }) {
+  const o = sspOverrides(i.meta ?? {}, i.lang);
   const path = l(i.lang, `/${i.type}/${encodeURIComponent(i.slug)}/`);
-  const description = metaDescription({ lang: i.lang, kind: "post", excerpt: i.excerpt, body: i.body });
-  const image = ogImage(i.thumbnail);
+  const description = o.description ?? metaDescription({ lang: i.lang, kind: "post", excerpt: i.excerpt, body: i.body });
+  const image = o.image ? { url: o.image, isDefault: false } : ogImage(i.thumbnail);
   const author = await personFor(db, i.lang);
   return {
+    title: o.title ?? docTitle(i.title, i.lang),
     description,
     seo: {
       type: "article" as const,

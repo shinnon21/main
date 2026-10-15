@@ -34,9 +34,9 @@ const kpis = (lang === "en" && kpiEn.some((k) => k.value) ? kpiEn : Array.isArra
 const period = str("period_start");
 const sep = t(lang, "／", " / ");
 const thumb = mediaSrc(post.thumbnail);
-const sd = await articleSeo(db, { lang, type: "works", slug: post.slug, title, excerpt, body, thumbnail: post.thumbnail, published: post.published_at, modified: post.modified_at, listLabel: t(lang, "実績", "Works") });
+const sd = await articleSeo(db, { lang, type: "works", slug: post.slug, title, excerpt, body, thumbnail: post.thumbnail, published: post.published_at, modified: post.modified_at, meta: post.meta, listLabel: t(lang, "実績", "Works") });
 ---
-<Layout title={docTitle(title, lang)} description={sd.description} lang={lang} seo={sd.seo}>
+<Layout title={sd.title} description={sd.description} lang={lang} seo={sd.seo}>
 <div class="sec">
   <div class="container" style="max-width:900px">
     <Crumbs items={[{ label: t(lang, "実績", "Works"), href: l(lang, "/works/") }, { label: title }]} lang={lang} />

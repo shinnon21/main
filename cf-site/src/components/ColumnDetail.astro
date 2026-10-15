@@ -23,9 +23,9 @@ const db = getEnv().DB;
 const [terms, related, prof] = await Promise.all([postTerms(db, post.id), relatedByTerm(db, post, "skill", 3), profileSummary(db, lang)]);
 const thumb = mediaSrc(post.thumbnail);
 const excerpt = pick(lang, post.excerpt, post.excerpt_en);
-const sd = await articleSeo(db, { lang, type: "column", slug: post.slug, title, excerpt, body, thumbnail: post.thumbnail, published: post.published_at, modified: post.modified_at, listLabel: t(lang, "コラム", "Column") });
+const sd = await articleSeo(db, { lang, type: "column", slug: post.slug, title, excerpt, body, thumbnail: post.thumbnail, published: post.published_at, modified: post.modified_at, meta: post.meta, listLabel: t(lang, "コラム", "Column") });
 ---
-<Layout title={docTitle(title, lang)} description={sd.description} lang={lang} seo={sd.seo}>
+<Layout title={sd.title} description={sd.description} lang={lang} seo={sd.seo}>
 <div class="sec">
   <div class="container" style="max-width:900px">
     <Crumbs items={[{ label: t(lang, "コラム", "Column"), href: l(lang, "/column/") }, { label: title }]} lang={lang} />

@@ -18,12 +18,12 @@ const body = pick(lang, post.content, post.content_en);
 const db = getEnv().DB;
 const terms = await postTerms(db, post.id);
 const excerpt = pick(lang, post.excerpt, post.excerpt_en);
-const sd = await articleSeo(db, { lang, type: "news", slug: post.slug, title, excerpt, body, thumbnail: post.thumbnail, published: post.published_at, modified: post.modified_at, listLabel: t(lang, "お知らせ", "News") });
+const sd = await articleSeo(db, { lang, type: "news", slug: post.slug, title, excerpt, body, thumbnail: post.thumbnail, published: post.published_at, modified: post.modified_at, meta: post.meta, listLabel: t(lang, "お知らせ", "News") });
 const kindRaw = terms.find((x) => x.taxonomy === "news_type")?.name;
 const kind = kindRaw ? newsTypeName(lang, kindRaw) : undefined;
 const { yt, sp } = mediaEmbedIds(post.meta.media_youtube, post.meta.media_spotify);
 ---
-<Layout title={docTitle(title, lang)} description={sd.description} lang={lang} seo={sd.seo}>
+<Layout title={sd.title} description={sd.description} lang={lang} seo={sd.seo}>
 <div class="sec">
   <div class="container" style="max-width:820px">
     <Crumbs items={[{ label: t(lang, "お知らせ", "News"), href: l(lang, "/news/") }, { label: title }]} lang={lang} />

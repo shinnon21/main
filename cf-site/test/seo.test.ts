@@ -66,3 +66,12 @@ test("llmsTxt follows the llmstxt.org layout used by the theme", () => {
   expect(t).toContain("## コラム\n\n- [コラムB](https://shinnosuke-kobayashi.jp/column/b/)");
   expect(t).toContain("## SNS\n\n- X: https://x.com/a");
 });
+
+import { sspOverrides } from "../src/lib/seo.ts";
+test("sspOverrides reads SEO SIMPLE PACK custom fields for Japanese only, trims, ignores blanks", () => {
+  const meta = { ssp_meta_title: " 独自タイトル｜小林慎之助 ", ssp_meta_description: "独自説明", ssp_meta_image: "/media/2026/07/a.jpeg" };
+  expect(sspOverrides(meta, "ja")).toEqual({ title: "独自タイトル｜小林慎之助", description: "独自説明", image: "https://shinnosuke-kobayashi.jp/media/2026/07/a.jpeg" });
+  expect(sspOverrides(meta, "en")).toEqual({});
+  expect(sspOverrides({ ssp_meta_title: "  ", ssp_meta_image: 5 }, "ja")).toEqual({});
+  expect(sspOverrides({ ssp_meta_image: "https://cdn.example/x.png" }, "ja")).toEqual({ image: "https://cdn.example/x.png" });
+});

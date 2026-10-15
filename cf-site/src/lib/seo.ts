@@ -129,3 +129,15 @@ export function llmsTxt(i: { name: string; description: string; bio: string; pro
   lines.push("", "## SNS", "", ...i.sns.map((s) => `- ${s.label}: ${s.url}`));
   return lines.join("\n") + "\n";
 }
+
+/** SEO SIMPLE PACK の個別設定（ssp_meta_*）。旧サイトは日本語ページでのみ出力していたため ja のみ適用する */
+export function sspOverrides(meta: Record<string, unknown>, lang: Lang): { title?: string; description?: string; image?: string } {
+  if (lang !== "ja") return {};
+  const s = (k: string) => (typeof meta[k] === "string" ? (meta[k] as string).trim() : "");
+  const out: { title?: string; description?: string; image?: string } = {};
+  if (s("ssp_meta_title")) out.title = s("ssp_meta_title");
+  if (s("ssp_meta_description")) out.description = s("ssp_meta_description");
+  const img = s("ssp_meta_image");
+  if (img) out.image = img.startsWith("/") ? SITE_URL + img : img;
+  return out;
+}
