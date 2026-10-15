@@ -1,0 +1,19 @@
+---
+import AdminLayout from "../../../admin/AdminLayout.astro";
+const groups: [string, string][] = [["skill", "スキル（横断タグ）"], ["works_type", "実績の種別"], ["industry", "業界"], ["news_type", "お知らせの種別"]];
+---
+<AdminLayout title="分類の管理">
+  <h1>分類の管理</h1>
+  <p style="color:#6a6a6a">名前の変更・追加ができます。スラッグ（URL）は変更できません。記事で使用中の分類は削除できません。</p>
+  <div id="termsMsg" role="status" aria-live="polite" style="min-height:22px;font-weight:600"></div>
+  {groups.map(([tax, label]) => (
+    <section class="card" data-tax={tax}>
+      <h2 style="margin-top:0">{label}</h2>
+      <table class="list"><thead><tr><th>名前</th><th>スラッグ</th><th>使用数</th><th></th></tr></thead><tbody class="terms-body"></tbody></table>
+      <form class="bar term-add" style="margin-top:12px"><input type="text" name="name" maxlength="100" placeholder="新しい分類の名前" style="width:260px" required /><button class="btn primary" type="submit">追加</button></form>
+    </section>
+  ))}
+</AdminLayout>
+<script>
+  import "../../../admin/client/terms.ts";
+</script>

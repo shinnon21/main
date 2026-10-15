@@ -2,6 +2,7 @@ import type { D1Like } from "../lib/d1.ts";
 import { createPost, getAdminPost, listAdminPosts, listRevisions, restoreRevision, setStatus, updatePost } from "./store.ts";
 import { HttpError, type PostStatus } from "./types.ts";
 import { cleanPostInput, utcToJstLocal } from "./validate.ts";
+import { createTerm, deleteTerm, listTerms, renameTerm } from "./terms.ts";
 import { MAX_BYTES, deleteMediaRow, findUsage, getMedia, insertMedia, listMedia, makeKey, setAlt, validateUpload } from "./media.ts";
 
 export interface R2Like {
@@ -114,9 +115,20 @@ async function route(req: Request, ctx: ApiCtx): Promise<Response> {
       if (method === "POST") { const { id } = await createPost(db, cleanPostInput(await body(req)), email, nowUtc); return json({ id }, 201); }
       throw new HttpError(405, "method not allowed");
     }
-    if (path === "/terms") {
-      if (method !== "GET") throw new HttpError(405, "method not allowed");
-      return json({ terms: (await db.prepare("SELECT taxonomy,slug,name FROM terms ORDER BY taxonomy,id").bind().all()).results });
+    const tm = path.match(/^\/terms(?:\/(\d+))?$/);
+    if (tm) {
+      if (!tm[1]) {
+        if (method === "GET") return json({ terms: await listTerms(db) });
+        if (method === "POST") return json(await createTerm(db, await body(req)), 201);
+        throw new HttpError(405, "method not allowed");
+      }
+      const tid = Number(tm[1]);
+      if (method === "PUT") { await renameTerm(db, tid, await body(req)); return json({ ok: true }); }
+      if (method === "DELETE") {
+        const r = await deleteTerm(db, tid);
+        return "inUse" in r ? json({ error: "in use", count: r.inUse }, 409) : new Response(null, { status: 204 });
+      }
+      throw new HttpError(405, "method not allowed");
     }
     const m = path.match(/^\/posts\/(\d+)(?:\/(revisions|status|restore\/(\d+)))?$/);
     if (!m) throw new HttpError(404, "not found");
