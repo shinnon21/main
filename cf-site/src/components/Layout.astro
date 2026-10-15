@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import SnsLinks from "./SnsLinks.astro";
+import { ADSENSE_CLIENT, GA_ID, gaSnippet, trackingEnabled } from "../lib/tracking.ts";
 import { getEnv } from "../lib/env.ts";
 import LangSwitch from "./LangSwitch.astro";
 import { t, type Lang } from "../lib/i18n.ts";
@@ -37,6 +38,7 @@ const nav: [string, string, string][] = [
   ["About", t(lang, "about", "このサイトについて"), l(lang, "/about/")],
 ];
 const year = new Date().getFullYear();
+const tracking = trackingEnabled(Astro.url.host);
 const searchSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5C5C5C" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>';
 ---
 <!DOCTYPE html>
@@ -46,6 +48,9 @@ const searchSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" s
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{title}</title>
   <meta name="description" content={description} />
+  {tracking && <script async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`} crossorigin="anonymous" is:inline></script>}
+  {tracking && <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} is:inline></script>}
+  {tracking && <script is:inline set:html={gaSnippet()} />}
   {noindex && <meta name="robots" content="noindex,follow" />}
   {canonical && <link rel="canonical" href={canonical} />}
   {canonical && (
