@@ -1,7 +1,7 @@
 import { OAuthProvider } from "@cloudflare/workers-oauth-provider";
 import { handle } from "@astrojs/cloudflare/handler";
 import { wwwRedirect } from "./lib/redirects.ts";
-import { capBody } from "./mcp/limits.ts";
+import { capBody, registrationAllowed } from "./mcp/limits.ts";
 import { handleAuthorize, handleGrantsApi, mcpEndpoint } from "./mcp/oauth.ts";
 
 /**
@@ -49,6 +49,7 @@ export default {
     if (request.method === "POST" && u.pathname === "/oauth/register") {
       const capped = await capBody(request, 8 * 1024);
       if (capped instanceof Response) return capped;
+      if (!(await registrationAllowed(env.CACHE, Date.now(), 30))) return new Response("Too Many Requests", { status: 429, headers: { "Retry-After": "86400" } });
       request = capped;
     }
     const origin = String(env.SITE_ORIGIN || "https://shinnosuke-kobayashi.jp").replace(/\/+$/, "");
