@@ -3,13 +3,13 @@ import { SITE_URL, mediaSrc } from "./format.ts";
 import type { Lang } from "./i18n.ts";
 import { profileFull } from "./queries.ts";
 import { personLd } from "./seo.ts";
-import { SNS } from "./sns.ts";
+import { resolveSns } from "./sns-data.ts";
 
 /** Person の JSON-LD（プロフィール編集欄・SNSアカウントと連動）。 */
 export async function personFor(db: D1Like, lang: Lang) {
   const p = await profileFull(db, lang);
   const img = mediaSrc(p.avatar);
-  return personLd({ lang, name: p.name, bio: p.bio, sameAs: SNS.filter((s) => s.url).map((s) => s.url), image: img ? SITE_URL + img : null });
+  return personLd({ lang, name: p.name, bio: p.bio, sameAs: (await resolveSns(db)).map((s) => s.url), image: img ? SITE_URL + img : null });
 }
 export const ogImage = (thumbnail: string | null) => {
   const m = mediaSrc(thumbnail);

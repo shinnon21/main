@@ -1,5 +1,6 @@
 ---
-import { SNS } from "../lib/sns.ts";
+import { getEnv } from "../lib/env.ts";
+import { resolveSns } from "../lib/sns-data.ts";
 interface Props { style?: "pill" | "icons" | "tiles" }
 const { style = "pill" } = Astro.props;
 const iconsOnly = style === "icons";
@@ -7,7 +8,7 @@ const iconsOnly = style === "icons";
 const g = globalThis as unknown as { __kbIg?: number };
 g.__kbIg = (g.__kbIg ?? 0) + 1;
 const uid = g.__kbIg;
-const items = SNS.filter((s) => s.url).map((s) => ({ ...s, svg: s.svg.replaceAll("kbIgGrad", `kbIgGrad${uid}`) }));
+const items = (await resolveSns(getEnv().DB)).map((s) => ({ ...s, svg: s.svg.replaceAll("kbIgGrad", `kbIgGrad${uid}`) }));
 ---
 {items.length > 0 && (
   <div class={`sns-row${iconsOnly ? " sns-icons" : style === "tiles" ? " sns-tiles" : ""}`}>

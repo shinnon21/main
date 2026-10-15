@@ -1,0 +1,22 @@
+---
+import AdminLayout from "../../../admin/AdminLayout.astro";
+import { getEnv } from "../../../lib/env.ts";
+import { readSettings } from "../../../admin/settings.ts";
+import { SNS } from "../../../lib/sns.ts";
+const s = await readSettings(getEnv().DB);
+---
+<AdminLayout title="サイト設定">
+  <h1>サイト設定</h1>
+  <div id="setMsg" role="status" aria-live="polite" style="min-height:22px;font-weight:600"></div>
+  <form id="settingsForm" class="card">
+    <label>サイト名（日本語）<input type="text" name="blogname" maxlength="100" required value={s.blogname} /></label>
+    <label style="display:block;margin-top:12px">キャッチフレーズ<input type="text" name="blogdescription" maxlength="300" value={s.blogdescription} /></label>
+    <h2>SNSアカウント</h2>
+    <p style="color:#6a6a6a">https:// から始まるURLを入力。空欄にするとサイトに表示されません。</p>
+    {SNS.map((x) => <label style="display:block;margin-top:8px">{x.label}<input type="url" name={`sns_${x.key}`} maxlength="300" placeholder="https://" value={s.sns[x.key]} /></label>)}
+    <div class="bar" style="margin-top:16px"><button class="btn primary" type="submit">保存</button></div>
+  </form>
+</AdminLayout>
+<script>
+  import "../../../admin/client/settings.ts";
+</script>

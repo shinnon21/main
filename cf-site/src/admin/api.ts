@@ -2,6 +2,7 @@ import type { D1Like } from "../lib/d1.ts";
 import { createPost, getAdminPost, listAdminPosts, listRevisions, restoreRevision, setStatus, updatePost } from "./store.ts";
 import { HttpError, type PostStatus } from "./types.ts";
 import { cleanPostInput, utcToJstLocal } from "./validate.ts";
+import { cleanSettings, readSettings, saveSettings } from "./settings.ts";
 import { createTerm, deleteTerm, listTerms, renameTerm } from "./terms.ts";
 import { MAX_BYTES, deleteMediaRow, findUsage, getMedia, insertMedia, listMedia, makeKey, setAlt, validateUpload } from "./media.ts";
 
@@ -113,6 +114,11 @@ async function route(req: Request, ctx: ApiCtx): Promise<Response> {
     if (path === "/posts") {
       if (method === "GET") return json({ posts: await listAdminPosts(db, { type: url.searchParams.get("type") ?? undefined, status: url.searchParams.get("status") ?? undefined, q: url.searchParams.get("q") ?? undefined }) });
       if (method === "POST") { const { id } = await createPost(db, cleanPostInput(await body(req)), email, nowUtc); return json({ id }, 201); }
+      throw new HttpError(405, "method not allowed");
+    }
+    if (path === "/settings") {
+      if (method === "GET") return json(await readSettings(db));
+      if (method === "PUT") { await saveSettings(db, cleanSettings(await body(req))); return json({ ok: true }); }
       throw new HttpError(405, "method not allowed");
     }
     const tm = path.match(/^\/terms(?:\/(\d+))?$/);
