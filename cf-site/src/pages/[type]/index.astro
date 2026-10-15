@@ -1,11 +1,18 @@
 ---
 import ArchiveView from "../../components/ArchiveView.astro";
+import PageView from "../../components/PageView.astro";
 import { getEnv } from "../../lib/env.ts";
+import { getPostBySlug } from "../../lib/posts.ts";
 import { isListType, listPage } from "../../lib/queries.ts";
 const TITLES = { works: "実績", column: "コラム", news: "お知らせ" } as const;
+// 1階層の固定ページ（/about/ 等）もこのルートで解決する。contact/chat/searches/profile は専用ルート（または未実装＝404）
+const RESERVED = new Set(["contact", "chat", "searches", "profile"]);
 const { type } = Astro.params;
-if (!type || !isListType(type)) return Astro.rewrite("/404/");
-const t = type as keyof typeof TITLES;
-const data = await listPage(getEnv().DB, t, 1);
+if (!type) return Astro.rewrite("/404/");
+const db = getEnv().DB;
+const list = isListType(type);
+const page = !list && !RESERVED.has(type) ? await getPostBySlug(db, "page", type) : null;
+if (!list && !page) return Astro.rewrite("/404/");
+const data = list ? await listPage(db, type, 1) : null;
 ---
-<ArchiveView type={t} data={data} page={1} basePath={`/${t}/`} title={TITLES[t]} crumbs={[{ label: TITLES[t] }]} />
+{list && data ? <ArchiveView type={type} data={data} page={1} basePath={`/${type}/`} title={TITLES[type]} crumbs={[{ label: TITLES[type] }]} /> : page && <PageView post={page} />}

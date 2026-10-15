@@ -106,3 +106,17 @@ export async function loadTermPage(db: D1Like, taxonomy: string, slug: string, p
   const data = await listByTerm(db, taxonomy, term.slug, page, TAX_PER_PAGE[taxonomy]);
   return page > data.pages ? null : { term, data };
 }
+
+export async function profileFull(db: D1Like) {
+  const p = await one<{ id: number; thumbnail: string | null; content: string | null }>(db, "SELECT id,thumbnail,content FROM posts WHERE type='page' AND slug='profile' AND status='publish'");
+  const m = p ? await rows<{ key: string; value: string }>(db, "SELECT key,value FROM post_meta WHERE post_id=? AND key LIKE 'profile\\_%' ESCAPE '\\'", p.id) : [];
+  const raw = (k: string) => parse(m.find((x) => x.key === k)?.value ?? '""').trim();
+  return {
+    kana: raw("profile_kana") || PROFILE_DEFAULTS.kana,
+    name: raw("profile_name") || PROFILE_DEFAULTS.name,
+    role: raw("profile_role") || PROFILE_DEFAULTS.role,
+    bio: raw("profile_bio"), career: raw("profile_career"), skills: raw("profile_skills"),
+    researchTitle: raw("profile_research_title"), researchBody: raw("profile_research_body"), activities: raw("profile_activities"),
+    content: p?.content?.trim() ?? "", avatar: p?.thumbnail ?? null,
+  };
+}

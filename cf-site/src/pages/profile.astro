@@ -1,0 +1,89 @@
+---
+import Layout from "../components/Layout.astro";
+import PageHero from "../components/PageHero.astro";
+import Avatar from "../components/Avatar.astro";
+import SnsLinks from "../components/SnsLinks.astro";
+import { getEnv } from "../lib/env.ts";
+import { profileFull } from "../lib/queries.ts";
+import { parseCareer, parseSkills, profileLines } from "../lib/profile.ts";
+import { autop, docTitle } from "../lib/format.ts";
+import { t } from "../lib/i18n.ts";
+
+const lang = "ja" as const;
+const p = await profileFull(getEnv().DB);
+const career = parseCareer(p.career);
+const skills = parseSkills(p.skills);
+const activities = profileLines(p.activities);
+const paras = (s: string) => s.split(/\r\n|\r|\n/);
+---
+<Layout title={docTitle(t(lang, "プロフィール", "Profile"))} lang={lang}>
+  <PageHero label="profile" title={t(lang, "プロフィール", "Profile")} crumbs={[{ label: t(lang, "プロフィール", "Profile") }]} />
+  <div class="sec">
+    <div class="container" style="max-width:900px">
+
+      <div class="prof" style="margin-bottom:32px">
+        <Avatar src={p.avatar} alt={p.name} />
+        <div>
+          <p class="kana">{p.kana}</p>
+          <h2>{p.name}</h2>
+          <p class="role">{p.role}</p>
+          {p.bio && <p>{paras(p.bio).map((l, i) => <Fragment>{i > 0 && <br />}{l}</Fragment>)}</p>}
+        </div>
+      </div>
+
+      {p.content && <div class="profile-sec"><div class="entry-content" set:html={autop(p.content)} /></div>}
+
+      {career.length > 0 && (
+        <div class="profile-sec">
+          <h2><span class="lbl">career</span>{t(lang, "経歴", "Career")}</h2>
+          <div class="timeline">
+            {career.map((c) => (
+              <div class="tl-item">
+                <div class="d">{c.d}</div>
+                <div class="t">{c.t}</div>
+                {c.p && <p>{c.p}</p>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {skills.length > 0 && (
+        <div class="profile-sec">
+          <h2><span class="lbl">skills</span>{t(lang, "スキル・強み", "Skills & Strengths")}</h2>
+          {skills.map((s) => <div class="skill-group"><div class="g">{s.g}</div>{s.chips.map((c) => <span class="chip"># {c}</span>)}</div>)}
+        </div>
+      )}
+
+      {(p.researchTitle || p.researchBody) && (
+        <div class="profile-sec" id="research">
+          <h2><span class="lbl">research</span>{t(lang, "研究テーマ", "Research")}</h2>
+          <p style="font-weight:700;margin-bottom:10px">{p.researchTitle}</p>
+          <p style="font-size:14px;color:#4a4a4a">{paras(p.researchBody).map((l, i) => <Fragment>{i > 0 && <br />}{l}</Fragment>)}</p>
+        </div>
+      )}
+
+      {activities.length > 0 && (
+        <div class="profile-sec">
+          <h2><span class="lbl">activity</span>{t(lang, "登壇・対外活動", "Talks & Activities")}</h2>
+          <ul style="list-style:disc;margin-left:20px;font-size:15px">
+            {activities.map((l) => <li style="margin-bottom:8px">{l}</li>)}
+          </ul>
+        </div>
+      )}
+
+      <div class="profile-sec">
+        <h2><span class="lbl">follow</span>{t(lang, "SNSアカウント", "Social Media")}</h2>
+        <SnsLinks style="tiles" />
+      </div>
+
+      <div class="contact-cta">
+        <p class="lbl">contact</p>
+        <h2>{t(lang, "お問い合わせ・ご相談", "Contact & Inquiries")}</h2>
+        <p>{t(lang, "案件のご相談、取材・登壇のご依頼、協業のお声がけなど、お気軽にご連絡ください。", "For project inquiries, interview and speaking requests, or collaboration proposals — please feel free to reach out.")}</p>
+        <a class="btn white" href="/contact/">{t(lang, "お問い合わせ →", "Contact →")}</a>
+      </div>
+
+    </div>
+  </div>
+</Layout>

@@ -70,6 +70,7 @@
 - GCP（WordPress）から Cloudflare ネイティブ（Astro SSR＋Workers＋D1＋R2＋KV＋自作簡易CMS）へ完全移行中。設計書 `docs/superpowers/specs/2026-10-14-cf-foundation-migration-design.md`・実装計画 `docs/superpowers/plans/2026-10-14-cf-foundation-migration.md`。
 - `cf-site/` が新サイト（ブランチ `cf-migration`）。サブプロジェクト1（基盤とデータ移行）は完了: 本番WPの全公開記事を個人CFアカウント（hello@shinnosuke-kobayashi.jp・Account ID `5ab6d2a7…`）の D1 `kb-site`・R2 `kb-media`・KV `CACHE` に投入済み、確認用URL `https://kb-site.curly-wave-c49f.workers.dev` にデプロイ済み（最小の一覧/詳細のみ。トップ/固定ページ/英語版/フォーム/デザインは未実装＝サブプロジェクト2以降）。**独自ドメインは未切替で、公開サイトは引き続き GCP の WordPress**。AIチャットは初回移行対象外。
 - 再取込: `cf-site/scripts/`（`wp-export.php`→`import.ts`→`wrangler d1 execute`→`sync-media.ts`）。**`import.ts` の出力は全テーブルを DELETE する＝CMS稼働後・PV蓄積後は再実行禁止（サブプロジェクト3でガードを入れる）**。VMスナップショット `pre-cf-migration-20261014`。
+- **2b完了（2026-10-15）**: 固定ページ /profile/・/about/・/privacy/・/sample-page/ を現行と同一表示で公開（1階層ルート `[type]/index.astro` が一覧と固定ページを兼ねる。contact/chat/searches は4で実装するまで404）。
 - **2a完了（2026-10-15）**: 確認用URLでトップ・実績/コラム/お知らせの一覧と詳細・タクソノミー一覧・404 を現行と同じ見た目で表示（CSS/main.js/画像は無改変移植、旧uploadsと末尾スラッシュの301あり）。未実装＝固定ページ(2b)・英語版(2c)・SEO/AIO(2d)・条件検索/お問い合わせ/チャット/PV書き込み(4)・CMS(3)。確認は `astro preview` でなく確認用Workerへデプロイして行う（previewは `/` が404になる癖あり）。視覚比較は `cf-site/scripts/shot.sh`（ヘッドレスChrome）。
 - GitHub Actions `cf-deploy.yml` は Secrets（`CLOUDFLARE_API_TOKEN`/`CLOUDFLARE_ACCOUNT_ID`）登録まで失敗する。
 - 切替完了までは `kobayashi-theme/` と GCP を変更しない（DNS切替・VM停止はサブプロジェクト5）。

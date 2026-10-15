@@ -1,6 +1,6 @@
 ---
 import { SNS } from "../lib/sns.ts";
-interface Props { style?: "pill" | "icons" }
+interface Props { style?: "pill" | "icons" | "tiles" }
 const { style = "pill" } = Astro.props;
 const iconsOnly = style === "icons";
 // 同一ページに複数回出力してもSVGグラデーションのidが衝突しないよう連番化
@@ -10,7 +10,7 @@ const uid = g.__kbIg;
 const items = SNS.filter((s) => s.url).map((s) => ({ ...s, svg: s.svg.replaceAll("kbIgGrad", `kbIgGrad${uid}`) }));
 ---
 {items.length > 0 && (
-  <div class={`sns-row${iconsOnly ? " sns-icons" : ""}`}>
+  <div class={`sns-row${iconsOnly ? " sns-icons" : style === "tiles" ? " sns-tiles" : ""}`}>
     {items.map((s) => (
       <a class="sns-btn" href={s.url} target="_blank" rel="noopener" aria-label={iconsOnly ? s.label : undefined}>
         <Fragment set:html={s.svg} />

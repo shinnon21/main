@@ -112,3 +112,15 @@ test("loadTermPage paginates terms and returns null for missing term or out-of-r
   expect(await loadTermPage(q, "skill", "nope", 1)).toBeNull();
   expect(await loadTermPage(q, "bogus", "many", 1)).toBeNull();
 });
+
+import { profileFull } from "../src/lib/queries.ts";
+test("profileFull returns all profile fields, falls back only for name/kana/role, and exposes body + avatar", async () => {
+  const q = db((e) => {
+    e.posts[4].content = "<p>本文</p>";
+    e.posts[4].meta = { profile_name: "名", profile_career: "2025 | A | b", profile_research_title: "R" };
+  });
+  const p = await profileFull(q);
+  expect(p).toMatchObject({ name: "名", kana: "こばやし しんのすけ", career: "2025 | A | b", researchTitle: "R", bio: "", skills: "", activities: "", researchBody: "", content: "<p>本文</p>" });
+  const none = await profileFull(db((e) => { e.posts.splice(4, 1); }));
+  expect(none.name).toBe("小林 慎之助"); expect(none.content).toBe(""); expect(none.avatar).toBeNull();
+});
