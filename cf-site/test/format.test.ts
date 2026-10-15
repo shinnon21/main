@@ -64,3 +64,9 @@ test("autop: existing <br> is not doubled; multi-line headings, split opening ta
   expect(autop('<div\n class="x">\nin\n</div>')).toBe('<div\n class="x">\nin\n</div>');
   expect(autop("<section>\nx\n</section>\ntail")).toBe("<section>\nx\n</section>\n<p>tail</p>");
 });
+
+test("docTitle in English", () => {
+  expect(docTitle(null, "en")).toBe("Shinnosuke Kobayashi Official Website");
+  expect(docTitle("Works", "en")).toBe("Works | Shinnosuke Kobayashi Official Website");
+  expect(docTitle("実績", "ja")).toBe("実績 | 小林慎之助");
+});

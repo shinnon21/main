@@ -51,7 +51,8 @@ export function hrefFor(...segments: string[]): string {
 export function mediaSrc(thumbnail: string | null): string | null {
   return thumbnail ? "/media/" + thumbnail.split("/").map(encodeURIComponent).join("/") : null;
 }
-export function docTitle(title: string | null): string {
+export function docTitle(title: string | null, lang: "ja" | "en" = "ja"): string {
+  if (lang === "en") return title ? `${title} | Shinnosuke Kobayashi Official Website` : "Shinnosuke Kobayashi Official Website";
   return title ? `${title} | 小林慎之助` : "小林慎之助 | 構想を、社会に実装する。";
 }
 export const gradientClass = (wpId: number): string => `g${(wpId % 6) + 1}`;

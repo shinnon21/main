@@ -20,3 +20,13 @@ test("taxonomy page 1 redirects to the term root", () => {
   expect(n(u("/works_type/%E8%B5%B7/page/1/?a=1"))).toEqual({ status: 301, location: "/works_type/%E8%B5%B7/?a=1" });
   expect(n(u("/skill/dx/page/2/"))).toBeNull();
 });
+test("language-prefixed URLs get the same normalization and keep the /en prefix", () => {
+  expect(n(u("/en"))).toEqual({ status: 301, location: "/en/" });
+  expect(n(u("/en/works"))).toEqual({ status: 301, location: "/en/works/" });
+  expect(n(u("/en/works/page/1/"))).toEqual({ status: 301, location: "/en/works/" });
+  expect(n(u("/en/skill/dx/page/1/?a=1"))).toEqual({ status: 301, location: "/en/skill/dx/?a=1" });
+  expect(n(u("/en/media/2026/07/a.jpg"))).toEqual({ status: 301, location: "/media/2026/07/a.jpg" });
+  expect(n(u("/en/wp-content/uploads/2026/07/a.jpg"))).toEqual({ status: 301, location: "/media/2026/07/a.jpg" });
+  for (const p of ["/en/", "/en/works/", "/en/works/page/2/"]) expect(n(u(p)), p).toBeNull();
+  expect(n(u("/enfoo"))).toEqual({ status: 301, location: "/enfoo/" });
+});
