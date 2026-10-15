@@ -12,6 +12,7 @@ export interface KbEnv {
   CACHE: { get(key: string): Promise<string | null>; put(key: string, value: string, opts?: { expirationTtl?: number }): Promise<void> };
   VIEWS?: { get(key: string): Promise<string | null>; put(key: string, value: string, opts?: { expirationTtl?: number }): Promise<void> };
   EMAIL?: { send(m: { to: string; from: string; subject: string; text: string; html: string; replyTo?: string }): Promise<{ messageId: string }> };
+  SITE_ORIGIN?: string;
   TURNSTILE_SITE_KEY?: string;
   TURNSTILE_SECRET?: string;
   CONTACT_TO?: string;
