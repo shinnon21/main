@@ -3,6 +3,7 @@ import { createPost, getAdminPost, listAdminPosts, listRevisions, restoreRevisio
 import { HttpError, type PostStatus } from "./types.ts";
 import { cleanPostInput, utcToJstLocal } from "./validate.ts";
 import { cleanSettings, readSettings, saveSettings } from "./settings.ts";
+import { cleanProfile, readProfile, saveProfile } from "./profile.ts";
 import { createTerm, deleteTerm, listTerms, renameTerm } from "./terms.ts";
 import { MAX_BYTES, deleteMediaRow, findUsage, getMedia, insertMedia, listMedia, makeKey, setAlt, validateUpload } from "./media.ts";
 
@@ -119,6 +120,11 @@ async function route(req: Request, ctx: ApiCtx): Promise<Response> {
     if (path === "/settings") {
       if (method === "GET") return json(await readSettings(db));
       if (method === "PUT") { await saveSettings(db, cleanSettings(await body(req))); return json({ ok: true }); }
+      throw new HttpError(405, "method not allowed");
+    }
+    if (path === "/profile") {
+      if (method === "GET") return json(await readProfile(db));
+      if (method === "PUT") { await saveProfile(db, cleanProfile(await body(req)), email, nowUtc); return json({ ok: true }); }
       throw new HttpError(405, "method not allowed");
     }
     const tm = path.match(/^\/terms(?:\/(\d+))?$/);

@@ -73,13 +73,13 @@ export async function createPost(db: D1Like, p: CleanPost, by: string, nowUtc: s
   return { id: row!.id };
 }
 
-async function snapshot(db: D1Like, id: number): Promise<string> {
+export async function snapshot(db: D1Like, id: number): Promise<string> {
   const post = await one<PostRowDb>(db, "SELECT * FROM posts WHERE id=?", id);
   const meta = await q<{ key: string; value: string }>(db, "SELECT key,value FROM post_meta WHERE post_id=?", id);
   const terms = await q<{ taxonomy: string; slug: string }>(db, "SELECT t.taxonomy,t.slug FROM post_terms pt JOIN terms t ON t.id=pt.term_id WHERE pt.post_id=?", id);
   return json({ post, meta, terms });
 }
-const revisionStatements = (db: D1Like, id: number, by: string, nowUtc: string, snap: string): D1Stmt[] => [
+export const revisionStatements = (db: D1Like, id: number, by: string, nowUtc: string, snap: string): D1Stmt[] => [
   db.prepare("INSERT INTO revisions(post_id,saved_at,saved_by,snapshot) VALUES(?,?,?,?)").bind(id, nowUtc, by, snap),
   db.prepare("DELETE FROM revisions WHERE post_id=? AND id NOT IN (SELECT id FROM revisions WHERE post_id=? ORDER BY id DESC LIMIT ?)").bind(id, id, REVISION_LIMIT),
 ];

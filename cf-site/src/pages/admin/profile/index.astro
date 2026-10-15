@@ -1,0 +1,48 @@
+---
+import AdminLayout from "../../../admin/AdminLayout.astro";
+import { getEnv } from "../../../lib/env.ts";
+import { readProfile } from "../../../admin/profile.ts";
+import { mediaSrc } from "../../../lib/format.ts";
+let data: Awaited<ReturnType<typeof readProfile>> | null = null;
+try { data = await readProfile(getEnv().DB); } catch { /* プロフィールページ未作成 */ }
+// [キー, ラベル, 行数(0=1行入力), ヒント]
+const FIELDS: [string, string, number, string?][] = [
+  ["profile_kana", "ふりがな", 0], ["profile_name", "名前", 0], ["profile_role", "肩書き", 0],
+  ["profile_bio", "自己紹介文", 6], ["profile_career", "経歴（1行につき1項目・新しい順）", 8, "書式: 期間 | タイトル | 説明（説明は省略可。「|」で区切る）"],
+  ["profile_skills", "スキル・強み（1行につき1グループ）", 5, "書式: グループ名 | スキル、スキル、スキル（読点「、」区切り）"],
+  ["profile_research_title", "研究テーマ（タイトル）", 0], ["profile_research_body", "研究テーマ（説明）", 4],
+  ["profile_activities", "登壇・対外活動（1行につき1項目）", 5],
+];
+const src = data ? mediaSrc(data.thumbnail) : null;
+---
+<AdminLayout title="プロフィール編集">
+  <h1>プロフィール編集</h1>
+  {!data ? <p>プロフィールページ（スラッグ: profile）が見つかりません。</p> : (
+  <>
+  <div id="profMsg" role="status" aria-live="polite" style="min-height:22px;font-weight:600"></div>
+  <form id="profileForm" class="card">
+    <h2 style="margin-top:0">顔写真</h2>
+    <div class="bar"><img id="profPhoto" alt="" src={src ?? ""} style="width:96px;height:96px;object-fit:cover;border-radius:50%;background:#eee" hidden={!src} />
+      <input type="hidden" name="thumbnail" value={data.thumbnail ?? ""} />
+      <button type="button" class="btn" id="profPick">画像を選ぶ</button><button type="button" class="btn danger" id="profClear">写真を外す</button></div>
+    <p style="color:#6a6a6a">空欄にした項目は、サイトの標準の表示（名前・肩書きなど）に戻ります。英語版が空の場合は日本語版が表示されます。</p>
+    <div class="cols" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px">
+      {(["", "_en"] as const).map((suf) => (
+        <div>
+          <h2>{suf ? "English" : "日本語"}</h2>
+          {FIELDS.map(([k, label, rows, hint]) => (
+            <label style="display:block;margin-top:10px">{label}{suf ? "（英語）" : ""}
+              {rows === 0 ? <input type="text" name={k + suf} value={data!.fields[k + suf]} maxlength="500" /> : <textarea name={k + suf} rows={rows} maxlength="20000">{data!.fields[k + suf]}</textarea>}
+              {hint && <small style="color:#6a6a6a;display:block">{hint}</small>}
+            </label>
+          ))}
+        </div>
+      ))}
+    </div>
+    <div class="bar" style="margin-top:16px"><button class="btn primary" type="submit">保存</button><a class="btn" href="/profile/" target="_blank" rel="noopener">プロフィールを見る ↗</a></div>
+  </form>
+  </>)}
+</AdminLayout>
+<script>
+  import "../../../admin/client/profile.ts";
+</script>
