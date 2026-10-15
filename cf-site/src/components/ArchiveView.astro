@@ -10,6 +10,8 @@ import { getEnv } from "../lib/env.ts";
 import { allSkills, ranking, topSkills, type CardPost } from "../lib/queries.ts";
 import { docTitle, formatDate, hrefFor } from "../lib/format.ts";
 import { t, type Lang } from "../lib/i18n.ts";
+import { l } from "../lib/lang.ts";
+import { newsTypeName, pick, termName } from "../lib/l10n.ts";
 
 interface Props {
   type: "works" | "column" | "news";
@@ -20,15 +22,15 @@ interface Props {
   crumbs: { label: string; href?: string }[];
   lang?: Lang;
 }
-const { type, data, page, basePath, title, crumbs, lang = "ja" } = Astro.props;
+const { type, data, page, basePath, title, crumbs, lang = Astro.locals.lang ?? "ja" } = Astro.props;
 const db = getEnv().DB;
 const [rank, skills12, skillsAll] = type === "news" ? [[], [], []] : await Promise.all([ranking(db, 5), topSkills(db, 12), allSkills(db)]);
-const badge = (p: CardPost) => p.terms.find((x) => x.taxonomy === "news_type")?.name;
+const badge = (p: CardPost) => { const n = p.terms.find((x) => x.taxonomy === "news_type")?.name; return n ? newsTypeName(lang, n) : undefined; };
 const empty = { works: t(lang, "該当する実績はまだありません。", "No works found yet."), column: t(lang, "コラムはまだありません。", "No columns yet."), news: t(lang, "お知らせはまだありません。", "No news yet.") }[type];
-const docName = page > 1 ? `${title}（${page}ページ目）` : title;
+const docName = page > 1 ? t(lang, `${title}（${page}ページ目）`, `${title} (Page ${page})`) : title;
 ---
-<Layout title={docTitle(docName)} lang={lang}>
-  <PageHero label={type} title={title} crumbs={crumbs} />
+<Layout title={docTitle(docName, lang)} lang={lang}>
+  <PageHero label={type} title={title} crumbs={crumbs} lang={lang} />
   <div class="sec">
     {type === "news" ? (
       <div class="container" style="max-width:820px">
@@ -36,10 +38,10 @@ const docName = page > 1 ? `${title}（${page}ページ目）` : title;
           <>
             <div class="news-list">
               {data.posts.map((n) => (
-                <a class="news-item" href={hrefFor("news", n.slug)}>
+                <a class="news-item" href={l(lang, hrefFor("news", n.slug))}>
                   <span class="d">{formatDate(n.published_at)}</span>
                   {badge(n) && <span class="badge">{badge(n)}</span>}
-                  <span class="t">{n.title}</span>
+                  <span class="t">{pick(lang, n.title, n.title_en)}</span>
                 </a>
               ))}
             </div>
@@ -51,12 +53,12 @@ const docName = page > 1 ? `${title}（${page}ページ目）` : title;
       <div class="container">
         {type === "works" && skills12.length > 0 && (
           <div class="filter-box" style="padding:22px 28px">
-            <form method="get" action="/searches/">
+            <form method="get" action={l(lang, "/searches/")}>
               <input type="hidden" name="types[]" value="works" />
-              {skills12.map((s) => <label class="check-pill"><input type="checkbox" name="skills[]" value={s.slug} /># {s.name}</label>)}
+              {skills12.map((s) => <label class="check-pill"><input type="checkbox" name="skills[]" value={s.slug} /># {termName(lang, s.name)}</label>)}
               <div class="filter-actions" style="margin-top:12px">
                 <button type="submit" class="btn primary sm">{t(lang, "条件から実績を探す", "Search works by criteria")}</button>
-                <a class="btn ghost sm" href="/works/">{t(lang, "条件をリセット", "Reset")}</a>
+                <a class="btn ghost sm" href={l(lang, "/works/")}>{t(lang, "条件をリセット", "Reset")}</a>
               </div>
             </form>
           </div>
@@ -78,7 +80,7 @@ const docName = page > 1 ? `${title}（${page}ページ目）` : title;
               <div class="side-box">
                 <div class="sb-head"><span class="lbl">search</span><h3>{t(lang, "条件から探す", "Advanced search")}</h3></div>
                 <p style="font-size:12.5px;color:var(--gray);margin-bottom:14px">{t(lang, "期間・種別・タグを組み合わせて記事を検索できます。", "Search articles by period, type, and tags.")}</p>
-                <a class="btn ghost sm" href="/searches/">{t(lang, "条件検索へ →", "Open search →")}</a>
+                <a class="btn ghost sm" href={l(lang, "/searches/")}>{t(lang, "条件検索へ →", "Open search →")}</a>
               </div>
             )}
           </aside>

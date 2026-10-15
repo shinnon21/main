@@ -8,19 +8,22 @@ import { getEnv } from "../lib/env.ts";
 import { ranking, type CardPost } from "../lib/queries.ts";
 import { docTitle, hrefFor } from "../lib/format.ts";
 import { t, type Lang } from "../lib/i18n.ts";
+import { l } from "../lib/lang.ts";
+import { termName } from "../lib/l10n.ts";
 interface Props { page?: number; taxonomy: string; term: { slug: string; name: string }; data: { posts: CardPost[]; total: number; pages: number }; lang?: Lang }
-const { page = 1, taxonomy, term, data, lang = "ja" } = Astro.props;
+const { page = 1, taxonomy, term, data, lang = Astro.locals.lang ?? "ja" } = Astro.props;
+const name = termName(lang, term.name);
 const rank = await ranking(getEnv().DB, 5);
 ---
-<Layout title={docTitle(`# ${term.name}`)} lang={lang}>
-  <PageHero label="tag" title={`# ${term.name}`} crumbs={[{ label: term.name }]} />
+<Layout title={docTitle(`# ${name}`, lang)} lang={lang}>
+  <PageHero label="tag" title={`# ${name}`} crumbs={[{ label: name }]} lang={lang} />
   <div class="sec">
     <div class="container col-wrap">
       <div>
         {data.posts.length > 0 ? (
           <>
             {data.posts.map((p) => <ColumnCard post={p} lang={lang} />)}
-            <Pagination basePath={hrefFor(taxonomy, term.slug)} current={page} total={data.pages} />
+            <Pagination basePath={l(lang, hrefFor(taxonomy, term.slug))} current={page} total={data.pages} />
           </>
         ) : <p>{t(lang, "該当するコンテンツはまだありません。", "No content yet.")}</p>}
       </div>

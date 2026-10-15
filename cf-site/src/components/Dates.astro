@@ -2,7 +2,7 @@
 import { formatDate } from "../lib/format.ts";
 import { t, type Lang } from "../lib/i18n.ts";
 interface Props { published: string; modified: string; lang?: Lang }
-const { published, modified, lang = "ja" } = Astro.props;
+const { published, modified, lang = Astro.locals.lang ?? "ja" } = Astro.props;
 const pub = formatDate(published);
 const mod = formatDate(modified);
 ---

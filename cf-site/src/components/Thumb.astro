@@ -1,10 +1,13 @@
 ---
 import type { CardPost } from "../lib/queries.ts";
 import { gradientClass, mediaSrc } from "../lib/format.ts";
-interface Props { post: CardPost; cls?: string }
-const { post, cls = "thumb" } = Astro.props;
+import { termName } from "../lib/l10n.ts";
+import type { Lang } from "../lib/i18n.ts";
+interface Props { post: CardPost; cls?: string; lang?: Lang }
+const { post, cls = "thumb", lang = Astro.locals.lang ?? "ja" } = Astro.props;
 const src = mediaSrc(post.thumbnail);
-const label = post.terms.find((t) => t.taxonomy === "works_type")?.name ?? post.type.toUpperCase();
+const wt = post.terms.find((t) => t.taxonomy === "works_type")?.name;
+const label = wt ? termName(lang, wt) : post.type.toUpperCase();
 ---
 <div class={`${cls} ${gradientClass(post.wp_id)}`}>
   {src && <img src={src} alt="" loading="lazy" decoding="async" />}<span class="ph-label">{label}</span>

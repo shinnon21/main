@@ -10,35 +10,41 @@ import { postTerms, relatedByTerm } from "../lib/queries.ts";
 import type { getPostBySlug } from "../lib/posts.ts";
 import { SITE_URL, autop, docTitle, hrefFor, mediaSrc } from "../lib/format.ts";
 import { t, type Lang } from "../lib/i18n.ts";
+import { l } from "../lib/lang.ts";
+import { pick, scopeLabel, termName } from "../lib/l10n.ts";
 type Post = NonNullable<Awaited<ReturnType<typeof getPostBySlug>>>;
 interface Props { post: Post; lang?: Lang }
-const { post, lang = "ja" } = Astro.props;
+const { post, lang = Astro.locals.lang ?? "ja" } = Astro.props;
 const db = getEnv().DB;
 const terms = await postTerms(db, post.id);
 const related = await relatedByTerm(db, post, "works_type", 3);
 const m = post.meta;
 const str = (k: string) => (typeof m[k] === "string" ? (m[k] as string).trim() : "");
-const client = str("client_name"), role = str("role"), tech = str("tech_stack"), url = str("site_url");
-const scope = Array.isArray(m.scope) ? (m.scope as string[]) : typeof m.scope === "string" && m.scope ? [m.scope] : [];
-const inds = terms.filter((x) => x.taxonomy === "industry").map((x) => x.name);
+const client = pick(lang, str("client_name"), str("client_name_en")), role = pick(lang, str("role"), str("role_en")), tech = pick(lang, str("tech_stack"), str("tech_stack_en")), url = str("site_url");
+const title = pick(lang, post.title, post.title_en);
+const excerpt = pick(lang, post.excerpt, post.excerpt_en);
+const body = pick(lang, post.content, post.content_en);
+const scope = (Array.isArray(m.scope) ? (m.scope as string[]) : typeof m.scope === "string" && m.scope ? [m.scope] : []).map((v) => scopeLabel(lang, v));
+const inds = terms.filter((x) => x.taxonomy === "industry").map((x) => termName(lang, x.name));
 const type = terms.find((x) => x.taxonomy === "works_type");
-const kpis = (Array.isArray(m.kpi_results) ? m.kpi_results : []) as { label?: string; value?: string }[];
+type Kpi = { label?: string; value?: string };
+const kpiEn = (Array.isArray(m.kpi_results_en) ? m.kpi_results_en : []) as Kpi[];
+const kpis = (lang === "en" && kpiEn.some((k) => k.value) ? kpiEn : Array.isArray(m.kpi_results) ? m.kpi_results : []) as Kpi[];
 const period = str("period_start");
 const sep = t(lang, "／", " / ");
 const thumb = mediaSrc(post.thumbnail);
-const withTerms = { ...post, terms, meta: {} } as never;
 ---
-<Layout title={docTitle(post.title)} description={post.excerpt ?? undefined} lang={lang}>
+<Layout title={docTitle(title, lang)} description={excerpt || undefined} lang={lang}>
 <div class="sec">
   <div class="container" style="max-width:900px">
-    <Crumbs items={[{ label: t(lang, "実績", "Works"), href: "/works/" }, { label: post.title }]} />
+    <Crumbs items={[{ label: t(lang, "実績", "Works"), href: l(lang, "/works/") }, { label: title }]} lang={lang} />
 
     <article class="entry-wrap" style="margin-top:18px;max-width:none">
       <header class="entry-head">
-        <div class="meta">{type && <span class="badge accent">{type.name}</span>}<Dates published={post.published_at} modified={post.modified_at} lang={lang} /></div>
-        <h1>{post.title}</h1>
-        {post.excerpt && <p class="standfirst">{post.excerpt}</p>}
-        <Chips terms={terms} limit={6} />
+        <div class="meta">{type && <span class="badge accent">{termName(lang, type.name)}</span>}<Dates published={post.published_at} modified={post.modified_at} lang={lang} /></div>
+        <h1>{title}</h1>
+        {excerpt && <p class="standfirst">{excerpt}</p>}
+        <Chips terms={terms} limit={6} lang={lang} />
       </header>
 
       {thumb && <div class="entry-thumb"><img src={thumb} alt="" /></div>}
@@ -55,7 +61,7 @@ const withTerms = { ...post, terms, meta: {} } as never;
         </dl>
       )}
 
-      <div class="entry-content" set:html={autop(post.content ?? "")} />
+      <div class="entry-content" set:html={autop(body)} />
 
       {kpis.some((k) => k.value) && (
         <>
@@ -66,14 +72,14 @@ const withTerms = { ...post, terms, meta: {} } as never;
         </>
       )}
 
-      <Share url={SITE_URL + hrefFor("works", post.slug)} title={post.title} lang={lang} />
+      <Share url={SITE_URL + l(lang, hrefFor("works", post.slug))} title={title} lang={lang} />
 
       <div class="entry-cta">
         <p class="lbl">contact</p>
         <h2>{t(lang, "この実績について相談する", "Discuss this project")}</h2>
         <p>{t(lang, "ご相談・詳細のご質問はお気軽にどうぞ。", "Questions and consultation requests are always welcome.")}</p>
-        <a class="btn primary" href="/contact/">{t(lang, "お問い合わせフォームへ →", "Go to contact form →")}</a>
-        <a class="btn ghost" href="/profile/">{t(lang, "プロフィールを見る", "View profile")}</a>
+        <a class="btn primary" href={l(lang, "/contact/")}>{t(lang, "お問い合わせフォームへ →", "Go to contact form →")}</a>
+        <a class="btn ghost" href={l(lang, "/profile/")}>{t(lang, "プロフィールを見る", "View profile")}</a>
       </div>
     </article>
 

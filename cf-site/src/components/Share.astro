@@ -1,7 +1,7 @@
 ---
 import { t, type Lang } from "../lib/i18n.ts";
 interface Props { url: string; title: string; lang?: Lang }
-const { url, title, lang = "ja" } = Astro.props;
+const { url, title, lang = Astro.locals.lang ?? "ja" } = Astro.props;
 const u = encodeURIComponent(url);
 const ti = encodeURIComponent(title);
 ---

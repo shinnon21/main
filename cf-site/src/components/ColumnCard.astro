@@ -2,23 +2,25 @@
 import type { CardPost } from "../lib/queries.ts";
 import { formatDate, hrefFor } from "../lib/format.ts";
 import { t, type Lang } from "../lib/i18n.ts";
+import { l } from "../lib/lang.ts";
+import { pick } from "../lib/l10n.ts";
 import Thumb from "./Thumb.astro";
 import Chips from "./Chips.astro";
 interface Props { post: CardPost; lang?: Lang }
-const { post, lang = "ja" } = Astro.props;
+const { post, lang = Astro.locals.lang ?? "ja" } = Astro.props;
 const pub = formatDate(post.published_at);
 const mod = formatDate(post.modified_at);
 const kind = { works: t(lang, "実績", "Works"), column: t(lang, "コラム", "Column"), news: t(lang, "お知らせ", "News") }[post.type] ?? post.type;
 ---
-<a class="article" href={hrefFor(post.type, post.slug)}>
-  <Thumb post={post} cls="a-thumb" />
+<a class="article" href={l(lang, hrefFor(post.type, post.slug))}>
+  <Thumb post={post} cls="a-thumb" lang={lang} />
   <div class="a-body">
     <div class="meta">
       {mod !== pub && <span>{t(lang, "更新日 ", "Updated ")}{mod}</span>}
       <span>{t(lang, "公開日 ", "Published ")}{pub}</span>
       <span class="badge accent" style="font-size:10px">{kind}</span>
     </div>
-    <h3>{post.title}</h3>
-    <Chips terms={post.terms} limit={3} linked={false} />
+    <h3>{pick(lang, post.title, post.title_en)}</h3>
+    <Chips terms={post.terms} limit={3} linked={false} lang={lang} />
   </div>
 </a>

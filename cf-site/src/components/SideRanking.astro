@@ -2,12 +2,14 @@
 import type { CardPost } from "../lib/queries.ts";
 import { hrefFor } from "../lib/format.ts";
 import { t, type Lang } from "../lib/i18n.ts";
+import { l } from "../lib/lang.ts";
+import { pick } from "../lib/l10n.ts";
 interface Props { items: CardPost[]; lang?: Lang }
-const { items, lang = "ja" } = Astro.props;
+const { items, lang = Astro.locals.lang ?? "ja" } = Astro.props;
 ---
 {items.length > 0 && (
   <div class="side-box">
     <div class="sb-head"><span class="lbl">ranking</span><h3>{t(lang, "人気コンテンツ", "Popular")}</h3></div>
-    {items.map((p, i) => <a class="rank-item" href={hrefFor(p.type, p.slug)}><span class="no">{i + 1}</span>{p.title}</a>)}
+    {items.map((p, i) => <a class="rank-item" href={l(lang, hrefFor(p.type, p.slug))}><span class="no">{i + 1}</span>{pick(lang, p.title, p.title_en)}</a>)}
   </div>
 )}

@@ -7,21 +7,26 @@ import { postTerms } from "../lib/queries.ts";
 import type { getPostBySlug } from "../lib/posts.ts";
 import { autop, docTitle, mediaEmbedIds } from "../lib/format.ts";
 import { t, type Lang } from "../lib/i18n.ts";
+import { l } from "../lib/lang.ts";
+import { newsTypeName, pick } from "../lib/l10n.ts";
 type Post = NonNullable<Awaited<ReturnType<typeof getPostBySlug>>>;
 interface Props { post: Post; lang?: Lang }
-const { post, lang = "ja" } = Astro.props;
+const { post, lang = Astro.locals.lang ?? "ja" } = Astro.props;
+const title = pick(lang, post.title, post.title_en);
+const body = pick(lang, post.content, post.content_en);
 const terms = await postTerms(getEnv().DB, post.id);
-const kind = terms.find((x) => x.taxonomy === "news_type")?.name;
+const kindRaw = terms.find((x) => x.taxonomy === "news_type")?.name;
+const kind = kindRaw ? newsTypeName(lang, kindRaw) : undefined;
 const { yt, sp } = mediaEmbedIds(post.meta.media_youtube, post.meta.media_spotify);
 ---
-<Layout title={docTitle(post.title)} lang={lang}>
+<Layout title={docTitle(title, lang)} lang={lang}>
 <div class="sec">
   <div class="container" style="max-width:820px">
-    <Crumbs items={[{ label: t(lang, "お知らせ", "News"), href: "/news/" }, { label: post.title }]} />
+    <Crumbs items={[{ label: t(lang, "お知らせ", "News"), href: l(lang, "/news/") }, { label: title }]} lang={lang} />
     <article class="entry-wrap" style="margin-top:18px;max-width:none">
       <header class="entry-head">
         <div class="meta">{kind && <span class="badge">{kind}</span>}<Dates published={post.published_at} modified={post.modified_at} lang={lang} /></div>
-        <h1>{post.title}</h1>
+        <h1>{title}</h1>
       </header>
       {(yt || sp) && (
         <div class="media-embeds">
@@ -29,9 +34,9 @@ const { yt, sp } = mediaEmbedIds(post.meta.media_youtube, post.meta.media_spotif
           {sp && <div class="media-embed sp"><iframe src={`https://open.spotify.com/embed/episode/${sp}`} title="Spotify" height="232" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe></div>}
         </div>
       )}
-      <div class="entry-content" set:html={autop(post.content ?? "")} />
+      <div class="entry-content" set:html={autop(body)} />
     </article>
-    <div class="center-btn"><a class="btn ghost" href="/news/">{t(lang, "一覧へ戻る", "Back to list")}</a></div>
+    <div class="center-btn"><a class="btn ghost" href={l(lang, "/news/")}>{t(lang, "一覧へ戻る", "Back to list")}</a></div>
   </div>
 </div>
 </Layout>
