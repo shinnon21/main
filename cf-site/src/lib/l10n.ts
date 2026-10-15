@@ -19,3 +19,6 @@ const look = (m: Record<string, string>, lang: Lang, k: string) => (lang === "en
 export const termName = (lang: Lang, name: string) => look(TERMS, lang, name);
 export const scopeLabel = (lang: Lang, v: string) => look(SCOPES, lang, v);
 export const newsTypeName = (lang: Lang, name: string) => look(NEWS, lang, name);
+
+/** 実績の担当領域として選べる値（管理画面のチェックボックス用） */
+export const SCOPE_VALUES = Object.keys(SCOPES);

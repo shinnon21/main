@@ -1,0 +1,19 @@
+---
+import AdminLayout from "../../../admin/AdminLayout.astro";
+import PostForm from "../../../admin/PostForm.astro";
+import { getEnv } from "../../../lib/env.ts";
+import { getAdminPost } from "../../../admin/store.ts";
+import { utcToJstLocal } from "../../../admin/validate.ts";
+const LABELS: Record<string, string> = { works: "実績", column: "コラム", news: "お知らせ", page: "固定ページ" };
+const { type, id } = Astro.params;
+if (!type || !Object.hasOwn(LABELS, type) || !/^\d+$/.test(id ?? "")) return new Response("Not found", { status: 404 });
+const db = getEnv().DB;
+const post = await getAdminPost(db, Number(id));
+if (!post || post.type !== type) return new Response("Not found", { status: 404 });
+const terms = (await db.prepare("SELECT taxonomy,slug,name FROM terms ORDER BY taxonomy,id").bind().all<{ taxonomy: string; slug: string; name: string }>()).results;
+const shown = { ...post, published_at: post.published_at ? utcToJstLocal(post.published_at) : null };
+---
+<AdminLayout title={`${post.title} を編集`}>
+  <h1>{LABELS[type]}を編集</h1>
+  <PostForm type={type} post={shown} terms={terms} />
+</AdminLayout>

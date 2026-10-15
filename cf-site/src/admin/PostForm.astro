@@ -1,0 +1,110 @@
+---
+import { SCOPE_VALUES } from "../lib/l10n.ts";
+import { allowedTaxonomies } from "./validate.ts";
+import type { PostType } from "./types.ts";
+
+interface Term { taxonomy: string; slug: string; name: string }
+interface Props { type: PostType; post?: any; terms: Term[] }
+const { type, post, terms } = Astro.props;
+const m = (post?.meta ?? {}) as Record<string, any>;
+const s = (k: string) => (typeof m[k] === "string" ? m[k] : "");
+const picked = new Set<string>((post?.terms ?? []).map((t: Term) => `${t.taxonomy}/${t.slug}`));
+const TAX_LABEL: Record<string, string> = { works_type: "実績種別", industry: "業界", skill: "スキルタグ", news_type: "お知らせ種別" };
+const SINGLE = new Set(["works_type", "news_type"]);
+const taxes = allowedTaxonomies(type);
+const initial = JSON.stringify({
+  type, id: post?.id ?? null, modified_at: post?.modified_at ?? null,
+  content: post?.content ?? "", content_en: post?.content_en ?? "",
+  kpi_results: m.kpi_results ?? [], kpi_results_en: m.kpi_results_en ?? [],
+}).replace(/</g, "\\u003c");
+const scope: string[] = Array.isArray(m.scope) ? m.scope : [];
+---
+<form id="postForm" autocomplete="off" data-type={type} data-id={post?.id ?? ""}>
+  <div id="msg" role="status" aria-live="polite"></div>
+  <div class="tabs" role="tablist">
+    <button type="button" role="tab" data-tab="ja" aria-selected="true">日本語</button>
+    <button type="button" role="tab" data-tab="en" aria-selected="false">English</button>
+    {(type === "works" || type === "news") && <button type="button" role="tab" data-tab="meta" aria-selected="false">概要</button>}
+    <button type="button" role="tab" data-tab="seo" aria-selected="false">SEO</button>
+  </div>
+
+  <section class="card" data-panel="ja">
+    <label class="f"><span>タイトル（必須）</span><input type="text" name="title" value={post?.title ?? ""} maxlength="500" required /></label>
+    <div class="row2">
+      <label class="f"><span>スラッグ（URLの一部。空なら自動）</span><input type="text" name="slug" value={post?.slug ?? ""} maxlength="200" /></label>
+      <label class="f"><span>公開日時（日本時間）</span><input type="datetime-local" name="published_at" value={post?.published_at ?? ""} /></label>
+    </div>
+    <div class="row2">
+      <label class="f"><span>状態</span><select name="status"><option value="draft" selected={(post?.status ?? "draft") === "draft"}>下書き</option><option value="publish" selected={post?.status === "publish"}>公開</option><option value="trash" selected={post?.status === "trash"}>ゴミ箱</option></select></label>
+      <label class="f"><span>アイキャッチ（R2のキー。例 2026/07/a.jpg）</span><input type="text" name="thumbnail" value={post?.thumbnail ?? ""} maxlength="500" /></label>
+    </div>
+    <label class="f"><span>抜粋（リード文）</span><textarea name="excerpt" maxlength="2000">{post?.excerpt ?? ""}</textarea></label>
+    <div class="f"><span style="font-size:12px;color:#6a6a6a">本文</span>
+      <div class="tt" data-tiptap="content"><div class="tt-bar"></div><div class="tt-body"></div></div></div>
+    {taxes.map((tx) => (
+      <fieldset class="f" style="border:0;padding:0"><legend style="font-size:12px;color:#6a6a6a">{TAX_LABEL[tx] ?? tx}</legend>
+        <div class="checks">
+          {SINGLE.has(tx) && <label><input type="radio" name={`term:${tx}`} data-term={tx} value="" checked={![...picked].some((p) => p.startsWith(`${tx}/`))} /> なし</label>}
+          {terms.filter((t) => t.taxonomy === tx).map((t) => (
+            <label><input type={SINGLE.has(tx) ? "radio" : "checkbox"} name={`term:${tx}`} data-term={tx} value={t.slug} checked={picked.has(`${tx}/${t.slug}`)} /> {t.name}</label>
+          ))}
+        </div>
+      </fieldset>
+    ))}
+  </section>
+
+  <section class="card" data-panel="en" hidden>
+    <label class="f"><span>Title</span><input type="text" name="title_en" value={post?.title_en ?? ""} maxlength="500" /></label>
+    <label class="f"><span>Excerpt</span><textarea name="excerpt_en" maxlength="2000">{post?.excerpt_en ?? ""}</textarea></label>
+    <div class="f"><span style="font-size:12px;color:#6a6a6a">Body</span>
+      <div class="tt" data-tiptap="content_en"><div class="tt-bar"></div><div class="tt-body"></div></div></div>
+  </section>
+
+  {type === "works" && (
+    <section class="card" data-panel="meta" hidden>
+      <div class="row2">
+        <label class="f"><span>クライアント</span><input type="text" name="meta.client_name" value={s("client_name")} /></label>
+        <label class="f"><span>Client (EN)</span><input type="text" name="meta.client_name_en" value={s("client_name_en")} /></label>
+        <label class="f"><span>期間（開始 例 2025.09）</span><input type="text" name="meta.period_start" value={s("period_start")} /></label>
+        <label class="f"><span>期間（終了。空=現在）</span><input type="text" name="meta.period_end" value={s("period_end")} /></label>
+        <label class="f"><span>役割</span><input type="text" name="meta.role" value={s("role")} /></label>
+        <label class="f"><span>Role (EN)</span><input type="text" name="meta.role_en" value={s("role_en")} /></label>
+        <label class="f"><span>使用技術</span><input type="text" name="meta.tech_stack" value={s("tech_stack")} /></label>
+        <label class="f"><span>Tech & Tools (EN)</span><input type="text" name="meta.tech_stack_en" value={s("tech_stack_en")} /></label>
+      </div>
+      <label class="f"><span>ウェブサイトURL</span><input type="url" name="meta.site_url" value={s("site_url")} /></label>
+      <fieldset class="f" style="border:0;padding:0"><legend style="font-size:12px;color:#6a6a6a">担当領域</legend>
+        <div class="checks">{SCOPE_VALUES.map((v) => <label><input type="checkbox" name="meta.scope" value={v} checked={scope.includes(v)} /> {v}</label>)}</div></fieldset>
+      <label class="f"><span><input type="checkbox" name="meta.is_featured" checked={m.is_featured === "1"} /> トップの「主な実績」に表示する</span></label>
+      <div class="f"><span style="font-size:12px;color:#6a6a6a">数値成果（日本語）</span><div data-kpi="kpi_results"></div><button type="button" class="btn" data-add-kpi="kpi_results">行を追加</button></div>
+      <div class="f"><span style="font-size:12px;color:#6a6a6a">Key Results (EN)</span><div data-kpi="kpi_results_en"></div><button type="button" class="btn" data-add-kpi="kpi_results_en">Add row</button></div>
+    </section>
+  )}
+  {type === "news" && (
+    <section class="card" data-panel="meta" hidden>
+      <label class="f"><span>YouTube（URLまたは動画ID）</span><input type="text" name="meta.media_youtube" value={s("media_youtube")} /></label>
+      <label class="f"><span>Spotify（エピソードURLまたはID）</span><input type="text" name="meta.media_spotify" value={s("media_spotify")} /></label>
+    </section>
+  )}
+
+  <section class="card" data-panel="seo" hidden>
+    <p style="margin-top:0;color:#6a6a6a">空欄なら自動（タイトル／抜粋／アイキャッチ）で出力されます。日本語ページのみ適用されます。</p>
+    <label class="f"><span>SEOタイトル</span><input type="text" name="meta.ssp_meta_title" value={s("ssp_meta_title")} /></label>
+    <label class="f"><span>SEO説明文</span><textarea name="meta.ssp_meta_description">{s("ssp_meta_description")}</textarea></label>
+    <label class="f"><span>OGP画像（URLまたは /media/…）</span><input type="text" name="meta.ssp_meta_image" value={s("ssp_meta_image")} /></label>
+  </section>
+
+  <div class="actions">
+    <button type="button" class="btn primary" data-act="save">保存</button>
+    <button type="button" class="btn" data-act="publish">公開して保存</button>
+    <button type="button" class="btn" data-act="draft">下書きにして保存</button>
+    {post && <button type="button" class="btn" data-act="history">履歴</button>}
+    {post && <button type="button" class="btn danger" data-act="trash">ゴミ箱へ</button>}
+  </div>
+  <script type="application/json" id="initial" set:html={initial}></script>
+</form>
+<dialog id="history"><h3>履歴</h3><ul id="historyList"></ul><button type="button" class="btn" id="historyClose">閉じる</button></dialog>
+
+<script>
+  import "./client/editor.ts";
+</script>

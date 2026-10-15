@@ -1,0 +1,23 @@
+---
+import "./admin.css";
+interface Props { title: string }
+const { title } = Astro.props;
+const nav: [string, string][] = [["/admin/", "ダッシュボード"], ["/admin/works/", "実績"], ["/admin/column/", "コラム"], ["/admin/news/", "お知らせ"], ["/admin/page/", "固定ページ"]];
+---
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>{title} | 管理画面</title>
+</head>
+<body>
+<header class="a-head"><div class="in">
+  <strong>管理画面</strong>
+  <nav>{nav.map(([h, l]) => <a href={h}>{l}</a>)}<a href="/" target="_blank" rel="noopener">サイトを見る ↗</a></nav>
+  <span class="me">{Astro.locals.adminEmail}</span>
+</div></header>
+<main><slot /></main>
+</body>
+</html>

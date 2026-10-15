@@ -1,0 +1,13 @@
+---
+import AdminLayout from "../../../admin/AdminLayout.astro";
+import PostForm from "../../../admin/PostForm.astro";
+import { getEnv } from "../../../lib/env.ts";
+const LABELS: Record<string, string> = { works: "実績", column: "コラム", news: "お知らせ", page: "固定ページ" };
+const { type } = Astro.params;
+if (!type || !Object.hasOwn(LABELS, type)) return new Response("Not found", { status: 404 });
+const terms = (await getEnv().DB.prepare("SELECT taxonomy,slug,name FROM terms ORDER BY taxonomy,id").bind().all<{ taxonomy: string; slug: string; name: string }>()).results;
+---
+<AdminLayout title={`${LABELS[type]}を新規作成`}>
+  <h1>{LABELS[type]}を新規作成</h1>
+  <PostForm type={type} terms={terms} />
+</AdminLayout>

@@ -1,0 +1,30 @@
+---
+import AdminLayout from "../../../admin/AdminLayout.astro";
+import { getEnv } from "../../../lib/env.ts";
+import { listAdminPosts } from "../../../admin/store.ts";
+const LABELS: Record<string, string> = { works: "実績", column: "コラム", news: "お知らせ", page: "固定ページ" };
+const { type } = Astro.params;
+if (!type || !Object.hasOwn(LABELS, type)) return new Response("Not found", { status: 404 });
+const status = Astro.url.searchParams.get("status") ?? "";
+const q = Astro.url.searchParams.get("q") ?? "";
+const rows = await listAdminPosts(getEnv().DB, { type, status: status || undefined, q: q || undefined }, 200);
+const pub = (r: { type: string; slug: string }) => (r.type === "page" ? `/${encodeURIComponent(r.slug)}/` : `/${r.type}/${encodeURIComponent(r.slug)}/`);
+---
+<AdminLayout title={LABELS[type]}>
+  <h1>{LABELS[type]}</h1>
+  <div class="bar">
+    <a class="btn primary" href={`/admin/${type}/new/`}>新規作成</a>
+    <form method="get">
+      <select name="status"><option value="">（ゴミ箱以外）</option>{["publish", "draft", "trash"].map((s) => <option value={s} selected={status === s}>{s}</option>)}</select>
+      <input type="text" name="q" value={q} placeholder="タイトル検索" style="width:200px" />
+      <button class="btn" type="submit">絞り込み</button>
+    </form>
+  </div>
+  <table class="list"><thead><tr><th>タイトル</th><th>スラッグ</th><th>状態</th><th>更新 (UTC)</th><th></th></tr></thead><tbody>
+    {rows.map((r) => (
+      <tr><td><a href={`/admin/${r.type}/${r.id}/`}>{r.title}</a></td><td>{r.slug}</td><td><span class={`badge ${r.status}`}>{r.status}</span></td><td>{r.modified_at.slice(0, 16)}</td>
+      <td>{r.status === "publish" && <a href={pub(r)} target="_blank" rel="noopener">公開ページ ↗</a>}</td></tr>
+    ))}
+    {rows.length === 0 && <tr><td colspan="5">該当する記事はありません。</td></tr>}
+  </tbody></table>
+</AdminLayout>
