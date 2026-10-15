@@ -101,3 +101,8 @@ export function cleanPostInput(raw: unknown): CleanPost {
     expected_modified_at: typeof r.expected_modified_at === "string" ? r.expected_modified_at : undefined,
   };
 }
+
+/** 管理画面が編集するメタキー（これら以外のメタ＝profile_* や kb_views などは更新時に触れない） */
+export const editableMetaKeys = (type: PostType): string[] =>
+  type === "works" ? [...STRING_META.works, ...SSP, "scope", "is_featured", "kpi_results", "kpi_results_en"] : [...STRING_META[type], ...SSP];
+export const allowedTaxonomies = (type: PostType): string[] => TAXONOMIES[type];
