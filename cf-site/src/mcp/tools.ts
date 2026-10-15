@@ -41,6 +41,8 @@ export async function updatePostTool(ctx: ToolCtx, input: Record<string, unknown
   if (!cur) throw new HttpError(404, "not found");
   if (typeof input.expected_modified_at !== "string" || !input.expected_modified_at) throw new HttpError(400, "expected_modified_at is required");
   if (input.type !== undefined && input.type !== cur.type) throw new HttpError(400, "type cannot be changed");
+  // 公開済み（下書き以外）のスラッグを変えるとURL・SEO・サイト全体の参照（プロフィール等）が壊れるため、MCPでは変更不可。同じ値の再送は許可
+  if (typeof input.slug === "string" && input.slug.trim() !== cur.slug && cur.status !== "draft") throw new HttpError(400, "slug of a published post cannot be changed via MCP");
   const patchMeta = input.meta;
   if (patchMeta !== undefined && (!patchMeta || typeof patchMeta !== "object" || Array.isArray(patchMeta))) throw new HttpError(400, "meta must be an object");
   const clean = cleanPostInput({

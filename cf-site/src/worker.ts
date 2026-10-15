@@ -1,6 +1,7 @@
 import { OAuthProvider } from "@cloudflare/workers-oauth-provider";
 import { handle } from "@astrojs/cloudflare/handler";
 import { wwwRedirect } from "./lib/redirects.ts";
+import { capBody } from "./mcp/limits.ts";
 import { handleAuthorize, handleGrantsApi, mcpEndpoint } from "./mcp/oauth.ts";
 
 /**
@@ -43,6 +44,13 @@ export default {
   async fetch(request: Request, env: any, ctx: ExecutionContext): Promise<Response> {
     const www = wwwRedirect(new URL(request.url));
     if (www) return new Response(null, { status: 301, headers: { Location: www } });
+    // 認証なしで書き込みが発生する動的クライアント登録は、巨大なボディを前段で拒否する（書き込み量の増幅対策。IP別のレート制限はWAF側で設定）
+    const u = new URL(request.url);
+    if (request.method === "POST" && u.pathname === "/oauth/register") {
+      const capped = await capBody(request, 8 * 1024);
+      if (capped instanceof Response) return capped;
+      request = capped;
+    }
     const origin = String(env.SITE_ORIGIN || "https://shinnosuke-kobayashi.jp").replace(/\/+$/, "");
     return providerFor(origin).fetch(request, env, ctx);
   },

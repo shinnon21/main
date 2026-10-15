@@ -83,3 +83,12 @@ test("terms: list with usage, create via the existing validation (dup → 409)",
   expect(status(await rejects(createTermTool(s.ctx, { taxonomy: "skill", name: "MCP" })))).toBe(409);
   expect(status(await rejects(createTermTool(s.ctx, { taxonomy: "bogus", name: "x" })))).toBe(400);
 });
+
+test("slug of a non-draft post cannot be changed via MCP (re-sending the same slug is fine); drafts may change their slug", async () => {
+  const s = setup(); const id = s.idOf("site-a"); const cur = await getPostTool(s.ctx, { id });
+  expect(status(await rejects(updatePostTool(s.ctx, { id, expected_modified_at: cur.modified_at, slug: "renamed" })))).toBe(400);
+  await updatePostTool(s.ctx, { id, expected_modified_at: cur.modified_at, slug: "site-a", title: "same slug ok" });
+  const d = await createPostTool(s.ctx, { type: "column", title: "d", slug: "d-1" }); const dc = await getPostTool(s.ctx, { id: d.id });
+  await updatePostTool(s.ctx, { id: d.id, expected_modified_at: dc.modified_at, slug: "d-2" });
+  expect((s.raw.prepare("select slug from posts where id=?").get(d.id) as any).slug).toBe("d-2");
+});

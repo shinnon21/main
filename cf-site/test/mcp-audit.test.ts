@@ -27,3 +27,10 @@ test("rate limit: 60 calls/min overall and 200 writes/hour, per user; KV failure
   const broken = { get: async () => { throw new Error("kv"); }, put: async () => { throw new Error("kv"); } };
   expect(await mcpAllowed(broken, "me@x", true, 1000)).toBe(false);
 });
+
+test("KV write errors (e.g. 1 write/sec/key 429s) do not block calls; read errors still deny", async () => {
+  const flaky = { get: async () => null, put: async () => { throw new Error("429 too many writes"); } };
+  expect(await mcpAllowed(flaky, "me@x", true, 1000)).toBe(true);
+  const unreadable = { get: async () => { throw new Error("kv down"); }, put: async () => {} };
+  expect(await mcpAllowed(unreadable, "me@x", false, 1000)).toBe(false);
+});

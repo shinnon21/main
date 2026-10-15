@@ -1,5 +1,5 @@
 import type { D1Like } from "../lib/d1.ts";
-import { MAX_BYTES, type R2Like, saveMedia, setAlt } from "../admin/media.ts";
+import { MAX_BYTES, type R2Like, saveMedia } from "../admin/media.ts";
 import { HttpError } from "../admin/types.ts";
 
 const bad = (m: string): never => { throw new HttpError(400, m); };
@@ -65,8 +65,8 @@ export async function uploadMediaFromUrl(
   const bytes = await readCapped(res);
   let name = "image";
   try { name = decodeURIComponent(url.pathname.split("/").pop() || "") || "image"; } catch { /* 既定名 */ }
-  const saved = await saveMedia(ctx, bytes, res.headers.get("Content-Type") ?? "", name);
   const alt = (a.alt ?? "").trim();
-  if (alt) { await setAlt(ctx.db, saved.id, alt); return { ...saved, alt }; }
-  return saved;
+  if (alt.length > 500) return bad("alt is too long");
+  // 保存形式は先頭バイトで判定するため、配信元の Content-Type（image/jpg・octet-stream 等の不正確な値）は照合に使わない
+  return saveMedia(ctx, bytes, "", name, alt);
 }

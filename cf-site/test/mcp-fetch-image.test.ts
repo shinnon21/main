@@ -74,3 +74,11 @@ test("a fetch that throws (DNS failure, timeout) becomes a 502-style error, not 
   const s = setup({}); const f = (async () => { throw new TypeError("network"); }) as unknown as typeof fetch;
   expect(status(await rejects(uploadMediaFromUrl({ ...s.ctx, fetcher: f }, { url: "https://example.com/x.png" })))).toBe(502);
 });
+
+test("accepts a real image served with a sloppy Content-Type (image/jpg, octet-stream, text/plain) and stores alt together with the row", async () => {
+  for (const ct of ["image/jpg", "binary/octet-stream", "text/plain"]) {
+    const s = setup({ "https://example.com/p.png": ok(png, ct) });
+    const r = await uploadMediaFromUrl(s.ctx, { url: "https://example.com/p.png", alt: "説明" });
+    expect(r.alt).toBe("説明"); expect(s.raw.prepare("select alt,content_type from media").get()).toEqual({ alt: "説明", content_type: "image/png" });
+  }
+});

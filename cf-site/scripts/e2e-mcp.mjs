@@ -5,7 +5,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 
 const base = process.argv[2] ?? "http://localhost:8790";
-const redirect = "https://claude.example/callback";
+const redirect = "https://claude.ai/callback";
 const ok = (c, m) => { if (!c) { console.error("FAIL:", m); process.exitCode = 1; } else console.log("ok  :", m); };
 const b64 = (b) => b.toString("base64url");
 

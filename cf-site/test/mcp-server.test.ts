@@ -77,3 +77,9 @@ test("rate limit: the 61st call within a minute is refused as a tool error and n
   expect(r.result.isError).toBe(true); expect(text(r)).toMatch(/rate limit/i);
   expect(s.raw.prepare("select count(*) c from posts where title='limited'").get()).toEqual({ c: 0 });
 });
+
+test("body cap is in bytes: ~4.5MB of multibyte text (1.5M characters) is refused with 413", async () => {
+  const s = setup(); const big = JSON.stringify({ jsonrpc: "2.0", id: 1, method: "ping", params: { x: "あ".repeat(1_500_000) } });
+  expect(big.length).toBeLessThan(3 * 1024 * 1024); expect(new TextEncoder().encode(big).length).toBeGreaterThan(3 * 1024 * 1024);
+  expect((await post(s, big)).status).toBe(413);
+});

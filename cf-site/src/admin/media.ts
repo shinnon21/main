@@ -84,18 +84,18 @@ const rand6 = () => Array.from(crypto.getRandomValues(new Uint8Array(6)), (b) =>
 /** 検証→D1でキー確保→R2へ書き込み。衝突時は別サフィックスで再試行し、R2失敗時はD1行を取り消す（管理画面アップロードとMCPで共用） */
 export async function saveMedia(
   ctx: { db: D1Like; media: R2Like; email: string; nowUtc: string; rand?: () => string },
-  bytes: Uint8Array, claimedType: string, name: string,
+  bytes: Uint8Array, claimedType: string, name: string, alt = "",
 ): Promise<{ id: number; key: string; url: string; alt: string; content_type: string; size: number }> {
   const { type } = validateUpload(bytes, claimedType);
   const nextRand = ctx.rand ?? rand6;
   for (let attempt = 0; attempt < 3; attempt++) {
     const key = makeKey(name, type, new Date(), nextRand());
     let newId: number;
-    try { ({ id: newId } = await insertMedia(ctx.db, { key, content_type: type, size: bytes.length, uploaded_by: ctx.email, now: ctx.nowUtc })); }
+    try { ({ id: newId } = await insertMedia(ctx.db, { key, content_type: type, size: bytes.length, uploaded_by: ctx.email, now: ctx.nowUtc, alt })); }
     catch (e) { if (e instanceof HttpError && e.status === 409) continue; throw e; }
     try { await ctx.media.put(key, bytes, { httpMetadata: { contentType: type } }); }
     catch (e) { await deleteMediaRow(ctx.db, newId).catch(() => {}); throw e; }
-    return { id: newId, key, url: `/media/${key}`, alt: "", content_type: type, size: bytes.length };
+    return { id: newId, key, url: `/media/${key}`, alt, content_type: type, size: bytes.length };
   }
   throw new HttpError(409, "could not allocate a unique media key");
 }

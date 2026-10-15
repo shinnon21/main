@@ -6,7 +6,7 @@ import { mcpHttp } from "./server.ts";
 /** workers-oauth-provider の OAuthHelpers のうち使う分（テストで差し替えやすいよう最小に絞る） */
 export interface Provider {
   parseAuthRequest(r: Request): Promise<any>;
-  describeConsent(a: any): Promise<{ clientName: string; redirectHost: string; redirectIsLoopback: boolean }>;
+  describeConsent(a: any): Promise<{ clientName: string; redirectUri: string; redirectHost: string; redirectIsLoopback: boolean }>;
   beginConsent(a: any): Promise<{ handle: string; headers: Headers }>;
   approveConsent(r: Request, handle: string, o?: { scope?: string[] }): Promise<{ request: any; headers: Headers }>;
   denyConsent(r: Request, handle: string): Promise<{ redirectTo: string; headers: Headers }>;
@@ -34,6 +34,11 @@ async function requireAdmin(req: Request, env: OEnv): Promise<{ email: string } 
   if (!isMcpAdmin(a.email, env.ADMIN_EMAILS)) return text(403, "Forbidden");
   return { email: a.email };
 }
+/** 同意を出す接続元はClaude公式（claude.ai / claude.com とそのサブドメイン）とローカル（Claude Code）に限る。誰でもクライアント登録できるため、他は偽装の恐れがあり拒否する */
+export function isAllowedRedirect(host: string, loopback: boolean): boolean {
+  const h = host.toLowerCase();
+  return loopback || h === "claude.ai" || h === "claude.com" || h.endsWith(".claude.ai") || h.endsWith(".claude.com");
+}
 const sameOrigin = (req: Request) => req.headers.get("Origin") === new URL(req.url).origin;
 
 const page = (body: string) => `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Claudeの接続を許可 | 管理画面</title>
@@ -50,11 +55,13 @@ export async function handleAuthorize(req: Request, env: OEnv): Promise<Response
     if (method === "GET") {
       const authReq = await p.parseAuthRequest(req);
       const d = await p.describeConsent(authReq);
+      if (!isAllowedRedirect(d.redirectHost, d.redirectIsLoopback)) return text(400, "this client is not allowed");
       const t = await p.beginConsent(authReq);
       const headers = new Headers(t.headers); headers.set("Content-Type", "text/html; charset=utf-8");
-      const html = page(`<h1 style="margin-top:0">Claudeの接続を許可しますか？</h1>
-<p><strong>${esc(d.clientName)}</strong>（${esc(d.redirectHost)}）が、サイトの記事を<strong>下書きの作成・編集</strong>できるようになります。</p>
-<ul><li>できること: 記事・実績・お知らせ・固定ページの閲覧、下書き作成、本文などの更新、分類の追加、画像の登録</li><li>できないこと: 公開・非公開の切替、削除、サイト設定、お問い合わせの閲覧</li></ul>
+      const html = page(`<h1 style="margin-top:0">アプリの接続を許可しますか？</h1>
+<p><strong>${esc(d.clientName.slice(0, 60))}</strong> が、サイトの記事を操作できるようになります。接続先: <code>${esc(d.redirectUri)}</code></p>
+<ul><li>できること: 記事・実績・お知らせ・固定ページの閲覧、<strong>下書きの作成</strong>、本文などの更新、分類の追加、画像の登録</li><li>できないこと: 公開・非公開の切替、削除、サイト設定、お問い合わせの閲覧</li></ul>
+<p style="background:#fbecee;padding:10px 12px;border-radius:8px">注意: <strong>公開済みの記事を更新すると、その内容は公開サイトに即時反映されます</strong>（改版履歴から元に戻せます）。心当たりのない接続は拒否してください。</p>
 <p>ログイン中のアカウント: <code>${esc(who.email)}</code></p>
 <form method="post"><input type="hidden" name="handle" value="${esc(t.handle)}"><div class="row"><button class="ok" name="decision" value="approve">許可する</button><button name="decision" value="deny">拒否する</button></div></form>`);
       return adminHeaders(new Response(html, { status: 200, headers }));
@@ -69,8 +76,9 @@ export async function handleAuthorize(req: Request, env: OEnv): Promise<Response
       return adminHeaders(new Response(null, { status: 302, headers: h }));
     }
     const approved = await p.approveConsent(req, handle, { scope: SCOPE });
-    let client = "Claude";
-    try { client = (await p.describeConsent(approved.request)).clientName.slice(0, 100) || client; } catch { /* 名前が取れなくても続行 */ }
+    const d = await p.describeConsent(approved.request);
+    if (!isAllowedRedirect(d.redirectHost, d.redirectIsLoopback)) return text(400, "this client is not allowed");
+    const client = d.clientName.slice(0, 100) || "Claude";
     const done = await p.completeAuthorization({ request: approved.request, userId: who.email, metadata: { clientName: client }, scope: SCOPE, props: { email: who.email, client } });
     const h = new Headers(approved.headers); h.set("Location", done.redirectTo);
     return adminHeaders(new Response(null, { status: 302, headers: h }));

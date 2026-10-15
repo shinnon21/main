@@ -6,11 +6,11 @@ import { exp } from "./fixtures/export.ts";
 import { handleAuthorize, handleGrantsApi, isMcpAdmin, mcpEndpoint } from "../src/mcp/oauth.ts";
 
 const L = "http://localhost:4321";
-function provider() {
+function provider(o: { host?: string; loopback?: boolean; uri?: string } = {}) {
   const calls: Record<string, unknown[]> = { complete: [], approve: [], deny: [], revoke: [] };
   return { calls, p: {
     parseAuthRequest: async () => ({ clientId: "c1", redirectUri: "https://claude.ai/cb", scope: ["cms"], state: "s", responseType: "code" }),
-    describeConsent: async () => ({ clientId: "c1", clientName: `<img src=x onerror=alert(1)>Claude`, redirectUri: "https://claude.ai/cb", redirectHost: "claude.ai", redirectIsLoopback: false }),
+    describeConsent: async () => ({ clientId: "c1", clientName: `<img src=x onerror=alert(1)>Claude`, redirectUri: o.uri ?? "https://claude.ai/cb", redirectHost: o.host ?? "claude.ai", redirectIsLoopback: o.loopback ?? false }),
     beginConsent: async () => ({ handle: "H123", headers: new Headers({ "Set-Cookie": "bind=1; HttpOnly" }) }),
     approveConsent: async (_r: Request, h: string, o: unknown) => { calls.approve.push([h, o]); return { request: { clientId: "c1", state: "s" }, headers: new Headers({ "Set-Cookie": "bind=; Max-Age=0" }) }; },
     denyConsent: async (_r: Request, h: string) => { calls.deny.push(h); return { redirectTo: "https://claude.ai/cb?error=access_denied", headers: new Headers({ "Set-Cookie": "bind=; Max-Age=0" }) }; },
@@ -80,4 +80,21 @@ test("mcpEndpoint: no/invalid props → 403 (also when the token's email left th
   expect((await mcpEndpoint(req(), { ...e, ADMIN_EMAILS: "" }, { props: { email: "me@x.com" } } as any)).status).toBe(403);
   const ok = await mcpEndpoint(req(), e, { props: { email: "me@x.com", client: "Claude" } } as any); expect(ok.status).toBe(200);
   expect(await ok.json()).toMatchObject({ result: {} });
+});
+
+test("consent is refused (400) unless the redirect target is claude.ai / claude.com (or a subdomain) or loopback — spoofed names and lookalike hosts get nothing", async () => {
+  for (const [host, loopback, allowed] of [["claude.ai", false, true], ["claude.com", false, true], ["www.claude.ai", false, true], ["localhost", true, true], ["127.0.0.1", true, true],
+    ["evil.example", false, false], ["claude.ai.evil.example", false, false], ["evilclaude.ai", false, false], ["claude-ai.example", false, false], ["claude.ai@evil.example", false, false]] as const) {
+    const { p, calls } = provider({ host, loopback }); const e = { ...env(), OAUTH_PROVIDER: p } as any;
+    const g = await handleAuthorize(get("/admin/mcp/authorize"), e);
+    expect(g.status, `GET ${host}`).toBe(allowed ? 200 : 400);
+    const po = await handleAuthorize(form("/admin/mcp/authorize", { handle: "H123", decision: "approve" }), e);
+    expect(po.status, `POST ${host}`).toBe(allowed ? 302 : 400);
+    if (!allowed) expect(calls.complete, host).toHaveLength(0);
+  }
+});
+test("consent page is neutral, shows the full redirect URI, and warns that edits to published posts go live immediately", async () => {
+  const { p } = provider({ uri: "https://claude.ai/api/mcp/auth_callback" });
+  const html = await (await handleAuthorize(get("/admin/mcp/authorize"), { ...env(), OAUTH_PROVIDER: p } as any)).text();
+  expect(html).toContain("https://claude.ai/api/mcp/auth_callback"); expect(html).toContain("公開済みの記事"); expect(html).not.toContain("Claudeの接続を許可しますか");
 });

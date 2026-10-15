@@ -69,14 +69,30 @@ async function callTool(deps: McpDeps, name: string, args: unknown) {
   }
 }
 
+/** バイト数で上限を数えながら読む（Content-Lengthの無いチャンク転送でも、上限超過で打ち切る） */
+async function readCapped(req: Request, max: number): Promise<string | null> {
+  if (!req.body) return "";
+  const reader = req.body.getReader(); const chunks: Uint8Array[] = []; let total = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > max) { await reader.cancel().catch(() => {}); return null; }
+    chunks.push(value);
+  }
+  const all = new Uint8Array(total); let off = 0;
+  for (const c of chunks) { all.set(c, off); off += c.length; }
+  return new TextDecoder().decode(all);
+}
+
 /** ステートレスな Streamable HTTP（POSTのみ・JSON応答）の最小MCPサーバー。認証は呼び出し側（OAuth）で済んでいること */
 export async function mcpHttp(req: Request, deps: McpDeps): Promise<Response> {
   if (req.method !== "POST") return new Response("Method Not Allowed", { status: 405, headers: { Allow: "POST" } });
   if (!/^application\/json(\s*;|$)/i.test(req.headers.get("Content-Type") ?? "")) return new Response("Unsupported Media Type", { status: 415 });
   const declared = Number(req.headers.get("Content-Length"));
   if (declared > MAX_BODY) return new Response("Payload Too Large", { status: 413 });
-  const raw = await req.text();
-  if (raw.length > MAX_BODY) return new Response("Payload Too Large", { status: 413 });
+  const raw = await readCapped(req, MAX_BODY);
+  if (raw === null) return new Response("Payload Too Large", { status: 413 });
   let msg: any;
   try { msg = JSON.parse(raw); } catch { return reply(rpcError(null, -32700, "parse error")); }
   if (!msg || typeof msg !== "object" || Array.isArray(msg) || msg.jsonrpc !== "2.0" || typeof msg.method !== "string") return reply(rpcError(null, -32600, "invalid request"), 400);
