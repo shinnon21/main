@@ -45,3 +45,10 @@
 ## 6. 緊急時の連絡先メモ
 - Cloudflare アカウント: hello@shinnosuke-kobayashi.jp（Account ID `5ab6d2a72a9bd3690514afbdbd661d07`）
 - 管理画面: `https://shinnosuke-kobayashi.jp/admin/`（Access のワンタイムPIN）
+
+## 付録: 切替直前のDNS控え（2026-10-15 エクスポート）
+ロールバック時はこの2件を復元（プロキシ有効）。それ以外のレコードは切替で一切変更しない。
+- A `shinnosuke-kobayashi.jp` → `35.189.147.122`（proxied）
+- A `www.shinnosuke-kobayashi.jp` → `35.189.147.122`（proxied）
+- 不変: MX（Google Workspace 5件・`cf-bounce` 3件）、TXT（apex SPF `v=spf1 include:_spf.google.com ~all`・google-site-verification・`cf-bounce` SPF/DKIM・`_dmarc` `p=none`）
+- 切替直前スナップショット: `pre-cutover-20261015`
