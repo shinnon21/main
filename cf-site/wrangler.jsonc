@@ -8,5 +8,6 @@
   ],
   "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "kb-media" }],
   "kv_namespaces": [{ "binding": "CACHE", "id": "cd751868d0984c1d88a0318bbdbd3c81" }],
-  "vars": { "ACCESS_TEAM_DOMAIN": "", "ACCESS_AUD": "", "ADMIN_EMAILS": "" }
+  "send_email": [{ "name": "EMAIL" }],
+  "vars": { "ACCESS_TEAM_DOMAIN": "", "ACCESS_AUD": "", "ADMIN_EMAILS": "", "TURNSTILE_SITE_KEY": "", "CONTACT_TO": "contact@shinnosuke-kobayashi.jp", "CONTACT_FROM": "noreply@shinnosuke-kobayashi.jp" }
 }

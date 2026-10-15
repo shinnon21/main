@@ -1,0 +1,45 @@
+---
+import AdminLayout from "../../../admin/AdminLayout.astro";
+import { getEnv } from "../../../lib/env.ts";
+const { id } = Astro.params;
+if (!/^\d+$/.test(id ?? "")) return new Response("Not found", { status: 404 });
+const db = getEnv().DB;
+const c = await db.prepare("SELECT * FROM contacts WHERE id=?").bind(Number(id)).first<{ id: number; created_at: string; name: string; email: string; company: string; kind: string; message: string; lang: string; status: string; notify_status: string; notify_error: string }>();
+if (!c) return new Response("Not found", { status: 404 });
+if (c.status === "new") { await db.prepare("UPDATE contacts SET status='read' WHERE id=? AND status='new'").bind(c.id).run(); c.status = "read"; }
+const subject = encodeURIComponent(`Re: ${c.kind}`);
+---
+<AdminLayout title={`お問い合わせ: ${c.name}`}>
+  <h1>お問い合わせ #{c.id}</h1>
+  <div class="card" id="contact" data-id={c.id}>
+    <p><strong>{c.name}</strong>{c.company && ` ／ ${c.company}`}</p>
+    <p>種別: {c.kind}（{c.lang}） ／ 受信: {c.created_at.slice(0, 19)} UTC ／ 状態: <span class={`badge ${c.status === "spam" ? "trash" : ""}`} id="statusBadge">{c.status}</span></p>
+    <p>メール: <a href={`mailto:${c.email}?subject=${subject}`}>{c.email}</a>（クリックで返信メールを作成）</p>
+    <p style="font-size:12px;color:#6a6a6a">メール通知: {c.notify_status}{c.notify_error && ` ／ ${c.notify_error}`}</p>
+    <div style="white-space:pre-wrap;border-left:4px solid #C22740;padding:6px 14px;background:#faf8f9;border-radius:6px">{c.message}</div>
+    <div class="bar" style="margin-top:16px">
+      <button type="button" class="btn" data-set="new">未読に戻す</button>
+      <button type="button" class="btn danger" data-set="spam">スパムにする</button>
+      <button type="button" class="btn" data-set="read">既読にする</button>
+      <a class="btn" href="/admin/contacts/">一覧へ</a>
+    </div>
+    <div id="cMsg" role="status" style="min-height:20px;font-weight:600"></div>
+  </div>
+</AdminLayout>
+<script>
+  const root = document.getElementById("contact");
+  if (root) {
+    const id = root.dataset.id;
+    root.querySelectorAll<HTMLButtonElement>("[data-set]").forEach((b) => b.addEventListener("click", async () => {
+      const msg = document.getElementById("cMsg")!;
+      b.disabled = true;
+      try {
+        const res = await fetch(`/admin/api/contacts/${id}/status`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: b.dataset.set }) });
+        if (!res.ok) throw new Error(`エラー (${res.status})`);
+        document.getElementById("statusBadge")!.textContent = b.dataset.set ?? "";
+        msg.textContent = "更新しました";
+      } catch (e) { msg.textContent = e instanceof Error ? e.message : String(e); }
+      finally { b.disabled = false; }
+    }));
+  }
+</script>

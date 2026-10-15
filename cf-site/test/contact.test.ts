@@ -34,11 +34,11 @@ test("notification mail: safe single-line subject, escaped HTML, reply-to data p
   expect(n.html).not.toContain("<script>"); expect(n.html).not.toContain("<img"); expect(n.html).toContain("&lt;img");
   expect(n.text).toContain("https://shinnosuke-kobayashi.jp/admin/contacts/7/");
 });
-test("auto-reply is language specific, plain, and does not echo the full message", () => {
-  const ja = buildAutoReply({ name: "山田", email: "a@b.com", company: "", kind: KINDS[0], message: "長い本文".repeat(100), lang: "ja", bot: false });
-  const en = buildAutoReply({ name: "Taro", email: "a@b.com", company: "", kind: KINDS[0], message: "m", lang: "en", bot: false });
-  expect(ja.subject).toMatch(/お問い合わせ/); expect(ja.text.length).toBeLessThan(900); expect(en.subject).toMatch(/inquiry|message/i); expect(en.text).toMatch(/Taro/);
-  expect(ja.subject).not.toMatch(/[\r\n]/);
+test("auto-reply is a fixed, language specific template that does not echo any submitted text", () => {
+  const ja = buildAutoReply({ lang: "ja" });
+  const en = buildAutoReply({ lang: "en" });
+  expect(ja.subject).toMatch(/お問い合わせ/); expect(ja.text.length).toBeLessThan(900); expect(en.subject).toMatch(/inquiry/i); expect(en.text).toMatch(/Thank you/);
+  for (const m of [ja, en]) expect(m.subject).not.toMatch(/[\r\n]/);
 });
 test("hashIp is stable, salted and does not contain the IP", async () => {
   const a = await hashIp("203.0.113.5", "salt1"), b = await hashIp("203.0.113.5", "salt1"), c = await hashIp("203.0.113.5", "salt2");

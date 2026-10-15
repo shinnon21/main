@@ -1,0 +1,80 @@
+---
+import "../styles/contact.css";
+import Layout from "../components/Layout.astro";
+import PageHero from "../components/PageHero.astro";
+import SnsLinks from "../components/SnsLinks.astro";
+import { getEnv } from "../lib/env.ts";
+import { KINDS, KIND_LABELS_EN } from "../lib/contact.ts";
+import { docTitle } from "../lib/format.ts";
+import { t } from "../lib/i18n.ts";
+import { l } from "../lib/lang.ts";
+
+const lang = Astro.locals.lang ?? "ja";
+const siteKey = getEnv().TURNSTILE_SITE_KEY?.trim() ?? "";
+const title = t(lang, "お問い合わせ", "Contact");
+const kinds = lang === "en" ? KIND_LABELS_EN : KINDS;
+const lead = t(lang, "お仕事のご依頼・ご相談、取材・登壇のご依頼など、お気軽にお送りください。<br>内容を確認のうえ、折り返しご連絡いたします。", "For work inquiries, consulting, interview or speaking requests — please feel free to reach out.<br>I will review your message and get back to you.");
+const T = {
+  name: t(lang, "氏名（必須）", "Name (required)"), email: t(lang, "メールアドレス（必須）", "Email (required)"), company: t(lang, "会社名・所属", "Company / Affiliation"),
+  kind: t(lang, "お問い合わせ種別（必須）", "Inquiry type (required)"), message: t(lang, "お問い合わせ内容（必須）", "Message (required)"),
+  choose: t(lang, "選択してください", "Please select"), consent: t(lang, "に同意します", " — I agree"), policy: t(lang, "プライバシーポリシー", "Privacy Policy"),
+  send: t(lang, "送信する", "Send"), sending: t(lang, "送信中…", "Sending…"),
+};
+const messages = {
+  network: t(lang, "送信に失敗しました。時間をおいて再度お試しください。", "Sending failed. Please try again later."),
+  challenge: t(lang, "確認（ボット対策）に失敗しました。もう一度お試しください。", "The verification failed. Please try again."),
+  limited: t(lang, "送信回数が上限に達しました。しばらくしてからお試しください。", "Too many submissions. Please try again later."),
+  notConfigured: t(lang, "現在フォームは準備中です。各SNSのDMからご連絡ください。", "The form is not available right now. Please reach out via social media DM."),
+  invalid: t(lang, "入力内容を確認してください。", "Please check your input."),
+};
+---
+<Layout title={docTitle(title, lang)} description={t(lang, "お仕事のご依頼・ご相談、取材・登壇のご依頼などはこちらから。", "Contact form for work inquiries, consulting, interviews and speaking requests.")} lang={lang}>
+  <PageHero label="contact" title={title} crumbs={[{ label: title }]} lang={lang} />
+  <div class="sec">
+    <div class="container" style="max-width:820px">
+
+      <div id="contactMain">
+        <p class="contact-lead" set:html={lead} />
+        {!siteKey && <p class="contact-notice">{messages.notConfigured}</p>}
+
+        <article class="entry-wrap contact-form-wrap" style="max-width:none">
+          <form id="contactForm" class="contact-form" novalidate data-endpoint="/api/contact/" data-lang={lang} data-sitekey={siteKey} data-msg={JSON.stringify(messages)} data-sending={T.sending}>
+            <div class="cf-field"><label class="cf-label" for="cf-name">{T.name}</label><span class="cf-control"><input type="text" id="cf-name" name="name" maxlength="100" autocomplete="name" required /></span><span class="field-tip" data-tip="name"></span></div>
+            <div class="cf-field"><label class="cf-label" for="cf-company">{T.company}</label><span class="cf-control"><input type="text" id="cf-company" name="company" maxlength="100" autocomplete="organization" /></span><span class="field-tip" data-tip="company"></span></div>
+            <div class="cf-field"><label class="cf-label" for="cf-email">{T.email}</label><span class="cf-control"><input type="email" id="cf-email" name="email" maxlength="254" autocomplete="email" required /></span><span class="field-tip" data-tip="email"></span></div>
+            <div class="cf-field"><label class="cf-label" for="cf-kind">{T.kind}</label><span class="cf-control"><select id="cf-kind" name="kind" required><option value="">{T.choose}</option>{kinds.map((k) => <option value={k}>{k}</option>)}</select></span><span class="field-tip" data-tip="kind"></span></div>
+            <div class="cf-field"><label class="cf-label" for="cf-message">{T.message}</label><span class="cf-control"><textarea id="cf-message" name="message" maxlength="5000" required></textarea></span><span class="field-tip" data-tip="message"></span></div>
+            <div class="cf-hp" aria-hidden="true"><label>Website <input type="text" name="website" tabindex="-1" autocomplete="off" /></label></div>
+            <div class="cf-field cf-accept"><label><input type="checkbox" name="consent" required /><span><a href={l(lang, "/privacy/")} target="_blank" rel="noopener">{T.policy}</a>{T.consent}</span></label><span class="field-tip" data-tip="consent"></span></div>
+            {siteKey && <div class="cf-turnstile cf-turnstile-widget" data-sitekey={siteKey}></div>}
+            <button type="submit" class="cf-submit" disabled={!siteKey}>{T.send}</button>
+            <div class="cf-response" role="alert" hidden></div>
+          </form>
+        </article>
+
+        <div class="contact-alt">
+          <p>{t(lang, "フォームのほか、各SNSのDMからもご連絡いただけます。", "You can also reach me by DM on any of these social accounts.")}</p>
+          <SnsLinks />
+        </div>
+      </div>
+
+      <div id="contactThanks" class="contact-thanks" hidden>
+        <div class="ct-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 12.5l5 5L20 6.5" stroke="#C22740" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h2>{t(lang, "お問い合わせありがとうございます", "Thank you for your message")}</h2>
+        <p set:html={t(lang, "メッセージを送信しました。<br>内容を確認のうえ、数日を目安に折り返しご連絡いたします。", "Your message has been sent.<br>I will review it and get back to you, usually within a few business days.")} />
+        <p class="ct-note">{t(lang, "自動返信メールが届かない場合は、迷惑メールフォルダをご確認ください。", "If you don’t receive an auto-reply, please check your spam folder.")}</p>
+        <div class="ct-cta">
+          <a class="btn primary" href={l(lang, "/")}>{t(lang, "トップへ戻る", "Back to home")}</a>
+          <a class="btn ghost" href={l(lang, "/works/")}>{t(lang, "実績を見る →", "View works →")}</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  {siteKey && <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>}
+</Layout>
+<script>
+  import "../scripts/contact-form.ts";
+</script>

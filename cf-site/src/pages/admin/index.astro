@@ -5,6 +5,7 @@ import { listAdminPosts } from "../../admin/store.ts";
 const db = getEnv().DB;
 const counts = (await db.prepare("SELECT type,status,COUNT(*) c FROM posts GROUP BY type,status").bind().all<{ type: string; status: string; c: number }>()).results;
 const recent = await listAdminPosts(db, {}, 10);
+const newContacts = (await db.prepare("SELECT COUNT(*) c FROM contacts WHERE status='new'").bind().first<{ c: number }>())?.c ?? 0;
 const types: [string, string][] = [["works", "実績"], ["column", "コラム"], ["news", "お知らせ"], ["page", "固定ページ"]];
 const n = (t: string, s: string) => counts.find((x) => x.type === t && x.status === s)?.c ?? 0;
 const pub = (r: { type: string; slug: string }) => (r.type === "page" ? `/${encodeURIComponent(r.slug)}/` : `/${r.type}/${encodeURIComponent(r.slug)}/`);
@@ -20,6 +21,7 @@ const pub = (r: { type: string; slug: string }) => (r.type === "page" ? `/${enco
       </div>
     ))}
   </div>
+  <p><a href="/admin/contacts/">お問い合わせ（未読 {newContacts} 件）</a></p>
   <h2>最近の更新</h2>
   <table class="list"><thead><tr><th>タイトル</th><th>種別</th><th>状態</th><th>更新</th></tr></thead><tbody>
     {recent.map((r) => <tr><td><a href={`/admin/${r.type}/${r.id}/`}>{r.title}</a></td><td>{r.type}</td><td><span class={`badge ${r.status}`}>{r.status}</span></td><td>{r.modified_at.slice(0, 16)} UTC</td></tr>)}

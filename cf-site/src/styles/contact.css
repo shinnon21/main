@@ -1,0 +1,28 @@
+/* お問い合わせフォーム（自前実装）。旧テーマの Contact Form 7 用スタイルを .contact-form 用に移植 */
+.contact-form .cf-field{margin-bottom:24px}
+.contact-form label.cf-label{display:block;font-size:14px;font-weight:700}
+.contact-form .cf-control{display:block;margin-top:8px}
+.contact-form input[type=text],.contact-form input[type=email],.contact-form select,.contact-form textarea{
+  width:100%;font-family:var(--font-jp);font-size:16px;color:var(--ink);
+  border:1px solid var(--line);border-radius:10px;padding:13px 16px;background-color:var(--bg);
+  transition:border-color .2s,box-shadow .2s,background-color .2s}
+.contact-form input[type=text]:focus,.contact-form input[type=email]:focus,.contact-form select:focus,.contact-form textarea:focus{
+  outline:none;border-color:var(--crimson);background-color:#fff;box-shadow:0 0 0 3px var(--tint-light)}
+.contact-form select{appearance:none;-webkit-appearance:none;cursor:pointer;padding-right:44px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%235C5C5C' stroke-width='2'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 18px center}
+.contact-form textarea{min-height:190px;resize:vertical}
+.contact-form .cf-accept label{display:inline-flex;align-items:center;gap:10px;font-size:13.5px;font-weight:500;cursor:pointer}
+.contact-form .cf-accept input[type=checkbox]{width:18px;height:18px;accent-color:var(--crimson);flex:none}
+.contact-form .cf-accept a{color:var(--crimson);text-decoration:underline}
+.contact-form .cf-submit{display:block;margin:6px auto 0;font-family:var(--font-jp);font-weight:700;font-size:15px;color:#fff;
+  background:var(--crimson);border:1.5px solid var(--crimson);border-radius:999px;padding:15px 56px;cursor:pointer;transition:.25s}
+.contact-form .cf-submit:hover{background:var(--crimson-dark);border-color:var(--crimson-dark);transform:translateY(-2px)}
+.contact-form .cf-submit:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.contact-form .field-tip{display:block;color:var(--crimson);font-size:12px;font-weight:500;margin-top:6px}
+.contact-form .cf-response{margin:26px 0 0;padding:14px 20px;border:1px solid var(--crimson);border-radius:10px;font-size:13.5px;text-align:center;background:var(--tint-light);color:var(--deep)}
+.contact-form .cf-response[hidden]{display:none}
+.contact-form .cf-hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.contact-form .cf-turnstile{display:flex;justify-content:center;margin:0 0 20px}
+.contact-notice{margin:0 0 24px;padding:14px 20px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:13.5px;text-align:center}
+@media(max-width:640px){.contact-form-wrap{padding:32px 20px}}

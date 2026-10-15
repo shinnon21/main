@@ -94,3 +94,26 @@ test("CRLF/header-injection attempts in name/email never reach mail headers", as
   await Promise.all(s.pending);
   for (const m of s.sent) { expect(m.subject).not.toMatch(/[\r\n]/); expect(String(m.replyTo ?? "")).not.toMatch(/[\r\n]/); }
 });
+
+// --- security review: relay/phishing abuse and rate-limit ordering ---
+test("auto-reply never contains attacker-controlled text (name/company/message/kind) — no phishing relay through our domain", async () => {
+  const s = setup();
+  await handleContactSubmit(post(body({ name: "CLICK http://evil.example/pay NOW", company: "http://evil2.example", message: "visit http://evil3.example" })), s.deps);
+  await Promise.all(s.pending);
+  const ar = s.sent.find((m) => m.to === "taro@example.com");
+  expect(ar).toBeTruthy();
+  for (const part of [ar.subject, ar.text, ar.html]) expect(part).not.toMatch(/evil|CLICK|http:\/\//i);
+});
+test("auto-replies have a global daily cap so the form cannot be used to spray many different addresses", async () => {
+  const s = setup();
+  for (let i = 0; i < 60; i++) await handleContactSubmit(post(body({ email: `victim${i}@example.com` }), { "CF-Connecting-IP": `198.51.100.${i}` }), s.deps);
+  await Promise.all(s.pending);
+  expect(s.sent.filter((m) => m.to !== "owner@site.test").length).toBeLessThanOrEqual(50);
+  expect(s.sent.filter((m) => m.to === "owner@site.test")).toHaveLength(60);
+});
+test("requests that fail the challenge never consume the global quota (a botnet cannot lock real visitors out)", async () => {
+  const s = setup();
+  for (let i = 0; i < 250; i++) await handleContactSubmit(post(body({ turnstile: "bad" }), { "CF-Connecting-IP": `192.0.2.${i % 250}${i > 249 ? "9" : ""}` }), s.deps);
+  const res = await handleContactSubmit(post(body(), { "CF-Connecting-IP": "203.0.113.200" }), s.deps);
+  expect(res.status).toBe(200);
+});

@@ -5,7 +5,7 @@ const { title } = Astro.props;
 // 多重防御: ミドルウェア未認証（adminEmail なし）なら中身を描画しない
 const authed = !!Astro.locals.adminEmail;
 if (!authed) Astro.response.status = 401;
-const nav: [string, string][] = [["/admin/", "ダッシュボード"], ["/admin/works/", "実績"], ["/admin/column/", "コラム"], ["/admin/news/", "お知らせ"], ["/admin/page/", "固定ページ"], ["/admin/media/", "メディア"]];
+const nav: [string, string][] = [["/admin/", "ダッシュボード"], ["/admin/works/", "実績"], ["/admin/column/", "コラム"], ["/admin/news/", "お知らせ"], ["/admin/page/", "固定ページ"], ["/admin/media/", "メディア"], ["/admin/contacts/", "お問い合わせ"]];
 ---
 <!DOCTYPE html>
 <html lang="ja">

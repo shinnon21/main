@@ -34,8 +34,9 @@ export async function handleContactSubmit(req: Request, deps: ContactDeps): Prom
 
     const ip = req.headers.get("CF-Connecting-IP") ?? "";
     const ipKey = (await hashIp(ip, deps.cfg.ipSalt)) || "unknown";
-    const [h, d, g] = await Promise.all([rateLimit(deps.kv, `contact:h:${ipKey}`, 5, 3600), rateLimit(deps.kv, `contact:d:${ipKey}`, 20, 86400), rateLimit(deps.kv, "contact:global", 200, 3600)]);
-    if (!h.allowed || !d.allowed || !g.allowed) return json({ error: "rate_limited" }, 429);
+    // 事前チェックはIP単位のみ。全体の上限は「チャレンジを通過した本物の送信」だけを数える（検証失敗の大量リクエストで正規利用者を締め出されないように）
+    const [h, d] = await Promise.all([rateLimit(deps.kv, `contact:h:${ipKey}`, 5, 3600), rateLimit(deps.kv, `contact:d:${ipKey}`, 20, 86400)]);
+    if (!h.allowed || !d.allowed) return json({ error: "rate_limited" }, 429);
 
     const v = validateContact(raw);
     if (!v.ok) return json({ errors: v.errors }, 400);
@@ -43,6 +44,8 @@ export async function handleContactSubmit(req: Request, deps: ContactDeps): Prom
 
     const token = typeof (raw as Record<string, unknown>).turnstile === "string" ? ((raw as Record<string, unknown>).turnstile as string) : "";
     if (!(await (deps.verify ?? verifyTurnstile)({ token, secret, ip }))) return json({ error: "challenge_failed" }, 400);
+
+    if (!(await rateLimit(deps.kv, "contact:global", 200, 3600)).allowed) return json({ error: "rate_limited" }, 429);
 
     const c = v.value;
     const ua = (req.headers.get("User-Agent") ?? "").slice(0, 300);
@@ -64,7 +67,7 @@ async function notify(deps: ContactDeps, id: number, c: ContactClean): Promise<v
     const n = buildNotification(c, id, deps.cfg.siteUrl);
     await deps.mail.send({ to: deps.cfg.to, from: deps.cfg.from, replyTo: c.email, ...n });
     // 自動返信は同一アドレスに1日1通まで（フォームを使った第三者へのメール爆撃を防ぐ）
-    if ((await rateLimit(deps.kv, `autoreply:${c.email}`, 1, 86400)).allowed) {
+    if ((await rateLimit(deps.kv, `autoreply:${c.email}`, 1, 86400)).allowed && (await rateLimit(deps.kv, "autoreply:global", 50, 86400)).allowed) {
       try { await deps.mail.send({ to: c.email, from: deps.cfg.from, ...buildAutoReply(c) }); } catch (e) { await set("sent", `autoreply: ${errText(e)}`); return; }
     }
     await set("sent");

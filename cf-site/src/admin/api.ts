@@ -39,6 +39,26 @@ export async function handleAdminApi(req: Request, ctx: ApiCtx): Promise<Respons
     }
 
     const { db, email, nowUtc } = ctx;
+    const cm = path.match(/^\/contacts(?:\/(\d+)(\/status)?)?$/);
+    if (cm) {
+      const cid = cm[1] ? Number(cm[1]) : null;
+      if (cid === null) {
+        if (method !== "GET") throw new HttpError(405, "method not allowed");
+        const status = url.searchParams.get("status");
+        const where = status ? "WHERE status=?" : "WHERE status<>'spam'";
+        const rows = (await db.prepare(`SELECT id,created_at,name,email,company,kind,lang,status,notify_status FROM contacts ${where} ORDER BY created_at DESC, id DESC LIMIT 200`).bind(...(status ? [status] : [])).all()).results;
+        const nc = (await db.prepare("SELECT COUNT(*) c FROM contacts WHERE status='new'").bind().first<{ c: number }>())?.c ?? 0;
+        return json({ contacts: rows, new_count: nc });
+      }
+      const row = await db.prepare("SELECT id,created_at,name,email,company,kind,message,lang,status,notify_status,notify_error FROM contacts WHERE id=?").bind(cid).first();
+      if (!row) throw new HttpError(404, "not found");
+      if (!cm[2]) { if (method !== "GET") throw new HttpError(405, "method not allowed"); return json(row); }
+      if (method !== "POST") throw new HttpError(405, "method not allowed");
+      const st = ((await body(req)) as { status?: string })?.status;
+      if (!st || !["new", "read", "spam"].includes(st)) throw new HttpError(400, "invalid status");
+      await db.prepare("UPDATE contacts SET status=? WHERE id=?").bind(st, cid).run();
+      return json({ ok: true });
+    }
     const mm = path.match(/^\/media(?:\/(\d+))?$/);
     if (mm) {
       if (!ctx.media) throw new HttpError(503, "media storage is not configured");

@@ -1,0 +1,20 @@
+---
+import AdminLayout from "../../../admin/AdminLayout.astro";
+import { getEnv } from "../../../lib/env.ts";
+const status = Astro.url.searchParams.get("status") ?? "";
+const db = getEnv().DB;
+const where = ["new", "read", "spam"].includes(status) ? "WHERE status=?" : "WHERE status<>'spam'";
+const rows = (await db.prepare(`SELECT id,created_at,name,email,company,kind,lang,status,notify_status FROM contacts ${where} ORDER BY created_at DESC, id DESC LIMIT 200`).bind(...(where.includes("?") ? [status] : [])).all<{ id: number; created_at: string; name: string; email: string; company: string; kind: string; lang: string; status: string; notify_status: string }>()).results;
+const tabs: [string, string][] = [["", "すべて（スパム除く）"], ["new", "未読"], ["read", "既読"], ["spam", "スパム"]];
+---
+<AdminLayout title="お問い合わせ">
+  <h1>お問い合わせ</h1>
+  <div class="bar">{tabs.map(([v, l]) => <a class="btn" style={status === v ? "background:#C22740;color:#fff;border-color:#C22740" : ""} href={v ? `?status=${v}` : "?"}>{l}</a>)}</div>
+  <table class="list"><thead><tr><th>受信日時 (UTC)</th><th>氏名</th><th>種別</th><th>状態</th><th>メール通知</th></tr></thead><tbody>
+    {rows.map((r) => (
+      <tr><td>{r.created_at.slice(0, 16)}</td><td><a href={`/admin/contacts/${r.id}/`}>{r.name}</a>{r.company && <div style="font-size:12px;color:#6a6a6a">{r.company}</div>}</td><td>{r.kind}{r.lang === "en" && " (EN)"}</td>
+      <td><span class={`badge ${r.status === "new" ? "publish" : r.status === "spam" ? "trash" : ""}`}>{r.status}</span></td><td>{r.notify_status}</td></tr>
+    ))}
+    {rows.length === 0 && <tr><td colspan="5">該当するお問い合わせはありません。</td></tr>}
+  </tbody></table>
+</AdminLayout>

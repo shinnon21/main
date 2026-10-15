@@ -54,13 +54,13 @@ export function buildNotification(c: ContactClean, id: number, siteUrl: string):
   return { subject, text, html };
 }
 
-/** 送信者への自動返信（本文は繰り返さない） */
-export function buildAutoReply(c: ContactClean): { subject: string; text: string; html: string } {
+/** 送信者への自動返信。送信者が入力した文字列（氏名・会社名・本文・種別）は一切含めない（当サイトのドメインからフィッシング文面を中継させないため）。言語のみで切り替える固定文面 */
+export function buildAutoReply(c: Pick<ContactClean, "lang">): { subject: string; text: string; html: string } {
   if (c.lang === "en") {
-    const text = `Hi ${c.name},\n\nThank you for your inquiry. I have received your message and will get back to you within a few business days.\n\nThis is an automated message — please do not reply to it.\n\nShinnosuke Kobayashi\nhttps://shinnosuke-kobayashi.jp/en/`;
+    const text = `Thank you for your inquiry.\n\nI have received your message and will get back to you within a few business days.\n\nThis is an automated message — please do not reply to it. If you did not send an inquiry, please ignore this email.\n\nShinnosuke Kobayashi\nhttps://shinnosuke-kobayashi.jp/en/`;
     return { subject: "Thank you for your inquiry", text, html: `<p>${esc(text).replace(/\n\n/g, "</p><p>").replace(/\n/g, "<br>")}</p>` };
   }
-  const text = `${c.name} 様\n\nお問い合わせありがとうございます。メッセージを受け付けました。\n内容を確認のうえ、数日を目安に折り返しご連絡いたします。\n\n※このメールは自動送信です。返信はお控えください。\n※心当たりのない場合は、このメールを破棄してください。\n\n小林慎之助\nhttps://shinnosuke-kobayashi.jp/`;
+  const text = `お問い合わせありがとうございます。\n\nメッセージを受け付けました。内容を確認のうえ、数日を目安に折り返しご連絡いたします。\n\n※このメールは自動送信です。返信はお控えください。\n※心当たりのない場合は、このメールを破棄してください。\n\n小林慎之助\nhttps://shinnosuke-kobayashi.jp/`;
   return { subject: "お問い合わせを受け付けました", text, html: `<p>${esc(text).replace(/\n\n/g, "</p><p>").replace(/\n/g, "<br>")}</p>` };
 }
 
