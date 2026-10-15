@@ -145,8 +145,8 @@ test("sitemapEntries lists static pages, published posts, whitelisted pages and 
   });
   const e = await sitemapEntries(q);
   const paths = e.map((x) => x.path);
-  for (const p of ["/", "/en/", "/works/", "/en/works/", "/column/", "/news/", "/works/site-a/", "/en/works/site-a/", "/profile/", "/about/", "/en/about/", "/skill/seo/", "/works_type/web/", "/en/skill/seo/"]) expect(paths, p).toContain(p);
-  for (const p of ["/contact/", "/sample-page/", "/works/site-b-draft/"]) expect(paths, p).not.toContain(p);
+  for (const p of ["/", "/en/", "/works/", "/en/works/", "/column/", "/news/", "/works/site-a/", "/en/works/site-a/", "/profile/", "/about/", "/en/about/", "/contact/", "/en/contact/", "/skill/seo/", "/works_type/web/", "/en/skill/seo/"]) expect(paths, p).toContain(p);
+  for (const p of ["/chat/", "/sample-page/", "/works/site-b-draft/"]) expect(paths, p).not.toContain(p);
   expect(new Set(paths).size).toBe(paths.length);
   const a = e.find((x) => x.path === "/works/site-a/")!;
   expect(a.alt).toEqual({ ja: "/works/site-a/", en: "/en/works/site-a/" });

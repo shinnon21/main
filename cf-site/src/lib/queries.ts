@@ -128,7 +128,7 @@ export async function loadTermPage(db: D1Like, taxonomy: string, slug: string, p
 }
 
 export interface SitemapRow { path: string; lastmod?: string; alt: { ja: string; en: string } }
-const PAGE_WHITELIST = ["profile", "about", "privacy"];
+const PAGE_WHITELIST = ["profile", "about", "privacy", "contact"];
 const enc = (...s: string[]) => "/" + s.map((x) => encodeURIComponent(x) + "/").join("");
 export async function sitemapEntries(db: D1Like): Promise<SitemapRow[]> {
   const neutral: { path: string; lastmod?: string }[] = [{ path: "/" }];
