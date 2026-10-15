@@ -11,7 +11,7 @@
   "kv_namespaces": [
     { "binding": "CACHE", "id": "cd751868d0984c1d88a0318bbdbd3c81" },
     { "binding": "VIEWS", "id": "5443c9e7e9bd4dd5a77d8ce55bfca865" },
-    { "binding": "OAUTH_KV" }
+    { "binding": "OAUTH_KV", "id": "405020939f394713b9903e61ef0433b9" }
   ],
   "routes": [
     { "pattern": "shinnosuke-kobayashi.jp", "custom_domain": true },
