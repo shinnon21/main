@@ -13,3 +13,16 @@ test("adminHeaders adds noindex and no-store without losing the body/status", as
 test("nowUtcMs formats as 'YYYY-MM-DD HH:MM:SS.mmm'", () => {
   expect(nowUtcMs(new Date("2026-10-15T01:02:03.456Z"))).toBe("2026-10-15 01:02:03.456");
 });
+
+import { classifyPath } from "../src/admin/guard.ts";
+test("classifyPath: every spelling that can reach /admin is 'admin'; /en/admin variants are 'blocked'; others 'public'", () => {
+  for (const p of ["/admin", "/admin/", "/admin/api/posts", "/ADMIN/x", "/Admin", "/%61dmin/", "/%41DMIN/api", "//admin/", "//admin//api//posts", "/admin%2Fapi/posts", "/admin%2fapi", "/%2e%2e/admin/"])
+    expect(classifyPath(p), p).toBe("admin");
+  for (const p of ["/en/admin", "/en/admin/", "/en/admin/api/posts", "/en//admin/", "/en/%61dmin/", "/EN/admin/", "/en/ADMIN/x", "//en/admin/"])
+    expect(classifyPath(p), p).toBe("blocked");
+  for (const p of ["/", "/works/", "/administrator/", "/adminx", "/works/admin/", "/en/", "/en/works/admin/", "/en/administrator/"])
+    expect(classifyPath(p), p).toBe("public");
+});
+test("classifyPath treats undecodable paths as admin (fail closed)", () => {
+  expect(classifyPath("/%E0%A4%A")).toBe("admin");
+});
