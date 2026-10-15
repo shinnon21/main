@@ -4,6 +4,8 @@ export function normalizeRequest(url: URL): { status: 301; location: string } | 
   const { lang, path } = resolveLang(url.pathname);
   const prefix = lang === "en" ? "/en" : "";
   const search = url.search;
+  if (/^\/wp-sitemap[^/]*\.xml$/.test(path)) return { status: 301, location: "/sitemap.xml" };
+  if (path === "/favicon.ico") return { status: 301, location: "/assets/img/favicon-192.png" };
   const legacy = path.match(/^\/wp-content\/uploads\/(.+)$/);
   if (legacy) return { status: 301, location: `/media/${legacy[1]}${search}` };
   if (/^\/(media|assets|_astro)(\/|$)/.test(path)) return lang === "en" ? { status: 301, location: `${path}${search}` } : null;

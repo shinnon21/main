@@ -11,6 +11,7 @@ import { postTerms, profileSummary, relatedByTerm } from "../lib/queries.ts";
 import type { getPostBySlug } from "../lib/posts.ts";
 import { SITE_URL, autop, docTitle, hrefFor, mediaSrc } from "../lib/format.ts";
 import { t, type Lang } from "../lib/i18n.ts";
+import { articleSeo } from "../lib/seo-data.ts";
 import { l } from "../lib/lang.ts";
 import { pick } from "../lib/l10n.ts";
 type Post = NonNullable<Awaited<ReturnType<typeof getPostBySlug>>>;
@@ -21,8 +22,10 @@ const body = pick(lang, post.content, post.content_en);
 const db = getEnv().DB;
 const [terms, related, prof] = await Promise.all([postTerms(db, post.id), relatedByTerm(db, post, "skill", 3), profileSummary(db, lang)]);
 const thumb = mediaSrc(post.thumbnail);
+const excerpt = pick(lang, post.excerpt, post.excerpt_en);
+const sd = await articleSeo(db, { lang, type: "column", slug: post.slug, title, excerpt, body, thumbnail: post.thumbnail, published: post.published_at, modified: post.modified_at, listLabel: t(lang, "コラム", "Column") });
 ---
-<Layout title={docTitle(title, lang)} lang={lang}>
+<Layout title={docTitle(title, lang)} description={sd.description} lang={lang} seo={sd.seo}>
 <div class="sec">
   <div class="container" style="max-width:900px">
     <Crumbs items={[{ label: t(lang, "コラム", "Column"), href: l(lang, "/column/") }, { label: title }]} lang={lang} />

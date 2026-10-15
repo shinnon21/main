@@ -9,7 +9,7 @@ test("adds a trailing slash to extension-less paths and keeps the query", () => 
   expect(n(u("/works/%E6%97%A5%E6%9C%AC?a=b"))).toEqual({ status: 301, location: "/works/%E6%97%A5%E6%9C%AC/?a=b" });
 });
 test("does not loop or touch files and system paths", () => {
-  for (const p of ["/", "/works/", "/media/2026/07/a.jpg", "/media/noext", "/assets/main.js", "/_astro/x.css", "/favicon.ico", "/sitemap.xml"]) expect(n(u(p)), p).toBeNull();
+  for (const p of ["/", "/works/", "/media/2026/07/a.jpg", "/media/noext", "/assets/main.js", "/_astro/x.css", "/sitemap.xml"]) expect(n(u(p)), p).toBeNull();
 });
 test("page 1 redirects to the list root", () => {
   expect(n(u("/works/page/1/"))).toEqual({ status: 301, location: "/works/" });
@@ -29,4 +29,11 @@ test("language-prefixed URLs get the same normalization and keep the /en prefix"
   expect(n(u("/en/wp-content/uploads/2026/07/a.jpg"))).toEqual({ status: 301, location: "/media/2026/07/a.jpg" });
   for (const p of ["/en/", "/en/works/", "/en/works/page/2/"]) expect(n(u(p)), p).toBeNull();
   expect(n(u("/enfoo"))).toEqual({ status: 301, location: "/enfoo/" });
+});
+test("legacy WP sitemap URLs and favicon.ico redirect to the new locations", () => {
+  expect(n(u("/wp-sitemap.xml"))).toEqual({ status: 301, location: "/sitemap.xml" });
+  expect(n(u("/wp-sitemap-posts-works-1.xml"))).toEqual({ status: 301, location: "/sitemap.xml" });
+  expect(n(u("/wp-sitemap-taxonomies-skill-1.xml"))).toEqual({ status: 301, location: "/sitemap.xml" });
+  expect(n(u("/favicon.ico"))).toEqual({ status: 301, location: "/assets/img/favicon-192.png" });
+  for (const p of ["/sitemap.xml", "/robots.txt", "/llms.txt"]) expect(n(u(p)), p).toBeNull();
 });

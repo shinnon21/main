@@ -6,9 +6,11 @@ import LangSwitch from "./LangSwitch.astro";
 import { t, type Lang } from "../lib/i18n.ts";
 import { altPair, l } from "../lib/lang.ts";
 import { SITE_URL } from "../lib/format.ts";
+import { canonicalUrl, metaDescription } from "../lib/seo.ts";
 
-interface Props { title: string; description?: string; lang?: Lang; bodyClass?: string; pair?: boolean }
-const { title, description, bodyClass = "", pair = true } = Astro.props;
+interface Seo { type?: "website" | "article"; image?: { url: string; isDefault: boolean }; jsonld?: Record<string, unknown>[]; path?: string }
+interface Props { title: string; description?: string; lang?: Lang; bodyClass?: string; pair?: boolean; seo?: Seo }
+const { title, bodyClass = "", pair = true, seo = {} } = Astro.props;
 const lang: Lang = Astro.props.lang ?? Astro.locals.lang ?? "ja";
 const alt = pair ? altPair(Astro.locals.path ?? "/") : { ja: "/", en: "/en/" };
 
@@ -18,8 +20,13 @@ const setting = async (key: string, fallback: string) => {
   try { return r ? (JSON.parse(r.value) as string) || fallback : fallback; } catch { return fallback; }
 };
 const siteNameJa = await setting("blogname", "小林慎之助");
+const siteDescJa = await setting("blogdescription", "構想を、社会に実装する。");
 const siteName = t(lang, siteNameJa, "Shinnosuke Kobayashi");
-const siteDesc = await setting("blogdescription", "構想を、社会に実装する。");
+const siteDesc = siteDescJa;
+const description = Astro.props.description ?? metaDescription({ lang, kind: "site", siteDescription: siteDescJa });
+const canonical = pair ? canonicalUrl(l(lang, seo.path ?? Astro.locals.path ?? "/")) : null;
+const og = seo.image ?? { url: `${SITE_URL}/assets/img/og-default.png`, isDefault: true };
+const ld = seo.jsonld?.length ? JSON.stringify({ "@context": "https://schema.org", "@graph": seo.jsonld }).replace(/</g, "\\u003c") : null;
 
 const nav: [string, string, string][] = [
   [t(lang, "実績", "Works"), t(lang, "works", "実績"), l(lang, "/works/")],
@@ -38,7 +45,23 @@ const searchSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" s
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{title}</title>
-  {description && <meta name="description" content={description} />}
+  <meta name="description" content={description} />
+  {canonical && <link rel="canonical" href={canonical} />}
+  {canonical && (
+    <>
+      <meta property="og:site_name" content={t(lang, siteNameJa, "Shinnosuke Kobayashi Official Website")} />
+      <meta property="og:title" content={title} />
+      <meta property="og:type" content={seo.type ?? "website"} />
+      <meta property="og:url" content={canonical} />
+      <meta property="og:description" content={description} />
+      <meta property="og:image" content={og.url} />
+      {og.isDefault && <meta property="og:image:width" content="1200" />}
+      {og.isDefault && <meta property="og:image:height" content="630" />}
+      <meta property="og:locale" content={lang === "en" ? "en_US" : "ja_JP"} />
+      <meta name="twitter:card" content="summary_large_image" />
+    </>
+  )}
+  {ld && <script type="application/ld+json" set:html={ld} />}
   {pair && <link rel="alternate" hreflang="ja" href={SITE_URL + alt.ja} />}
   {pair && <link rel="alternate" hreflang="en" href={SITE_URL + alt.en} />}
   {pair && <link rel="alternate" hreflang="x-default" href={SITE_URL + alt.ja} />}

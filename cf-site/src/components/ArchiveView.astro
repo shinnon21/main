@@ -11,6 +11,7 @@ import { allSkills, ranking, topSkills, type CardPost } from "../lib/queries.ts"
 import { docTitle, formatDate, hrefFor } from "../lib/format.ts";
 import { t, type Lang } from "../lib/i18n.ts";
 import { l } from "../lib/lang.ts";
+import { metaDescription } from "../lib/seo.ts";
 import { newsTypeName, pick, termName } from "../lib/l10n.ts";
 
 interface Props {
@@ -29,7 +30,7 @@ const badge = (p: CardPost) => { const n = p.terms.find((x) => x.taxonomy === "n
 const empty = { works: t(lang, "該当する実績はまだありません。", "No works found yet."), column: t(lang, "コラムはまだありません。", "No columns yet."), news: t(lang, "お知らせはまだありません。", "No news yet.") }[type];
 const docName = page > 1 ? t(lang, `${title}（${page}ページ目）`, `${title} (Page ${page})`) : title;
 ---
-<Layout title={docTitle(docName, lang)} lang={lang}>
+<Layout title={docTitle(docName, lang)} description={metaDescription({ lang, kind: type === "works" && basePath.includes("works_type") ? "term" : "archive", name: title })} lang={lang}>
   <PageHero label={type} title={title} crumbs={crumbs} lang={lang} />
   <div class="sec">
     {type === "news" ? (

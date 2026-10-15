@@ -9,13 +9,14 @@ import { ranking, type CardPost } from "../lib/queries.ts";
 import { docTitle, hrefFor } from "../lib/format.ts";
 import { t, type Lang } from "../lib/i18n.ts";
 import { l } from "../lib/lang.ts";
+import { metaDescription } from "../lib/seo.ts";
 import { termName } from "../lib/l10n.ts";
 interface Props { page?: number; taxonomy: string; term: { slug: string; name: string }; data: { posts: CardPost[]; total: number; pages: number }; lang?: Lang }
 const { page = 1, taxonomy, term, data, lang = Astro.locals.lang ?? "ja" } = Astro.props;
 const name = termName(lang, term.name);
 const rank = await ranking(getEnv().DB, 5);
 ---
-<Layout title={docTitle(`# ${name}`, lang)} lang={lang}>
+<Layout title={docTitle(`# ${name}`, lang)} description={metaDescription({ lang, kind: "term", name })} lang={lang}>
   <PageHero label="tag" title={`# ${name}`} crumbs={[{ label: name }]} lang={lang} />
   <div class="sec">
     <div class="container col-wrap">

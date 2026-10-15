@@ -11,6 +11,8 @@ import { getEnv } from "../lib/env.ts";
 import { featuredWorks, latest, topSkills, ranking, profileSummary } from "../lib/queries.ts";
 import { docTitle, formatDate, hrefFor } from "../lib/format.ts";
 import { t } from "../lib/i18n.ts";
+import { metaDescription, websiteLd } from "../lib/seo.ts";
+import { personFor } from "../lib/seo-data.ts";
 import { l } from "../lib/lang.ts";
 import { newsTypeName, pick, termName } from "../lib/l10n.ts";
 
@@ -24,8 +26,10 @@ const ttl = (p: { title: string; title_en: string | null }) => pick(lang, p.titl
 const JA_DESC = "政治・行政のDX支援から、医薬品サプライチェーンの研究まで。「日本の技術を社会に届けるコーディネーター」を志す、小林慎之助の公式サイトです。";
 const EN_DESC = "From DX support for politics and government to research on pharmaceutical supply chains — the official website of Shinnosuke Kobayashi, an aspiring coordinator who delivers Japanese technology to society.";
 const [main, ...rest] = featured;
+const person = await personFor(db, lang);
+const ld = [websiteLd({ lang, name: t(lang, "小林慎之助", "Shinnosuke Kobayashi Official Website"), description: metaDescription({ lang, kind: "site", siteDescription: "構想を、社会に実装する。" }) }), person];
 ---
-<Layout title={docTitle(null, lang)} description={t(lang, JA_DESC, EN_DESC)} lang={lang}>
+<Layout title={docTitle(null, lang)} description={t(lang, JA_DESC, EN_DESC)} lang={lang} seo={{ jsonld: ld }}>
 
 <!-- 1. ヒーロー -->
 <section class="hero">

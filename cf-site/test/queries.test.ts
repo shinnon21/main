@@ -137,3 +137,18 @@ test("listPage rows carry excerpt_en", async () => {
   const q = db((e) => { e.posts[0].meta.excerpt_en = "EN excerpt"; });
   expect((await listPage(q, "works", 1)).posts.find((p) => p.slug === "site-a")?.excerpt_en).toBe("EN excerpt");
 });
+
+import { sitemapEntries } from "../src/lib/queries.ts";
+test("sitemapEntries lists static pages, published posts, whitelisted pages and used terms for both languages", async () => {
+  const q = db((e) => {
+    e.posts.push({ ...mk(300, "page", "about", "2026-01-01T00:00:00"), meta: {} } as never, { ...mk(301, "page", "contact", "2026-01-01T00:00:00"), meta: {} } as never, { ...mk(302, "page", "sample-page", "2026-01-01T00:00:00"), meta: {} } as never);
+  });
+  const e = await sitemapEntries(q);
+  const paths = e.map((x) => x.path);
+  for (const p of ["/", "/en/", "/works/", "/en/works/", "/column/", "/news/", "/works/site-a/", "/en/works/site-a/", "/profile/", "/about/", "/en/about/", "/skill/seo/", "/works_type/web/", "/en/skill/seo/"]) expect(paths, p).toContain(p);
+  for (const p of ["/contact/", "/sample-page/", "/works/site-b-draft/"]) expect(paths, p).not.toContain(p);
+  expect(new Set(paths).size).toBe(paths.length);
+  const a = e.find((x) => x.path === "/works/site-a/")!;
+  expect(a.alt).toEqual({ ja: "/works/site-a/", en: "/en/works/site-a/" });
+  expect(a.lastmod).toMatch(/^\d{4}-\d\d-\d\d/);
+});

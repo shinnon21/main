@@ -10,6 +10,7 @@ import { postTerms, relatedByTerm } from "../lib/queries.ts";
 import type { getPostBySlug } from "../lib/posts.ts";
 import { SITE_URL, autop, docTitle, hrefFor, mediaSrc } from "../lib/format.ts";
 import { t, type Lang } from "../lib/i18n.ts";
+import { articleSeo } from "../lib/seo-data.ts";
 import { l } from "../lib/lang.ts";
 import { pick, scopeLabel, termName } from "../lib/l10n.ts";
 type Post = NonNullable<Awaited<ReturnType<typeof getPostBySlug>>>;
@@ -33,8 +34,9 @@ const kpis = (lang === "en" && kpiEn.some((k) => k.value) ? kpiEn : Array.isArra
 const period = str("period_start");
 const sep = t(lang, "／", " / ");
 const thumb = mediaSrc(post.thumbnail);
+const sd = await articleSeo(db, { lang, type: "works", slug: post.slug, title, excerpt, body, thumbnail: post.thumbnail, published: post.published_at, modified: post.modified_at, listLabel: t(lang, "実績", "Works") });
 ---
-<Layout title={docTitle(title, lang)} description={excerpt || undefined} lang={lang}>
+<Layout title={docTitle(title, lang)} description={sd.description} lang={lang} seo={sd.seo}>
 <div class="sec">
   <div class="container" style="max-width:900px">
     <Crumbs items={[{ label: t(lang, "実績", "Works"), href: l(lang, "/works/") }, { label: title }]} lang={lang} />

@@ -5,13 +5,14 @@ import type { getPostBySlug } from "../lib/posts.ts";
 import { autop, docTitle } from "../lib/format.ts";
 import type { Lang } from "../lib/i18n.ts";
 import { pick } from "../lib/l10n.ts";
+import { metaDescription } from "../lib/seo.ts";
 type Post = NonNullable<Awaited<ReturnType<typeof getPostBySlug>>>;
 interface Props { post: Post; lang?: Lang }
 const { post, lang = Astro.locals.lang ?? "ja" } = Astro.props;
 const title = pick(lang, post.title, post.title_en);
 const body = pick(lang, post.content, post.content_en);
 ---
-<Layout title={docTitle(title, lang)} lang={lang}>
+<Layout title={docTitle(title, lang)} description={metaDescription({ lang, kind: "post", excerpt: pick(lang, post.excerpt, post.excerpt_en), body })} lang={lang}>
   <PageHero label={post.slug} title={title} crumbs={[{ label: title }]} lang={lang} />
   <div class="sec">
     <div class="container" style="max-width:820px">

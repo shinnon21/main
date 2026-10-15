@@ -126,3 +126,41 @@ export async function loadTermPage(db: D1Like, taxonomy: string, slug: string, p
   const data = await listByTerm(db, taxonomy, term.slug, page, TAX_PER_PAGE[taxonomy]);
   return page > data.pages ? null : { term, data };
 }
+
+export interface SitemapRow { path: string; lastmod?: string; alt: { ja: string; en: string } }
+const PAGE_WHITELIST = ["profile", "about", "privacy"];
+const enc = (...s: string[]) => "/" + s.map((x) => encodeURIComponent(x) + "/").join("");
+export async function sitemapEntries(db: D1Like): Promise<SitemapRow[]> {
+  const neutral: { path: string; lastmod?: string }[] = [{ path: "/" }];
+  for (const type of ["works", "column", "news"]) {
+    const last = await one<{ m: string | null }>(db, "SELECT MAX(modified_at) m FROM posts WHERE type=? AND status='publish'", type);
+    neutral.push({ path: `/${type}/`, lastmod: last?.m ?? undefined });
+  }
+  const posts = await rows<{ type: string; slug: string; modified_at: string }>(db,
+    `SELECT type,slug,modified_at FROM posts WHERE status='publish' AND (type IN ('works','column','news') OR (type='page' AND slug IN (${ph(PAGE_WHITELIST.length)}))) ORDER BY type, published_at DESC, wp_id`, ...PAGE_WHITELIST);
+  for (const p of posts) neutral.push({ path: p.type === "page" ? enc(p.slug) : enc(p.type, p.slug), lastmod: p.modified_at });
+  const terms = await rows<{ taxonomy: string; slug: string; m: string }>(db,
+    `SELECT t.taxonomy,t.slug,MAX(p.modified_at) m FROM terms t JOIN post_terms pt ON pt.term_id=t.id JOIN posts p ON p.id=pt.post_id AND p.status='publish' GROUP BY t.id ORDER BY t.taxonomy,t.id`);
+  for (const t of terms) neutral.push({ path: enc(t.taxonomy, t.slug), lastmod: t.m });
+  const out: SitemapRow[] = [];
+  for (const n of neutral) {
+    const en = n.path === "/" ? "/en/" : "/en" + n.path;
+    const alt = { ja: n.path, en };
+    out.push({ path: n.path, lastmod: n.lastmod, alt }, { path: en, lastmod: n.lastmod, alt });
+  }
+  return out;
+}
+
+export async function llmsInputs(db: D1Like) {
+  const setting = async (key: string, d: string) => {
+    const r = await one<{ value: string }>(db, "SELECT value FROM settings WHERE key=?", key);
+    try { return r ? (JSON.parse(r.value) as string) || d : d; } catch { return d; }
+  };
+  const prof = await profileFull(db, "ja");
+  const pick = async (type: string) => (await latest(db, type, 20)).map((p) => ({ title: p.title, path: enc(type, p.slug), excerpt: p.excerpt }));
+  return {
+    name: await setting("blogname", "小林慎之助"), description: await setting("blogdescription", "構想を、社会に実装する。"),
+    bio: prof.bio, profileName: prof.name, kana: prof.kana, role: prof.role, research: prof.researchTitle,
+    works: await pick("works"), columns: await pick("column"),
+  };
+}
