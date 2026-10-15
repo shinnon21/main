@@ -12,5 +12,5 @@
     { "binding": "VIEWS", "id": "5443c9e7e9bd4dd5a77d8ce55bfca865" }
   ],
   "send_email": [{ "name": "EMAIL" }],
-  "vars": { "ACCESS_TEAM_DOMAIN": "shinnosuke-kobayashi.cloudflareaccess.com", "ACCESS_AUD": "9725fa5d9a5c82cbebcd9a7359842680054c9df871b11999eb1cec615323f660", "ADMIN_EMAILS": "hello@shinnosuke-kobayashi.jp", "TURNSTILE_SITE_KEY": "", "CONTACT_TO": "contact@shinnosuke-kobayashi.jp", "CONTACT_FROM": "noreply@shinnosuke-kobayashi.jp" }
+  "vars": { "ACCESS_TEAM_DOMAIN": "shinnosuke-kobayashi.cloudflareaccess.com", "ACCESS_AUD": "9725fa5d9a5c82cbebcd9a7359842680054c9df871b11999eb1cec615323f660", "ADMIN_EMAILS": "hello@shinnosuke-kobayashi.jp", "TURNSTILE_SITE_KEY": "0x4AAAAAAFXTbIeOVoZJpRrz", "CONTACT_TO": "contact@shinnosuke-kobayashi.jp", "CONTACT_FROM": "noreply@shinnosuke-kobayashi.jp" }
 }
