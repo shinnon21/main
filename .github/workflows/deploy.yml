@@ -1,11 +1,7 @@
 name: Deploy theme to production
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "kobayashi-theme/**"
-      - ".github/workflows/deploy.yml"
+  # 2026-10-15 Cloudflareへ本番切替済みのため自動実行を停止（旧WordPress VMへのテーマ反映は手動実行のみ）
   workflow_dispatch:
 
 concurrency:

@@ -51,6 +51,7 @@ const searchSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" s
   {tracking && <script async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`} crossorigin="anonymous" is:inline></script>}
   {tracking && <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} is:inline></script>}
   {tracking && <script is:inline set:html={gaSnippet()} />}
+  <link rel="alternate" type="application/rss+xml" title={siteNameJa} href="/feed/" />
   {noindex && <meta name="robots" content="noindex,follow" />}
   {canonical && <link rel="canonical" href={canonical} />}
   {canonical && (

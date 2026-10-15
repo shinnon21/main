@@ -164,3 +164,10 @@ export async function llmsInputs(db: D1Like) {
     works: await pick("works"), columns: await pick("column"),
   };
 }
+
+/** RSS用: 実績・コラム・お知らせの公開済み新着（新しい順） */
+export async function feedPosts(db: D1Like, n: number) {
+  const r = await rows<{ type: string; slug: string; title: string; excerpt: string | null; published_at: string }>(db,
+    "SELECT type,slug,title,excerpt,published_at FROM posts WHERE type IN ('works','column','news') AND status='publish' ORDER BY published_at DESC, id DESC LIMIT ?", n);
+  return r.map((p) => ({ ...p, path: enc(p.type, p.slug) }));
+}

@@ -142,3 +142,14 @@ export function sspOverrides(meta: Record<string, unknown>, lang: Lang): { title
   if (img) out.image = img.startsWith("/") ? SITE_URL + img : img;
   return out;
 }
+
+export interface RssItem { title: string; path: string; excerpt?: string | null; published_at: string; type: string }
+const rfc822 = (utc: string) => new Date(utc.replace(" ", "T") + "Z").toUTCString();
+/** RSS 2.0（/feed/）。リンクはcanonicalと同じ形式で絶対URL化 */
+export function rssXml(o: { title: string; description: string; items: RssItem[] }): string {
+  const items = o.items.map((i) => {
+    const url = esc(canonicalUrl(i.path));
+    return `<item><title>${esc(i.title)}</title><link>${url}</link><guid isPermaLink="true">${url}</guid><pubDate>${rfc822(i.published_at)}</pubDate><category>${esc(i.type)}</category>${i.excerpt ? `<description>${esc(i.excerpt)}</description>` : ""}</item>`;
+  });
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>${esc(o.title)}</title><link>${SITE_URL}/</link><description>${esc(o.description)}</description><language>ja</language><atom:link href="${SITE_URL}/feed/" rel="self" type="application/rss+xml"/>${items.join("")}</channel></rss>\n`;
+}
