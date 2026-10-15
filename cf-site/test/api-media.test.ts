@@ -84,3 +84,37 @@ test("media endpoints without an R2 binding fail with 503 instead of crashing", 
   const res = await handleAdminApi(new Request(`${ORIGIN}/admin/api/media`, { method: "POST", body: png, headers: { Origin: ORIGIN, "X-Kb-Admin": "1", "Content-Type": "image/png" } }), { db: s.db, email: "me@x", nowUtc: "t" });
   expect(res.status).toBe(503);
 });
+
+// --- security review: key collisions must never overwrite or delete an existing object ---
+const ctxWith = (s: ReturnType<typeof setup>, rand: () => string) => ({ ...ctx(s), rand });
+const up2 = (s: ReturnType<typeof setup>, c: ReturnType<typeof ctxWith>) =>
+  handleAdminApi(new Request(`${ORIGIN}/admin/api/media`, { method: "POST", body: png, headers: { Origin: ORIGIN, "X-Kb-Admin": "1", "Content-Type": "image/png", "X-Filename": "photo.png" } }), c);
+const seedExisting = (s: ReturnType<typeof setup>, key: string) => {
+  s.store.set(key, { bytes: Uint8Array.from([9, 9, 9]), type: "image/png" });
+  s.raw.prepare("insert into media(key,content_type,size,alt,uploaded_at,uploaded_by) values(?,?,?,?,?,?)").run(key, "image/png", 3, "", "2026-01-01 00:00:00", "wp-import");
+};
+test("M1: on a key collision the existing object is untouched and the upload retries with a new suffix", async () => {
+  const s = setup();
+  const y = new Date(Date.now() + 9 * 3600e3).getUTCFullYear(), mo = String(new Date(Date.now() + 9 * 3600e3).getUTCMonth() + 1).padStart(2, "0");
+  const taken = `${y}/${mo}/photo-aaaaaa.png`; seedExisting(s, taken);
+  const seq = ["aaaaaa", "bbbbbb"]; const res = await up2(s, ctxWith(s, () => seq.shift()!));
+  expect(res.status).toBe(201); expect(((await res.json()) as any).key).toBe(`${y}/${mo}/photo-bbbbbb.png`);
+  expect(Array.from(s.store.get(taken)!.bytes)).toEqual([9, 9, 9]);
+  expect((s.raw.prepare("select count(*) c from media where key=?").get(taken) as any).c).toBe(1);
+});
+test("M1: repeated collisions give 409 and leave the existing object and row intact", async () => {
+  const s = setup();
+  const y = new Date(Date.now() + 9 * 3600e3).getUTCFullYear(), mo = String(new Date(Date.now() + 9 * 3600e3).getUTCMonth() + 1).padStart(2, "0");
+  const taken = `${y}/${mo}/photo-aaaaaa.png`; seedExisting(s, taken);
+  const res = await up2(s, ctxWith(s, () => "aaaaaa"));
+  expect(res.status).toBe(409);
+  expect(Array.from(s.store.get(taken)!.bytes)).toEqual([9, 9, 9]); expect(s.store.has(taken)).toBe(true);
+  expect((s.raw.prepare("select count(*) c from media").get() as any).c).toBe(1);
+});
+test("M1: if the R2 put fails the D1 row is removed again (no ghost library entry)", async () => {
+  const s = setup();
+  const failing = { put: async () => { throw new Error("r2 down"); }, delete: async () => {} };
+  const res = await handleAdminApi(new Request(`${ORIGIN}/admin/api/media`, { method: "POST", body: png, headers: { Origin: ORIGIN, "X-Kb-Admin": "1", "Content-Type": "image/png" } }), { ...ctx(s), media: failing });
+  expect(res.status).toBe(500);
+  expect((s.raw.prepare("select count(*) c from media").get() as any).c).toBe(0);
+});
