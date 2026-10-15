@@ -36,7 +36,7 @@ const scope: string[] = Array.isArray(m.scope) ? m.scope : [];
     </div>
     <div class="row2">
       <label class="f"><span>状態</span><select name="status"><option value="draft" selected={(post?.status ?? "draft") === "draft"}>下書き</option><option value="publish" selected={post?.status === "publish"}>公開</option><option value="trash" selected={post?.status === "trash"}>ゴミ箱</option></select></label>
-      <label class="f"><span>アイキャッチ（R2のキー。例 2026/07/a.jpg）</span><input type="text" name="thumbnail" value={post?.thumbnail ?? ""} maxlength="500" /></label>
+      <div class="f"><span style="font-size:12px;color:#6a6a6a">アイキャッチ</span><div class="thumb-field"><img data-thumb-preview alt="" hidden /><input type="text" name="thumbnail" value={post?.thumbnail ?? ""} maxlength="500" placeholder="R2のキー（選択ボタンで入力）" /><button type="button" class="btn" data-pick-thumb>選択</button><button type="button" class="btn" data-clear-thumb>解除</button></div></div>
     </div>
     <label class="f"><span>抜粋（リード文）</span><textarea name="excerpt" maxlength="2000">{post?.excerpt ?? ""}</textarea></label>
     <div class="f"><span style="font-size:12px;color:#6a6a6a">本文</span>

@@ -1,6 +1,7 @@
 import { Editor } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
+import { mediaUrl, openPicker } from "./picker.ts";
 
 interface Initial { type: string; id: number | null; modified_at: string | null; content: string; content_en: string; kpi_results: { label: string; value: string }[]; kpi_results_en: { label: string; value: string }[] }
 
@@ -20,6 +21,14 @@ function init(form: HTMLFormElement) {
     form.querySelectorAll<HTMLElement>("[data-panel]").forEach((p) => { p.hidden = p.dataset.panel !== b.dataset.tab; });
   }));
 
+  // アイキャッチ: 画像ダイアログで選ぶ
+  const thumbInput = form.elements.namedItem("thumbnail") as HTMLInputElement | null;
+  const thumbPreview = form.querySelector<HTMLImageElement>("[data-thumb-preview]");
+  const showThumb = () => { if (thumbPreview) { thumbPreview.hidden = !thumbInput?.value; if (thumbInput?.value) thumbPreview.src = `/media/${thumbInput.value}`; } };
+  form.querySelector("[data-pick-thumb]")?.addEventListener("click", async () => { const m = await openPicker(); if (m && thumbInput) { thumbInput.value = m.key; showThumb(); } });
+  form.querySelector("[data-clear-thumb]")?.addEventListener("click", () => { if (thumbInput) { thumbInput.value = ""; showThumb(); } });
+  thumbInput?.addEventListener("input", showThumb); showThumb();
+
   // Tiptap
   const editors: Record<string, Editor> = {};
   form.querySelectorAll<HTMLElement>("[data-tiptap]").forEach((el) => {
@@ -37,7 +46,7 @@ function init(form: HTMLFormElement) {
       ["• リスト", () => ed.chain().focus().toggleBulletList().run(), "bulletList"], ["1. リスト", () => ed.chain().focus().toggleOrderedList().run(), "orderedList"],
       ["引用", () => ed.chain().focus().toggleBlockquote().run(), "blockquote"],
       ["リンク", () => { const url = window.prompt("リンク先URL（空で解除）", ed.getAttributes("link").href ?? "https://"); if (url === null) return; if (!url) ed.chain().focus().unsetLink().run(); else ed.chain().focus().extendMarkRange("link").setLink({ href: url }).run(); }, "link"],
-      ["画像URL", () => { const src = window.prompt("画像のURL（/media/… または https://…）"); if (src) ed.chain().focus().setImage({ src }).run(); }],
+      ["画像", async () => { const m = await openPicker(); if (m) ed.chain().focus().setImage({ src: m.url, alt: m.alt }).run(); }],
       ["区切り線", () => ed.chain().focus().setHorizontalRule().run()],
       ["↶", () => ed.chain().focus().undo().run()], ["↷", () => ed.chain().focus().redo().run()],
     ];

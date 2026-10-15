@@ -1,0 +1,18 @@
+---
+import AdminLayout from "../../../admin/AdminLayout.astro";
+---
+<AdminLayout title="メディア">
+  <h1>メディア</h1>
+  <div id="mediaMsg" role="status" aria-live="polite" style="min-height:22px;font-weight:600"></div>
+  <div class="bar">
+    <button type="button" class="btn primary" id="mediaUpload">画像をアップロード</button>
+    <input type="file" id="mediaFile" accept="image/jpeg,image/png,image/gif,image/webp" multiple hidden />
+    <input type="text" id="mediaSearch" placeholder="ファイル名・altで検索" style="width:240px" />
+    <span style="color:#6a6a6a;font-size:12px">JPEG / PNG / GIF / WebP、1枚10MBまで</span>
+  </div>
+  <div id="dropZone" class="card" style="border-style:dashed;text-align:center;color:#6a6a6a">ここに画像をドラッグ＆ドロップ</div>
+  <div id="mediaGrid" class="media-grid"></div>
+</AdminLayout>
+<script>
+  import "../../../admin/client/media.ts";
+</script>
