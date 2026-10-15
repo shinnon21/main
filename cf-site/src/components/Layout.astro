@@ -5,6 +5,7 @@ import { getEnv } from "../lib/env.ts";
 import LangSwitch from "./LangSwitch.astro";
 import { t, type Lang } from "../lib/i18n.ts";
 import { altPair, l } from "../lib/lang.ts";
+import { SITE_URL } from "../lib/format.ts";
 
 interface Props { title: string; description?: string; lang?: Lang; bodyClass?: string; pair?: boolean }
 const { title, description, bodyClass = "", pair = true } = Astro.props;
@@ -38,9 +39,9 @@ const searchSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" s
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{title}</title>
   {description && <meta name="description" content={description} />}
-  {pair && <link rel="alternate" hreflang="ja" href={alt.ja} />}
-  {pair && <link rel="alternate" hreflang="en" href={alt.en} />}
-  {pair && <link rel="alternate" hreflang="x-default" href={alt.ja} />}
+  {pair && <link rel="alternate" hreflang="ja" href={SITE_URL + alt.ja} />}
+  {pair && <link rel="alternate" hreflang="en" href={SITE_URL + alt.en} />}
+  {pair && <link rel="alternate" hreflang="x-default" href={SITE_URL + alt.ja} />}
   <link rel="icon" href="/assets/img/favicon-32.png" sizes="32x32" />
   <link rel="icon" href="/assets/img/favicon-192.png" sizes="192x192" />
   <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png" />
