@@ -6,15 +6,10 @@ import { cleanSettings, readSettings, saveSettings } from "./settings.ts";
 import { backupFilename, buildBackup } from "./backup.ts";
 import { cleanProfile, readProfile, saveProfile } from "./profile.ts";
 import { createTerm, deleteTerm, listTerms, renameTerm } from "./terms.ts";
-import { MAX_BYTES, deleteMediaRow, findUsage, getMedia, insertMedia, listMedia, makeKey, setAlt, validateUpload } from "./media.ts";
+import { MAX_BYTES, type R2Like, deleteMediaRow, findUsage, getMedia, listMedia, saveMedia, setAlt } from "./media.ts";
+export type { R2Like } from "./media.ts";
 
-export interface R2Like {
-  put(key: string, body: ArrayBuffer | Uint8Array, opts: { httpMetadata: { contentType: string } }): Promise<unknown>;
-  delete(key: string): Promise<void>;
-}
 export interface ApiCtx { db: D1Like; email: string; nowUtc: string; media?: R2Like; rand?: () => string }
-
-const rand6 = () => Array.from(crypto.getRandomValues(new Uint8Array(6)), (b) => (b % 36).toString(36)).join("");
 
 const json = (data: unknown, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
@@ -83,21 +78,9 @@ async function route(req: Request, ctx: ApiCtx): Promise<Response> {
           const declared = Number(req.headers.get("Content-Length"));
           if (declared > MAX_BYTES) throw new HttpError(413, "file too large (max 10MB)");
           const bytes = new Uint8Array(await req.arrayBuffer());
-          const { type } = validateUpload(bytes, req.headers.get("Content-Type") ?? "");
           let name = "image";
           try { name = decodeURIComponent(req.headers.get("X-Filename") ?? "") || "image"; } catch { /* 不正なエンコードは既定名 */ }
-          // D1(一意制約)で先にキーを確保してから R2 に書く。衝突しても既存オブジェクトには一切触れず、別のサフィックスで再試行する
-          const nextRand = ctx.rand ?? rand6;
-          for (let attempt = 0; attempt < 3; attempt++) {
-            const key = makeKey(name, type, new Date(), nextRand());
-            let newId: number;
-            try { ({ id: newId } = await insertMedia(db, { key, content_type: type, size: bytes.length, uploaded_by: email, now: nowUtc })); }
-            catch (e) { if (e instanceof HttpError && e.status === 409) continue; throw e; }
-            try { await ctx.media.put(key, bytes, { httpMetadata: { contentType: type } }); }
-            catch (e) { await deleteMediaRow(db, newId).catch(() => {}); throw e; }
-            return json({ id: newId, key, url: `/media/${key}`, alt: "", content_type: type, size: bytes.length }, 201);
-          }
-          throw new HttpError(409, "could not allocate a unique media key");
+          return json(await saveMedia({ db, media: ctx.media, email, nowUtc, rand: ctx.rand }, bytes, req.headers.get("Content-Type") ?? "", name), 201);
         }
         throw new HttpError(405, "method not allowed");
       }

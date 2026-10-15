@@ -74,3 +74,28 @@ export async function findUsage(db: D1Like, key: string): Promise<{ id: number; 
      UNION SELECT p.id,p.type,p.title FROM post_meta m JOIN posts p ON p.id=m.post_id WHERE m.value LIKE ? ESCAPE '\\'`,
   ).bind(key, pat, pat, pat).all<{ id: number; type: string; title: string }>()).results;
 }
+
+export interface R2Like {
+  put(key: string, body: ArrayBuffer | Uint8Array, opts: { httpMetadata: { contentType: string } }): Promise<unknown>;
+  delete(key: string): Promise<void>;
+}
+const rand6 = () => Array.from(crypto.getRandomValues(new Uint8Array(6)), (b) => (b % 36).toString(36)).join("");
+
+/** 検証→D1でキー確保→R2へ書き込み。衝突時は別サフィックスで再試行し、R2失敗時はD1行を取り消す（管理画面アップロードとMCPで共用） */
+export async function saveMedia(
+  ctx: { db: D1Like; media: R2Like; email: string; nowUtc: string; rand?: () => string },
+  bytes: Uint8Array, claimedType: string, name: string,
+): Promise<{ id: number; key: string; url: string; alt: string; content_type: string; size: number }> {
+  const { type } = validateUpload(bytes, claimedType);
+  const nextRand = ctx.rand ?? rand6;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const key = makeKey(name, type, new Date(), nextRand());
+    let newId: number;
+    try { ({ id: newId } = await insertMedia(ctx.db, { key, content_type: type, size: bytes.length, uploaded_by: ctx.email, now: ctx.nowUtc })); }
+    catch (e) { if (e instanceof HttpError && e.status === 409) continue; throw e; }
+    try { await ctx.media.put(key, bytes, { httpMetadata: { contentType: type } }); }
+    catch (e) { await deleteMediaRow(ctx.db, newId).catch(() => {}); throw e; }
+    return { id: newId, key, url: `/media/${key}`, alt: "", content_type: type, size: bytes.length };
+  }
+  throw new HttpError(409, "could not allocate a unique media key");
+}

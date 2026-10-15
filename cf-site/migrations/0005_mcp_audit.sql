@@ -1,0 +1,6 @@
+CREATE TABLE mcp_audit (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  at TEXT NOT NULL, email TEXT NOT NULL, client TEXT NOT NULL DEFAULT '',
+  tool TEXT NOT NULL, target TEXT NOT NULL DEFAULT '', ok INTEGER NOT NULL
+);
+CREATE INDEX idx_mcp_audit_at ON mcp_audit(at DESC, id DESC);
