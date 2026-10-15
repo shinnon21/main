@@ -76,3 +76,30 @@ test("rel tokens: safe ones are preserved, noopener is guaranteed, opener-style 
   expect(s('<a href="https://e.com" target="_blank" rel="nofollow">x</a>')).toContain('rel="nofollow noopener"');
   expect(s('<a href="https://e.com" target="_blank" rel="opener evil">x</a>')).toContain('rel="noopener"');
 });
+
+// --- parser-differential hardening: randomized malformed input must never yield dangerous output ---
+test("fuzz: mixed malformed fragments never produce script/event handlers/javascript: URLs/non-canonical iframes", () => {
+  const frags = ["<", ">", '"', "'", "=", "/", " ", "\n", "\t", "\u0000", "&", "&#106;avascript:", "javascript:", "data:text/html,", "<iframe", "</iframe>", "<IFRAME", "<script>", "</script>", "<a ", "<img ", "<svg ", "<math>", "<style>", "src=", "href=", "onerror=", "onload=", "srcdoc=", "style=", "target=_blank", "target=\"_blank\"", "rel=", "alert(1)", "https://evil.example/", "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ", "x", "title=", "<!--", "-->", "<![CDATA[", "<p>", "</p>", "<a href=\"", "\">"];
+  let seed = 12345; const rnd = (n: number) => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed % n; };
+  const CANON = /^<iframe src="https:\/\/(?:www\.youtube-nocookie\.com\/embed\/[A-Za-z0-9_-]{11}|open\.spotify\.com\/embed\/(?:episode|show|track)\/[A-Za-z0-9]{22})(?:\?[A-Za-z0-9_=&%.-]*)?"(?: title="[^"<>]*")?(?: width="\d{1,4}")?(?: height="\d{1,4}")?(?: loading="(?:lazy|eager)")?(?: allowfullscreen)?>$/;
+  for (let i = 0; i < 4000; i++) {
+    let input = ""; for (let k = 0, n = 3 + rnd(14); k < n; k++) input += frags[rnd(frags.length)];
+    const out = s(input);
+    const tags = out.match(/<[^>]*>/g) ?? [];
+    for (const t of tags) {
+      expect(t, `input=${JSON.stringify(input)} out=${JSON.stringify(out)}`).not.toMatch(/^<\s*(?:script|style|svg|math|object|embed|base|form|meta|link)\b/i);
+      expect(t, `input=${JSON.stringify(input)} out=${JSON.stringify(out)}`).not.toMatch(/\son[a-z]+\s*=|srcdoc\s*=/i);
+      expect(t, `input=${JSON.stringify(input)} out=${JSON.stringify(out)}`).not.toMatch(/(?:href|src)\s*=\s*"?\s*(?:javascript|data|vbscript):/i);
+      if (/^<iframe\b/i.test(t)) expect(CANON.test(t), `input=${JSON.stringify(input)} tag=${t}`).toBe(true);
+    }
+    expect(out).not.toMatch(/<script|<\/script/i);
+  }
+});
+test("URL attributes: <, > and quotes are escaped inside href/src and control characters make the URL invalid", () => {
+  const out = s('<a href="https://ok.example/a<script>b>c" target="_blank">x</a>');
+  expect(out).not.toContain("<script"); expect(out).toContain("&lt;script&gt;");
+  expect(out).toMatch(/target="_blank" rel="noopener"/);
+  expect(s('<a href="https://ok.example/\u0000x">x</a>')).not.toMatch(/href="/);
+  expect(s('<a href="https://ok.example/a b">x</a>')).not.toMatch(/href="/);
+  expect(s('<img src="/media/a.jpg\n">')).toBe('<img src="/media/a.jpg">'); // 末尾の改行はxssの属性解析で落ちる（制御文字は残らない）
+});

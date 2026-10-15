@@ -13,7 +13,10 @@ wl.td = ["colspan", "rowspan", ...COMMON];
 wl.th = ["colspan", "rowspan", ...COMMON];
 
 const URL_OK = /^(?:https?:\/\/|mailto:|\/(?!\/)|#)/i;
-const EMBED_OK = /^https:\/\/(?:www\.youtube-nocookie\.com\/embed\/[A-Za-z0-9_-]{11}|open\.spotify\.com\/embed\/(?:episode|show|track)\/[A-Za-z0-9]{22})(?:\?[A-Za-z0-9_=&%.-]*)?$/;
+const EMBED_SRC = "https:\\/\\/(?:www\\.youtube-nocookie\\.com\\/embed\\/[A-Za-z0-9_-]{11}|open\\.spotify\\.com\\/embed\\/(?:episode|show|track)\\/[A-Za-z0-9]{22})(?:\\?[A-Za-z0-9_=&%.-]*)?";
+const EMBED_OK = new RegExp(`^${EMBED_SRC}$`);
+// 自前で再構築した iframe の正規形。xss 側でもこれに厳密一致しないものは必ず落とす（パーサーの癖・食い違いに依存しない2枚目の関門）
+const IFRAME_CANON = new RegExp(`^<iframe src="${EMBED_SRC}"(?: title="[^"<>]*")?(?: width="\\d{1,4}")?(?: height="\\d{1,4}")?(?: loading="(?:lazy|eager)")?(?: allowfullscreen)?>$`);
 // 制御文字・各種空白を除いた形でスキームを判定する（"java\tscript:" 等の回避対策）
 const squash = (v: string) => v.replace(new RegExp("[\\u0000-\\u0020\\u00a0\\u1680\\u180e\\u2000-\\u2029\\u205f\\u3000\\ufeff]", "g"), "");
 
@@ -21,6 +24,10 @@ const filter: FilterXSS = new FilterXSS({
   whiteList: wl,
   // style は見た目の寸法・揃えだけ許可（position/background/url() 等は cssfilter が除去）
   css: { whiteList: { width: true, height: true, "max-width": true, "text-align": true } },
+  onTag(tag, html, opts) {
+    if (tag === "iframe" && !opts.isClosing && !IFRAME_CANON.test(html)) return "";
+    return undefined;
+  },
   stripIgnoreTag: true,
   stripIgnoreTagBody: ["script", "style"],
   allowCommentTag: false,
@@ -28,7 +35,8 @@ const filter: FilterXSS = new FilterXSS({
     if (name === "href" || name === "src") {
       const v = value.trim();
       if (!URL_OK.test(v) || /^(?:javascript|data|vbscript):/i.test(squash(v))) return "";
-      return v.replace(/"/g, "&quot;");
+      if (new RegExp("[\\u0000-\\u0020\\u007f-\\u009f]").test(v)) return ""; // 制御文字・空白を含むURLは無効
+      return v.replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
     return defaultSafeAttrValue(tag, name, value, css);
   },
