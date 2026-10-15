@@ -16,6 +16,7 @@ export interface KbEnv {
   CONTACT_TO?: string;
   CONTACT_FROM?: string;
   IP_SALT?: string;
+  FORCE_VIEW_COUNT?: string;
   ACCESS_TEAM_DOMAIN?: string;
   ACCESS_AUD?: string;
   ADMIN_EMAILS?: string;

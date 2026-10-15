@@ -4,10 +4,18 @@ import ColumnDetail from "../../components/ColumnDetail.astro";
 import NewsDetail from "../../components/NewsDetail.astro";
 import { getEnv } from "../../lib/env.ts";
 import { isListType } from "../../lib/queries.ts";
+import { recordView, shouldCountRequest } from "../../lib/views.ts";
 import { getPostBySlug } from "../../lib/posts.ts";
 const { type, slug } = Astro.params;
 if (!type || !slug || !isListType(type)) return Astro.rewrite("/404/");
-const post = await getPostBySlug(getEnv().DB, type, slug);
+const env = getEnv();
+const post = await getPostBySlug(env.DB, type, slug);
 if (!post) return Astro.rewrite("/404/");
+// PVカウント（実績・コラムのみ。ボット・プリフェッチ・確認用ホストは数えない。応答を遅らせないよう waitUntil で実行）
+if ((type === "works" || type === "column") && shouldCountRequest(Astro.request, Astro.url.host, env)) {
+  const h = Astro.request.headers;
+  const work = recordView({ db: env.DB, kv: env.CACHE, postId: post.id, ip: h.get("CF-Connecting-IP") ?? "", ua: h.get("User-Agent") ?? "", salt: env.IP_SALT || env.TURNSTILE_SECRET || "kb" });
+  if (Astro.locals.cfContext) Astro.locals.cfContext.waitUntil(work); else void work;
+}
 ---
 {type === "works" ? <WorksDetail post={post} /> : type === "column" ? <ColumnDetail post={post} /> : <NewsDetail post={post} />}
