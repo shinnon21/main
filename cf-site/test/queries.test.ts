@@ -124,3 +124,16 @@ test("profileFull returns all profile fields, falls back only for name/kana/role
   const none = await profileFull(db((e) => { e.posts.splice(4, 1); }));
   expect(none.name).toBe("小林 慎之助"); expect(none.content).toBe(""); expect(none.avatar).toBeNull();
 });
+
+test("profileFull(en) prefers profile_*_en per field and falls back to Japanese", async () => {
+  const q = db((e) => { e.posts[4].meta = { profile_name: "名", profile_name_en: "Name", profile_bio: "和文", profile_bio_en: "", profile_career: "2025 | A | b", profile_career_en: "2025 | A-en | b-en" }; });
+  const en = await profileFull(q, "en");
+  expect(en).toMatchObject({ name: "Name", bio: "和文", career: "2025 | A-en | b-en" });
+  const ja = await profileFull(q, "ja");
+  expect(ja).toMatchObject({ name: "名", career: "2025 | A | b" });
+  expect((await profileSummary(q, "en")).name).toBe("Name");
+});
+test("listPage rows carry excerpt_en", async () => {
+  const q = db((e) => { e.posts[0].meta.excerpt_en = "EN excerpt"; });
+  expect((await listPage(q, "works", 1)).posts.find((p) => p.slug === "site-a")?.excerpt_en).toBe("EN excerpt");
+});

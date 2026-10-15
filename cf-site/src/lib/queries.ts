@@ -1,5 +1,6 @@
 import type { D1Like } from "./d1.ts";
 import type { PostRow } from "./posts.ts";
+import type { Lang } from "./i18n.ts";
 
 export interface TermRef { taxonomy: string; slug: string; name: string }
 export interface CardPost extends PostRow { terms: TermRef[]; meta: { period_start?: string; period_end?: string } }
@@ -8,7 +9,7 @@ export const TAX_PER_PAGE = { works_type: 12, skill: 10, industry: 10, news_type
 export const isListType = (t: string): t is keyof typeof PER_PAGE => Object.hasOwn(PER_PAGE, t);
 export const isTaxonomy = (t: string): t is keyof typeof TAX_PER_PAGE => Object.hasOwn(TAX_PER_PAGE, t);
 
-const COLS = "p.id,p.wp_id,p.type,p.slug,p.title,p.title_en,p.excerpt,p.content,p.content_en,p.thumbnail,p.published_at,p.modified_at";
+const COLS = "p.id,p.wp_id,p.type,p.slug,p.title,p.title_en,p.excerpt,p.excerpt_en,p.content,p.content_en,p.thumbnail,p.published_at,p.modified_at";
 const ph = (n: number) => Array(n).fill("?").join(",");
 
 async function rows<T>(db: D1Like, sql: string, ...args: unknown[]): Promise<T[]> {
@@ -92,11 +93,30 @@ const PROFILE_DEFAULTS = {
   name: "小林 慎之助",
   role: "Weeave株式会社 共同創業者・代表取締役 CEO ／ 筑波大学 理工学群 社会工学類 経営工学主専攻",
 };
-export async function profileSummary(db: D1Like) {
+export async function profileSummary(db: D1Like, lang: Lang = "ja") {
   const p = await one<{ id: number; thumbnail: string | null }>(db, "SELECT id,thumbnail FROM posts WHERE type='page' AND slug='profile' AND status='publish'");
-  const m = p ? await rows<{ key: string; value: string }>(db, "SELECT key,value FROM post_meta WHERE post_id=? AND key IN ('profile_kana','profile_name','profile_role')", p.id) : [];
-  const get = (k: string, d: string) => { const v = parse(m.find((x) => x.key === k)?.value ?? '""').trim(); return v || d; };
-  return { kana: get("profile_kana", PROFILE_DEFAULTS.kana), name: get("profile_name", PROFILE_DEFAULTS.name), role: get("profile_role", PROFILE_DEFAULTS.role), avatar: p?.thumbnail ?? null };
+  const m = p ? await rows<{ key: string; value: string }>(db, "SELECT key,value FROM post_meta WHERE post_id=? AND key LIKE 'profile\\_%' ESCAPE '\\'", p.id) : [];
+  const f = fieldGetter(m, lang);
+  return { kana: f("profile_kana") || PROFILE_DEFAULTS.kana, name: f("profile_name") || PROFILE_DEFAULTS.name, role: f("profile_role") || PROFILE_DEFAULTS.role, avatar: p?.thumbnail ?? null };
+}
+
+function fieldGetter(m: { key: string; value: string }[], lang: Lang) {
+  const raw = (k: string) => parse(m.find((x) => x.key === k)?.value ?? '""').trim();
+  return (k: string) => (lang === "en" ? raw(k + "_en") : "") || raw(k);
+}
+
+export async function profileFull(db: D1Like, lang: Lang = "ja") {
+  const p = await one<{ id: number; thumbnail: string | null; content: string | null }>(db, "SELECT id,thumbnail,content FROM posts WHERE type='page' AND slug='profile' AND status='publish'");
+  const m = p ? await rows<{ key: string; value: string }>(db, "SELECT key,value FROM post_meta WHERE post_id=? AND key LIKE 'profile\\_%' ESCAPE '\\'", p.id) : [];
+  const f = fieldGetter(m, lang);
+  return {
+    kana: f("profile_kana") || PROFILE_DEFAULTS.kana,
+    name: f("profile_name") || PROFILE_DEFAULTS.name,
+    role: f("profile_role") || PROFILE_DEFAULTS.role,
+    bio: f("profile_bio"), career: f("profile_career"), skills: f("profile_skills"),
+    researchTitle: f("profile_research_title"), researchBody: f("profile_research_body"), activities: f("profile_activities"),
+    content: p?.content?.trim() ?? "", avatar: p?.thumbnail ?? null,
+  };
 }
 
 export async function loadTermPage(db: D1Like, taxonomy: string, slug: string, page: number) {
@@ -105,18 +125,4 @@ export async function loadTermPage(db: D1Like, taxonomy: string, slug: string, p
   if (!term) return null;
   const data = await listByTerm(db, taxonomy, term.slug, page, TAX_PER_PAGE[taxonomy]);
   return page > data.pages ? null : { term, data };
-}
-
-export async function profileFull(db: D1Like) {
-  const p = await one<{ id: number; thumbnail: string | null; content: string | null }>(db, "SELECT id,thumbnail,content FROM posts WHERE type='page' AND slug='profile' AND status='publish'");
-  const m = p ? await rows<{ key: string; value: string }>(db, "SELECT key,value FROM post_meta WHERE post_id=? AND key LIKE 'profile\\_%' ESCAPE '\\'", p.id) : [];
-  const raw = (k: string) => parse(m.find((x) => x.key === k)?.value ?? '""').trim();
-  return {
-    kana: raw("profile_kana") || PROFILE_DEFAULTS.kana,
-    name: raw("profile_name") || PROFILE_DEFAULTS.name,
-    role: raw("profile_role") || PROFILE_DEFAULTS.role,
-    bio: raw("profile_bio"), career: raw("profile_career"), skills: raw("profile_skills"),
-    researchTitle: raw("profile_research_title"), researchBody: raw("profile_research_body"), activities: raw("profile_activities"),
-    content: p?.content?.trim() ?? "", avatar: p?.thumbnail ?? null,
-  };
 }
