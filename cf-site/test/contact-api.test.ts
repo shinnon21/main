@@ -117,3 +117,48 @@ test("requests that fail the challenge never consume the global quota (a botnet 
   const res = await handleContactSubmit(post(body(), { "CF-Connecting-IP": "203.0.113.200" }), s.deps);
   expect(res.status).toBe(200);
 });
+
+// --- security review (second round) ---
+const chunked = (size: number) => { const part = new TextEncoder().encode("x".repeat(1000)); let sent = 0; const stream = new ReadableStream({ pull(c) { if (sent >= size) { c.close(); return; } c.enqueue(part); sent += part.length; } });
+  return new Request(`${ORIGIN}/api/contact/`, { method: "POST", headers: { "Content-Type": "application/json", Origin: ORIGIN }, body: stream, duplex: "half" } as RequestInit); };
+test("body size is enforced on the stream itself, not only by Content-Length (chunked uploads without a length)", async () => {
+  const s = setup();
+  expect((await handleContactSubmit(chunked(5_000_000), s.deps)).status).toBe(413);
+});
+test("if the notification fails with reply-to, it is retried without reply-to so the owner still gets the mail", async () => {
+  const sent: any[] = []; let first = true;
+  const mail = { send: async (m: any) => { if (m.replyTo && first) { first = false; const e: any = new Error("invalid reply-to"); e.code = "E_VALIDATION_ERROR"; throw e; } sent.push(m); return { messageId: "x" }; } };
+  const s = setup({ mail });
+  await handleContactSubmit(post(body()), s.deps); await Promise.all(s.pending);
+  expect(rows(s.raw)[0].notify_status).toBe("sent");
+  expect(sent[0]).toMatchObject({ to: "owner@site.test" }); expect(sent[0].replyTo).toBeUndefined(); expect(sent[0].text).toContain("taro@example.com");
+});
+test("rate limits count only verified submissions: typos and failed challenges never use the per-IP quota or write KV", async () => {
+  const s = setup();
+  for (let i = 0; i < 10; i++) expect((await handleContactSubmit(post(body({ email: "bad" })), s.deps)).status).toBe(400);
+  for (let i = 0; i < 10; i++) expect((await handleContactSubmit(post(body({ turnstile: "bad" })), s.deps)).status).toBe(400);
+  expect(s.kvm.size).toBe(0);
+  expect((await handleContactSubmit(post(body()), s.deps)).status).toBe(200);
+});
+test("auto-reply fails closed when KV is unavailable (the notification to the owner still goes out)", async () => {
+  const s = setup(); let ok = true;
+  s.deps.kv = { get: async (k: string) => { if (!ok) throw new Error("kv down"); return s.kvm.get(k) ?? null; }, put: async (k: string, v: string) => { if (!ok) throw new Error("kv down"); s.kvm.set(k, v); } };
+  const res = await handleContactSubmit(post(body()), s.deps); expect(res.status).toBe(200);
+  ok = false; await Promise.all(s.pending);
+  expect(s.sent.filter((m) => m.to === "owner@site.test").length).toBe(1);
+  expect(s.sent.filter((m) => m.to === "taro@example.com").length).toBeLessThanOrEqual(1);
+  const s2 = setup(); s2.deps.kv = { get: async () => { throw new Error("kv down"); }, put: async () => { throw new Error("kv down"); } };
+  await handleContactSubmit(post(body()), s2.deps); await Promise.all(s2.pending);
+  expect(s2.sent.filter((m) => m.to === "taro@example.com")).toHaveLength(0); expect(s2.sent.filter((m) => m.to === "owner@site.test")).toHaveLength(1);
+});
+test("auto-reply cap is per normalized address (plus-tags and gmail dots do not multiply it)", async () => {
+  const s = setup();
+  for (const e of ["victim@gmail.com", "victim+a@gmail.com", "vic.tim@gmail.com", "VICTIM+b@Gmail.com"]) await handleContactSubmit(post(body({ email: e }), { "CF-Connecting-IP": `198.51.100.${Math.floor(Math.random() * 200)}` }), s.deps);
+  await Promise.all(s.pending);
+  expect(s.sent.filter((m) => /gmail\.com$/i.test(m.to) && m.to !== "owner@site.test")).toHaveLength(1);
+});
+test("IPv6 clients are limited per /64, not per address", async () => {
+  const s = setup();
+  const codes: number[] = []; for (let i = 0; i < 7; i++) codes.push((await handleContactSubmit(post(body({ message: `m${i}`, email: `u${i}@example.com` }), { "CF-Connecting-IP": `2001:db8:1:2:${i}:0:0:1` }), s.deps)).status);
+  expect(codes).toEqual([200, 200, 200, 200, 200, 429, 429]);
+});

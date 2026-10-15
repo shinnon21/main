@@ -9,8 +9,8 @@ import { SITE_URL } from "../lib/format.ts";
 import { canonicalUrl, metaDescription } from "../lib/seo.ts";
 
 interface Seo { type?: "website" | "article"; image?: { url: string; isDefault: boolean }; jsonld?: Record<string, unknown>[]; path?: string }
-interface Props { title: string; description?: string; lang?: Lang; bodyClass?: string; pair?: boolean; seo?: Seo }
-const { title, bodyClass = "", pair = true, seo = {} } = Astro.props;
+interface Props { title: string; description?: string; lang?: Lang; bodyClass?: string; pair?: boolean; seo?: Seo; noindex?: boolean }
+const { title, bodyClass = "", pair = true, seo = {}, noindex = false } = Astro.props;
 const lang: Lang = Astro.props.lang ?? Astro.locals.lang ?? "ja";
 const alt = pair ? altPair(Astro.locals.path ?? "/") : { ja: "/", en: "/en/" };
 
@@ -46,6 +46,7 @@ const searchSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" s
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{title}</title>
   <meta name="description" content={description} />
+  {noindex && <meta name="robots" content="noindex,follow" />}
   {canonical && <link rel="canonical" href={canonical} />}
   {canonical && (
     <>

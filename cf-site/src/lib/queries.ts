@@ -9,7 +9,7 @@ export const TAX_PER_PAGE = { works_type: 12, skill: 10, industry: 10, news_type
 export const isListType = (t: string): t is keyof typeof PER_PAGE => Object.hasOwn(PER_PAGE, t);
 export const isTaxonomy = (t: string): t is keyof typeof TAX_PER_PAGE => Object.hasOwn(TAX_PER_PAGE, t);
 
-const COLS = "p.id,p.wp_id,p.type,p.slug,p.title,p.title_en,p.excerpt,p.excerpt_en,p.content,p.content_en,p.thumbnail,p.published_at,p.modified_at";
+export const POST_COLS = "p.id,p.wp_id,p.type,p.slug,p.title,p.title_en,p.excerpt,p.excerpt_en,p.content,p.content_en,p.thumbnail,p.published_at,p.modified_at";
 const ph = (n: number) => Array(n).fill("?").join(",");
 
 async function rows<T>(db: D1Like, sql: string, ...args: unknown[]): Promise<T[]> {
@@ -18,7 +18,7 @@ async function rows<T>(db: D1Like, sql: string, ...args: unknown[]): Promise<T[]
 const one = async <T>(db: D1Like, sql: string, ...args: unknown[]) => db.prepare(sql).bind(...args).first<T>();
 const parse = (v: string) => { try { const x = JSON.parse(v); return typeof x === "string" ? x : String(x ?? ""); } catch { return ""; } };
 
-async function decorate(db: D1Like, posts: PostRow[]): Promise<CardPost[]> {
+export async function decorate(db: D1Like, posts: PostRow[]): Promise<CardPost[]> {
   if (!posts.length) return [];
   const ids = posts.map((p) => p.id);
   const terms = await rows<TermRef & { post_id: number }>(db,
@@ -36,18 +36,18 @@ export async function listPage(db: D1Like, type: string, page: number) {
   const per = isListType(type) ? PER_PAGE[type] : 12;
   const total = (await one<{ c: number }>(db, "SELECT COUNT(*) c FROM posts p WHERE p.type=? AND p.status='publish'", type))?.c ?? 0;
   const posts = await rows<PostRow>(db,
-    `SELECT ${COLS} FROM posts p WHERE p.type=? AND p.status='publish' ORDER BY p.published_at DESC, p.wp_id ASC LIMIT ? OFFSET ?`, type, per, (Math.max(1, page) - 1) * per);
+    `SELECT ${POST_COLS} FROM posts p WHERE p.type=? AND p.status='publish' ORDER BY p.published_at DESC, p.wp_id ASC LIMIT ? OFFSET ?`, type, per, (Math.max(1, page) - 1) * per);
   return { posts: await decorate(db, posts), total, pages: Math.max(1, Math.ceil(total / per)) };
 }
 
 export async function latest(db: D1Like, type: string, n: number): Promise<CardPost[]> {
   return decorate(db, await rows<PostRow>(db,
-    `SELECT ${COLS} FROM posts p WHERE p.type=? AND p.status='publish' ORDER BY p.published_at DESC, p.wp_id ASC LIMIT ?`, type, n));
+    `SELECT ${POST_COLS} FROM posts p WHERE p.type=? AND p.status='publish' ORDER BY p.published_at DESC, p.wp_id ASC LIMIT ?`, type, n));
 }
 
 export async function featuredWorks(db: D1Like, n = 4): Promise<CardPost[]> {
   const flagged = await rows<PostRow>(db,
-    `SELECT ${COLS} FROM posts p JOIN post_meta m ON m.post_id=p.id AND m.key='is_featured'
+    `SELECT ${POST_COLS} FROM posts p JOIN post_meta m ON m.post_id=p.id AND m.key='is_featured'
      WHERE p.type='works' AND p.status='publish' AND m.value IN ('"1"','1','true') ORDER BY p.published_at DESC, p.id DESC LIMIT ?`, n);
   return flagged.length ? decorate(db, flagged) : latest(db, "works", n);
 }
@@ -64,12 +64,12 @@ export async function allSkills(db: D1Like): Promise<TermRef[]> {
 
 export async function ranking(db: D1Like, n = 5): Promise<CardPost[]> {
   return decorate(db, await rows<PostRow>(db,
-    `SELECT ${COLS} FROM posts p JOIN views v ON v.post_id=p.id WHERE p.type IN ('works','column') AND p.status='publish' ORDER BY v.count DESC, p.id LIMIT ?`, n));
+    `SELECT ${POST_COLS} FROM posts p JOIN views v ON v.post_id=p.id WHERE p.type IN ('works','column') AND p.status='publish' ORDER BY v.count DESC, p.id LIMIT ?`, n));
 }
 
 export async function relatedByTerm(db: D1Like, post: { id: number; type: string }, taxonomy: string, n = 3): Promise<CardPost[]> {
   return decorate(db, await rows<PostRow>(db,
-    `SELECT DISTINCT ${COLS} FROM posts p JOIN post_terms pt ON pt.post_id=p.id JOIN terms t ON t.id=pt.term_id
+    `SELECT DISTINCT ${POST_COLS} FROM posts p JOIN post_terms pt ON pt.post_id=p.id JOIN terms t ON t.id=pt.term_id
      WHERE p.type=? AND p.status='publish' AND p.id<>? AND t.taxonomy=?
        AND t.id IN (SELECT pt2.term_id FROM post_terms pt2 JOIN terms t2 ON t2.id=pt2.term_id WHERE pt2.post_id=? AND t2.taxonomy=?)
      ORDER BY p.published_at DESC LIMIT ?`, post.type, post.id, taxonomy, post.id, taxonomy, n));
@@ -81,7 +81,7 @@ export const termBySlug = (db: D1Like, taxonomy: string, slug: string) =>
 export async function listByTerm(db: D1Like, taxonomy: string, slug: string, page: number, perPage: number) {
   const from = `FROM posts p JOIN post_terms pt ON pt.post_id=p.id JOIN terms t ON t.id=pt.term_id WHERE t.taxonomy=? AND t.slug=? AND p.status='publish'`;
   const total = (await one<{ c: number }>(db, `SELECT COUNT(*) c ${from}`, taxonomy, slug))?.c ?? 0;
-  const posts = await rows<PostRow>(db, `SELECT ${COLS} ${from} ORDER BY p.published_at DESC, p.wp_id ASC LIMIT ? OFFSET ?`, taxonomy, slug, perPage, (Math.max(1, page) - 1) * perPage);
+  const posts = await rows<PostRow>(db, `SELECT ${POST_COLS} ${from} ORDER BY p.published_at DESC, p.wp_id ASC LIMIT ? OFFSET ?`, taxonomy, slug, perPage, (Math.max(1, page) - 1) * perPage);
   return { posts: await decorate(db, posts), total, pages: Math.max(1, Math.ceil(total / perPage)) };
 }
 
@@ -128,7 +128,7 @@ export async function loadTermPage(db: D1Like, taxonomy: string, slug: string, p
 }
 
 export interface SitemapRow { path: string; lastmod?: string; alt: { ja: string; en: string } }
-const PAGE_WHITELIST = ["profile", "about", "privacy", "contact"];
+const PAGE_WHITELIST = ["profile", "about", "privacy", "contact", "searches"];
 const enc = (...s: string[]) => "/" + s.map((x) => encodeURIComponent(x) + "/").join("");
 export async function sitemapEntries(db: D1Like): Promise<SitemapRow[]> {
   const neutral: { path: string; lastmod?: string }[] = [{ path: "/" }];

@@ -70,3 +70,22 @@ test("verifyTurnstile posts secret/response/ip as form data and returns the succ
   expect(await verifyTurnstile({ token: "x".repeat(3000), secret: "sec", fetcher: f(true) })).toBe(false);
   expect(await verifyTurnstile({ token: "tok", secret: "sec", fetcher: (async () => { throw new Error("net"); }) as unknown as typeof fetch })).toBe(false);
 });
+
+// --- security review regressions ---
+import { ipBucket } from "../src/lib/contact.ts";
+test("email validation is strict ASCII: no mailto parameter injection, no addresses the mail service would reject", () => {
+  const bad = ["x?bcc=evil@atk.com", "x?bcc=evil%40atk.com&body=hi@example.com", "a@b..com", "a@-b.com", "a@b-.com", "テスト@例え.jp", '"a b"@x.com', "a..b@x.com", ".a@x.com", "a.@x.com", "a".repeat(65) + "@x.com", "a@b.c", "a@b", "a@b.com?x=1", "a@b.com#frag", "a&b@x.com", "a/b@x.com", "a@" + "b".repeat(64) + ".com"];
+  for (const email of bad) expect(validateContact({ ...ok, email }).ok, email).toBe(false);
+  for (const email of ["taro.yamada+news@sub.example.co.jp", "a@b.io", "A_B-c%d@example.com", "x@xn--r8jz45g.jp"]) expect(validateContact({ ...ok, email }).ok, email).toBe(true);
+});
+test("bidi/zero-width/format characters are stripped from single-line fields (no subject/list spoofing)", () => {
+  const r = validateContact({ ...ok, name: "n‮evil​⁦x⁩﻿", company: "c‏؜" });
+  expect(r.ok).toBe(true); if (r.ok) { expect(r.value.name).toBe("nevilx"); expect(r.value.company).toBe("c"); }
+});
+test("ipBucket groups IPv6 by /64 and leaves IPv4 alone", () => {
+  expect(ipBucket("203.0.113.9")).toBe("203.0.113.9");
+  expect(ipBucket("2001:db8:1:2:aaaa:bbbb:cccc:dddd")).toBe("2001:db8:1:2");
+  expect(ipBucket("2001:db8::1")).toBe("2001:db8:0:0");
+  expect(ipBucket("::1")).toBe("0:0:0:0");
+  expect(ipBucket("")).toBe("");
+});

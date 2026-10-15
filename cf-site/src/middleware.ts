@@ -32,5 +32,8 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
   const first = ctx.locals.lang === undefined;
   ctx.locals.lang ??= lang; // 書き換え再入場（Astro.rewrite）では最初の言語を保持
   if (first) ctx.locals.path = path; // 言語中立パス（hreflang・切替用）
+  // /?s=キーワード（フリーワード検索）は内部の /search/ へ書き換える（URLは変えない）。空のsはトップのまま
+  const isSearch = path === "/" && (ctx.url.searchParams.get("s") ?? "").trim() !== "";
+  if (isSearch && first) return guard(ctx.url.host, next("/search/" + ctx.url.search));
   return guard(ctx.url.host, lang === "en" && first ? next(path + ctx.url.search) : next());
 });

@@ -9,8 +9,11 @@ export type ContactResult = { ok: true; value: ContactClean } | { ok: false; err
 
 const CTRL = new RegExp("[\\u0000-\\u001f\\u007f-\\u009f]", "g");
 const CTRL_KEEP_NL = new RegExp("[\\u0000-\\u0008\\u000b\\u000c\\u000e-\\u001f\\u007f-\\u009f]", "g");
-const oneLine = (s: string) => s.replace(CTRL, " ").replace(/\s+/g, " ").trim();
-const EMAIL_RE = /^[^\s@<>()[\]\\,;:"]+@[^\s@<>()[\]\\,;:"]+\.[^\s@<>()[\]\\,;:"]{2,}$/;
+const FORMAT_CHARS = new RegExp("[\\p{Cf}]", "gu"); // 双方向制御・ゼロ幅など（件名や一覧の表示を偽装される）
+const oneLine = (s: string) => s.replace(FORMAT_CHARS, "").replace(CTRL, " ").replace(/\s+/g, " ").trim();
+// 厳密なASCIIのみ（mailto:のパラメータ注入・メールサービスに拒否されるアドレスを入口で排除。IDNはpunycode表記で受け付ける）
+const EMAIL_RE = /^[A-Za-z0-9._%+-]{1,64}@(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,24}$/;
+const emailOk = (e: string) => e.length <= 254 && EMAIL_RE.test(e) && !/(?:^\.|\.\.|\.@)/.test(e);
 
 const MSG = {
   ja: { name: "氏名を入力してください（100文字以内）", email: "正しいメールアドレスを入力してください", company: "会社名・所属は100文字以内で入力してください", kind: "お問い合わせ種別を選択してください", message: "お問い合わせ内容を入力してください（5000文字以内）", consent: "プライバシーポリシーへの同意が必要です", body: "入力内容を確認してください" },
@@ -28,7 +31,7 @@ export function validateContact(raw: unknown): ContactResult {
   const name = oneLine(str(r.name));
   if (!name || name.length > 100) errors.name = m.name;
   const email = str(r.email).trim().toLowerCase();
-  if (!email || email.length > 254 || CTRL.test(email) || !EMAIL_RE.test(email)) errors.email = m.email;
+  if (!email || !emailOk(email)) errors.email = m.email;
   const company = oneLine(str(r.company));
   if (company.length > 100) errors.company = m.company;
   const kindRaw = str(r.kind).trim();
@@ -62,6 +65,23 @@ export function buildAutoReply(c: Pick<ContactClean, "lang">): { subject: string
   }
   const text = `お問い合わせありがとうございます。\n\nメッセージを受け付けました。内容を確認のうえ、数日を目安に折り返しご連絡いたします。\n\n※このメールは自動送信です。返信はお控えください。\n※心当たりのない場合は、このメールを破棄してください。\n\n小林慎之助\nhttps://shinnosuke-kobayashi.jp/`;
   return { subject: "お問い合わせを受け付けました", text, html: `<p>${esc(text).replace(/\n\n/g, "</p><p>").replace(/\n/g, "<br>")}</p>` };
+}
+
+/** 自動返信の上限用に正規化したアドレス（+タグと gmail のドットを無視） */
+export function emailKey(email: string): string {
+  let [local, domain] = email.toLowerCase().split("@");
+  local = local.split("+")[0];
+  if (domain === "gmail.com" || domain === "googlemail.com") { local = local.replace(/\./g, ""); domain = "gmail.com"; }
+  return `${local}@${domain}`;
+}
+
+/** IPv6 は /64 単位（クライアントは自由に下位64bitを変えられる）、IPv4 はそのまま */
+export function ipBucket(ip: string): string {
+  if (!ip.includes(":")) return ip;
+  const [head, tail = ""] = ip.split("::");
+  const h = head ? head.split(":") : [], t = tail ? tail.split(":") : [];
+  const groups = ip.includes("::") ? [...h, ...Array(Math.max(0, 8 - h.length - t.length)).fill("0"), ...t] : h;
+  return groups.slice(0, 4).map((g) => g.replace(/^0+(?=.)/, "") || "0").join(":");
 }
 
 export async function hashIp(ip: string, salt: string): Promise<string> {

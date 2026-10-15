@@ -97,6 +97,7 @@ export function robotsTxt(staging: boolean): string {
   if (staging) return "User-agent: *\nDisallow: /\n";
   let out = "User-agent: *\nAllow: /\nDisallow: /admin/\n\n# AIクローラーを明示的に許可（AI検索・アシスタントからの参照を歓迎）\n";
   for (const b of AI_BOTS) out += `User-agent: ${b}\nAllow: /\n\n`;
+  out += "# 検索結果ページはインデックスさせない\nDisallow: /search/\nDisallow: /*?s=\n\n";
   out += `# LLM向けサイト概要: ${SITE_URL}/llms.txt\nSitemap: ${SITE_URL}/sitemap.xml\n`;
   return out;
 }

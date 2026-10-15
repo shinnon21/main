@@ -1,0 +1,47 @@
+---
+import Layout from "../components/Layout.astro";
+import PageHero from "../components/PageHero.astro";
+import ColumnCard from "../components/ColumnCard.astro";
+import Pagination from "../components/Pagination.astro";
+import SideRanking from "../components/SideRanking.astro";
+import { getEnv } from "../lib/env.ts";
+import { ranking } from "../lib/queries.ts";
+import { parseSearchParams, searchPosts } from "../lib/search.ts";
+import { docTitle } from "../lib/format.ts";
+import { t } from "../lib/i18n.ts";
+import { l } from "../lib/lang.ts";
+
+// /?s=キーワード はミドルウェアがこのルートへ内部書き換えする（URLは /?s= のまま）。結果ページは noindex
+const lang = Astro.locals.lang ?? "ja";
+const db = getEnv().DB;
+const p = parseSearchParams(new URLSearchParams([["kw", Astro.url.searchParams.get("s") ?? ""], ["page", Astro.url.searchParams.get("page") ?? "1"]]));
+const data = p.kw ? await searchPosts(db, { ...p, types: [], skills: [], from: "", to: "", sort: "date" }, lang) : { posts: [], total: 0, pages: 1 };
+const rank = await ranking(db, 5);
+const heading = p.kw ? t(lang, `「${p.kw}」の検索結果`, `Search results for “${p.kw}”`) : t(lang, "検索", "Search");
+const pageUrl = (n: number) => `${l(lang, "/")}?s=${encodeURIComponent(p.kw)}${n > 1 ? `&page=${n}` : ""}`;
+---
+<Layout title={docTitle(heading, lang)} lang={lang} pair={false} noindex>
+  <PageHero label="search" title={heading} crumbs={[{ label: t(lang, "検索結果", "Search results") }]} lang={lang} />
+  <div class="sec">
+    <div class="container col-wrap">
+      <div>
+        {data.posts.length > 0 ? (
+          <>
+            <p class="result-count">{t(lang, `全 ${data.total} 件`, `${data.total} results`)}</p>
+            {data.posts.map((post) => <ColumnCard post={post} lang={lang} />)}
+            <Pagination basePath={pageUrl(1)} current={p.page} total={data.pages} hrefFor={pageUrl} />
+          </>
+        ) : (
+          <div class="notfound" style="padding:60px 24px">
+            <p>{p.kw ? t(lang, `「${p.kw}」に一致するコンテンツが見つかりませんでした。`, `No content matched “${p.kw}”.`) : t(lang, "検索キーワードを入力してください。", "Please enter a keyword.")}</p>
+            <div class="links">
+              <a class="btn ghost sm" href={l(lang, "/searches/")}>{t(lang, "条件から探す", "Advanced search")}</a>
+              <a class="btn ghost sm" href={l(lang, "/works/")}>{t(lang, "実績一覧へ", "View works")}</a>
+            </div>
+          </div>
+        )}
+      </div>
+      <aside><SideRanking items={rank} lang={lang} /></aside>
+    </div>
+  </div>
+</Layout>

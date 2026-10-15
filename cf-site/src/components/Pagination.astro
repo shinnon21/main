@@ -1,9 +1,9 @@
 ---
 import { paginationModel } from "../lib/format.ts";
-interface Props { basePath: string; current: number; total: number }
-const { basePath, current, total } = Astro.props;
+interface Props { basePath: string; current: number; total: number; hrefFor?: (n: number) => string }
+const { basePath, current, total, hrefFor } = Astro.props;
 const items = paginationModel(current, total);
-const href = (n: number) => (n === 1 ? basePath : `${basePath}page/${n}/`);
+const href = (n: number) => (hrefFor ? hrefFor(n) : n === 1 ? basePath : `${basePath}page/${n}/`);
 ---
 {items.length > 0 && (
   <div class="pagination"><div class="nav-links">

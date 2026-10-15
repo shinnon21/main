@@ -14,7 +14,7 @@ const subject = encodeURIComponent(`Re: ${c.kind}`);
   <div class="card" id="contact" data-id={c.id}>
     <p><strong>{c.name}</strong>{c.company && ` ／ ${c.company}`}</p>
     <p>種別: {c.kind}（{c.lang}） ／ 受信: {c.created_at.slice(0, 19)} UTC ／ 状態: <span class={`badge ${c.status === "spam" ? "trash" : ""}`} id="statusBadge">{c.status}</span></p>
-    <p>メール: <a href={`mailto:${c.email}?subject=${subject}`}>{c.email}</a>（クリックで返信メールを作成）</p>
+    <p>メール: <a href={`mailto:${encodeURI(c.email)}?subject=${subject}`}>{c.email}</a>（クリックで返信メールを作成）</p>
     <p style="font-size:12px;color:#6a6a6a">メール通知: {c.notify_status}{c.notify_error && ` ／ ${c.notify_error}`}</p>
     <div style="white-space:pre-wrap;border-left:4px solid #C22740;padding:6px 14px;background:#faf8f9;border-radius:6px">{c.message}</div>
     <div class="bar" style="margin-top:16px">

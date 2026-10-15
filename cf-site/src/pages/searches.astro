@@ -1,0 +1,87 @@
+---
+import Layout from "../components/Layout.astro";
+import PageHero from "../components/PageHero.astro";
+import ColumnCard from "../components/ColumnCard.astro";
+import Pagination from "../components/Pagination.astro";
+import { getEnv } from "../lib/env.ts";
+import { allSkills } from "../lib/queries.ts";
+import { monthOptions, parseSearchParams, searchPosts } from "../lib/search.ts";
+import { termName } from "../lib/l10n.ts";
+import { docTitle } from "../lib/format.ts";
+import { t } from "../lib/i18n.ts";
+import { l } from "../lib/lang.ts";
+
+const lang = Astro.locals.lang ?? "ja";
+const db = getEnv().DB;
+const p = parseSearchParams(Astro.url.searchParams);
+const skills = await allSkills(db);
+const months = monthOptions(new Date(), 48);
+const monthLabel = (m: string) => (lang === "en" ? m : m.replace("-", "年") + "月");
+const base = l(lang, "/searches/");
+const qs = (over: Record<string, string | number | null>) => {
+  const u = new URLSearchParams();
+  if (p.kw) u.set("kw", p.kw); if (p.from) u.set("from", p.from); if (p.to) u.set("to", p.to);
+  for (const x of p.types) u.append("types[]", x); for (const x of p.skills) u.append("skills[]", x);
+  u.set("sort", p.sort);
+  for (const [k, v] of Object.entries(over)) { if (v === null) u.delete(k); else u.set(k, String(v)); }
+  return `${base}?${u.toString()}`;
+};
+const data = p.did ? await searchPosts(db, p, lang) : null;
+const title = t(lang, "条件から探す", "Advanced Search");
+const typeLabels: [string, string][] = [["works", t(lang, "実績", "Works")], ["column", t(lang, "コラム", "Column")], ["news", t(lang, "お知らせ", "News")]];
+---
+<Layout title={docTitle(title, lang)} lang={lang} pair={!p.did} noindex={p.did}>
+  <PageHero label="search" title={title} crumbs={[{ label: title }]} lang={lang} />
+  <div class="sec">
+    <div class="container">
+      <form class="filter-box" method="get" action={base}>
+        <div class="filter-row">
+          <span class="f-lbl">{t(lang, "フリーワード", "Keyword")}</span>
+          <div class="f-body"><input type="text" name="kw" value={p.kw} maxlength="100" placeholder={t(lang, "キーワードを入力", "Enter keywords")} /></div>
+        </div>
+        <div class="filter-row">
+          <span class="f-lbl">{t(lang, "期間", "Period")}</span>
+          <div class="f-body">
+            <select name="from"><option value="">{t(lang, "年月を選択", "Select month")}</option>{months.map((m) => <option value={m} selected={p.from === m}>{monthLabel(m)}</option>)}</select>
+            {t(lang, "〜", "–")}
+            <select name="to"><option value="">{t(lang, "年月を選択", "Select month")}</option>{months.map((m) => <option value={m} selected={p.to === m}>{monthLabel(m)}</option>)}</select>
+          </div>
+        </div>
+        <div class="filter-row">
+          <span class="f-lbl">{t(lang, "種別", "Type")}</span>
+          <div class="f-body">{typeLabels.map(([v, label]) => <label class="check-pill"><input type="checkbox" name="types[]" value={v} checked={p.types.includes(v)} />{label}</label>)}</div>
+        </div>
+        <div class="filter-row">
+          <span class="f-lbl">{t(lang, "キーワードタグ", "Tags")}</span>
+          <div class="f-body">
+            {skills.map((s, i) => <label class={`check-pill${i >= 10 ? " skill-extra" : ""}`}><input type="checkbox" name="skills[]" value={s.slug} checked={p.skills.includes(s.slug)} /># {termName(lang, s.name)}</label>)}
+            {skills.length > 10 && <div style="margin-top:6px"><button type="button" class="toggle-skills" id="toggleSkills" data-open={t(lang, "すべて表示する ▼", "Show all ▼")} data-close={t(lang, "閉じる ▲", "Show less ▲")}>{t(lang, "すべて表示する ▼", "Show all ▼")}</button></div>}
+          </div>
+        </div>
+        <input type="hidden" name="sort" value={p.sort} />
+        <div class="filter-actions">
+          <button type="submit" class="btn primary">{t(lang, "この条件で探す", "Search")}</button>
+          <a class="btn ghost" href={base}>{t(lang, "条件をリセット", "Reset")}</a>
+        </div>
+      </form>
+
+      {data && (
+        <>
+          <div class="sort-tabs">
+            <a href={qs({ sort: "date", page: null })} class={p.sort === "date" ? "on" : ""}>{t(lang, "公開順", "By date")}</a>
+            <a href={qs({ sort: "modified", page: null })} class={p.sort === "modified" ? "on" : ""}>{t(lang, "更新順", "By updated")}</a>
+          </div>
+          <p class="result-count">{t(lang, `全 ${data.total} 件`, `${data.total} results`)}</p>
+          {data.posts.length > 0 ? (
+            <>
+              {data.posts.map((post) => <ColumnCard post={post} lang={lang} />)}
+              <Pagination basePath={base} current={p.page} total={data.pages} hrefFor={(n) => qs({ page: n > 1 ? n : null })} />
+            </>
+          ) : (
+            <div class="notfound" style="padding:60px 24px"><p set:html={t(lang, "条件に一致するコンテンツが見つかりませんでした。<br>条件を変えて再度お試しください。", "No content matched your criteria.<br>Please adjust the filters and try again.")} /></div>
+          )}
+        </>
+      )}
+    </div>
+  </div>
+</Layout>

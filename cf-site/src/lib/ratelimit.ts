@@ -1,7 +1,7 @@
 export interface KvLike { get(key: string): Promise<string | null>; put(key: string, value: string, opts?: { expirationTtl?: number }): Promise<void> }
 
 /** 固定ウィンドウのレート制限（KV）。ブロックされたリクエストはカウントしない。KV障害時は fail open（インフラ障害で正規ユーザーを締め出さない） */
-export async function rateLimit(kv: KvLike, key: string, limit: number, windowSec: number, nowMs = Date.now()): Promise<{ allowed: boolean; remaining: number }> {
+export async function rateLimit(kv: KvLike, key: string, limit: number, windowSec: number, nowMs = Date.now(), opts: { failOpen?: boolean } = {}): Promise<{ allowed: boolean; remaining: number }> {
   try {
     const raw = await kv.get(`rl:${key}`);
     let n = 0, exp = nowMs + windowSec * 1000;
@@ -10,6 +10,8 @@ export async function rateLimit(kv: KvLike, key: string, limit: number, windowSe
     await kv.put(`rl:${key}`, `${n + 1}|${exp}`, { expirationTtl: Math.max(60, Math.ceil((exp - nowMs) / 1000)) });
     return { allowed: true, remaining: limit - n - 1 };
   } catch {
-    return { allowed: true, remaining: limit };
+    // 既定は fail open（インフラ障害で正規ユーザーを締め出さない）。自動返信のように「送らなくても困らない」処理は failOpen:false で閉じる
+    const open = opts.failOpen !== false;
+    return { allowed: open, remaining: open ? limit : 0 };
   }
 }

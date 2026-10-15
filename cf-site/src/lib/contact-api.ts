@@ -1,5 +1,5 @@
 import type { D1Like } from "./d1.ts";
-import { buildAutoReply, buildNotification, hashIp, validateContact, type ContactClean } from "./contact.ts";
+import { buildAutoReply, buildNotification, emailKey, hashIp, ipBucket, validateContact, type ContactClean } from "./contact.ts";
 import { rateLimit, type KvLike } from "./ratelimit.ts";
 import { verifyTurnstile } from "./turnstile.ts";
 
@@ -24,27 +24,26 @@ export async function handleContactSubmit(req: Request, deps: ContactDeps): Prom
     if (req.headers.get("Origin") !== url.origin) return json({ error: "bad_origin" }, 403);
     if (!/^application\/json(\s*;|$)/i.test(req.headers.get("Content-Type") ?? "")) return json({ error: "unsupported_media_type" }, 415);
     if (Number(req.headers.get("Content-Length")) > MAX_BODY) return json({ error: "too_large" }, 413);
-    const text = await req.text();
-    if (text.length > MAX_BODY) return json({ error: "too_large" }, 413);
+    const text = await readLimited(req, MAX_BODY);
+    if (text === null) return json({ error: "too_large" }, 413);
     let raw: unknown;
     try { raw = JSON.parse(text); } catch { return json({ error: "invalid_json" }, 400); }
 
     const secret = deps.cfg.turnstileSecret?.trim();
     if (!secret) return json({ error: "not_configured" }, 503);
 
-    const ip = req.headers.get("CF-Connecting-IP") ?? "";
-    const ipKey = (await hashIp(ip, deps.cfg.ipSalt)) || "unknown";
-    // 事前チェックはIP単位のみ。全体の上限は「チャレンジを通過した本物の送信」だけを数える（検証失敗の大量リクエストで正規利用者を締め出されないように）
-    const [h, d] = await Promise.all([rateLimit(deps.kv, `contact:h:${ipKey}`, 5, 3600), rateLimit(deps.kv, `contact:d:${ipKey}`, 20, 86400)]);
-    if (!h.allowed || !d.allowed) return json({ error: "rate_limited" }, 429);
-
     const v = validateContact(raw);
     if (!v.ok) return json({ errors: v.errors }, 400);
     if (v.value.bot) return json({ ok: true }); // ハニーポット: ボットには成功に見せて何も保存・送信しない
 
+    const ip = req.headers.get("CF-Connecting-IP") ?? "";
     const token = typeof (raw as Record<string, unknown>).turnstile === "string" ? ((raw as Record<string, unknown>).turnstile as string) : "";
     if (!(await (deps.verify ?? verifyTurnstile)({ token, secret, ip }))) return json({ error: "challenge_failed" }, 400);
 
+    // レート制限は「検証を通過した本物の送信」だけを数える（入力ミス・検証失敗の大量リクエストでKVを消費させず、正規利用者も締め出されない）
+    const ipKey = (await hashIp(ipBucket(ip), deps.cfg.ipSalt)) || "unknown";
+    const [h, d] = await Promise.all([rateLimit(deps.kv, `contact:h:${ipKey}`, 5, 3600), rateLimit(deps.kv, `contact:d:${ipKey}`, 20, 86400)]);
+    if (!h.allowed || !d.allowed) return json({ error: "rate_limited" }, 429);
     if (!(await rateLimit(deps.kv, "contact:global", 200, 3600)).allowed) return json({ error: "rate_limited" }, 429);
 
     const c = v.value;
@@ -65,14 +64,31 @@ async function notify(deps: ContactDeps, id: number, c: ContactClean): Promise<v
   if (!deps.mail) { await set("disabled"); return; }
   try {
     const n = buildNotification(c, id, deps.cfg.siteUrl);
-    await deps.mail.send({ to: deps.cfg.to, from: deps.cfg.from, replyTo: c.email, ...n });
-    // 自動返信は同一アドレスに1日1通まで（フォームを使った第三者へのメール爆撃を防ぐ）
-    if ((await rateLimit(deps.kv, `autoreply:${c.email}`, 1, 86400)).allowed && (await rateLimit(deps.kv, "autoreply:global", 50, 86400)).allowed) {
+    try { await deps.mail.send({ to: deps.cfg.to, from: deps.cfg.from, replyTo: c.email, ...n }); }
+    catch { await deps.mail.send({ to: deps.cfg.to, from: deps.cfg.from, ...n }); } // reply-to が原因で拒否されても運営者への通知は必ず届ける（送信者のメールは本文にある）
+    // 自動返信は同一アドレス（+タグ・gmailのドットは同一視）に1日1通・全体で1日50通まで。KV障害時は送らない（フォームを使った第三者へのメール爆撃を防ぐ）
+    const strict = { failOpen: false };
+    if ((await rateLimit(deps.kv, `autoreply:${emailKey(c.email)}`, 1, 86400, Date.now(), strict)).allowed && (await rateLimit(deps.kv, "autoreply:global", 50, 86400, Date.now(), strict)).allowed) {
       try { await deps.mail.send({ to: c.email, from: deps.cfg.from, ...buildAutoReply(c) }); } catch (e) { await set("sent", `autoreply: ${errText(e)}`); return; }
     }
     await set("sent");
   } catch (e) {
     await set("error", errText(e));
   }
+}
+/** ストリームを読みながらバイト数を制限する（Content-Length のないチャンク送信でも全量をバッファしない）。超過は null */
+async function readLimited(req: Request, max: number): Promise<string | null> {
+  if (!req.body) return "";
+  const reader = req.body.getReader();
+  const chunks: Uint8Array[] = []; let total = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > max) { await reader.cancel().catch(() => {}); return null; }
+    chunks.push(value);
+  }
+  const all = new Uint8Array(total); let o = 0; for (const c of chunks) { all.set(c, o); o += c.byteLength; }
+  return new TextDecoder().decode(all);
 }
 const errText = (e: unknown) => { const x = e as { code?: string; message?: string }; return `${x?.code ?? "ERR"}: ${x?.message ?? String(e)}`; };
