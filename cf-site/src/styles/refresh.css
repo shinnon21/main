@@ -75,6 +75,34 @@
 }
 .contact-cta{border-radius:var(--r-lg)}
 
+/* ===== 下層ページ共通（ページ見出し・詳細・サイドバー・絞り込み・プロフィール） ===== */
+.page-mv{border-bottom:1px solid var(--line)}
+@media (min-width:601px){
+  .page-mv{padding:104px 0 56px}
+  .page-mv .lbl{font-size:12.5px;letter-spacing:.26em}
+  .page-mv h1{font-size:clamp(40px,4.6vw,64px);line-height:1.2;letter-spacing:.01em;margin-top:10px}
+  .breadcrumbs{margin-top:22px}
+  .entry-wrap{padding:64px 72px;max-width:900px}
+  .entry-head h1{font-size:clamp(26px,2.8vw,38px);line-height:1.5}
+  .entry-content{line-height:2.05}
+  .profile-sec{padding:56px 64px;margin-bottom:28px}
+  .filter-box{padding:40px 44px}
+  .contact-form-wrap{padding:56px 64px}
+}
+.entry-wrap,.profile-sec,.filter-box,.side-box,.doc-card{box-shadow:none;border:1px solid var(--line);border-radius:var(--r-lg)}
+.side-box{border-radius:var(--r-md)}
+.entry-content h2{border-left-width:3px}
+.standfirst{font-size:16.5px;line-height:1.95}
+.kpi{border-radius:var(--r-md)}
+/* チップ類: ピル→角を少し丸めた小さなタグ（トップのボタンと揃える） */
+.chip{border-radius:6px;background:var(--tint-light);padding:3px 10px;font-weight:500}
+.chip:hover{background:var(--tint)}
+.check-pill{border-radius:8px}
+@media (min-width:901px){.sns-tiles{grid-template-columns:repeat(5,minmax(0,1fr))}}
+/* 一覧のページ送り・フッターの余白 */
+footer.site-footer{margin-top:104px}
+footer.site-footer .top{padding:88px 0 56px}
+
 /* ===== スクロールリビール（距離と時間をゆったり。上の.cardのtransitionに負けないよう最後に置く） ===== */
 .js-reveal,.card.js-reveal{opacity:0;transform:translateY(30px);transition:opacity .95s var(--ease),transform .95s var(--ease)}
 .js-reveal.in,.card.js-reveal.in{opacity:1;transform:none}
