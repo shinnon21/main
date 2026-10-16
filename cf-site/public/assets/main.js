@@ -42,7 +42,7 @@
   if (motionOk && 'IntersectionObserver' in window) {
     var revealTargets = document.querySelectorAll(
       '.sec-head, .featured .card, .grid3 .card, .news-list .news-item, .col-wrap .article,' +
-      ' .trust .container, .prof, .profile-sec, .contact-cta, .kpi-grid .kpi, .timeline .tl-item, .sns-tiles .sns-btn'
+      ' .prof, .profile-sec, .contact-cta, .kpi-grid .kpi, .timeline .tl-item, .sns-tiles .sns-btn'
     );
     if (revealTargets.length) {
       var io = new IntersectionObserver(function (entries) {

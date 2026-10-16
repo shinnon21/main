@@ -171,20 +171,3 @@ export async function feedPosts(db: D1Like, n: number) {
     "SELECT type,slug,title,excerpt,published_at FROM posts WHERE type IN ('works','column','news') AND status='publish' ORDER BY published_at DESC, id DESC LIMIT ?", n);
   return r.map((p) => ({ ...p, path: enc(p.type, p.slug) }));
 }
-
-/** 公開済み実績の取引先・関係組織名（重複は1件、新しい実績の順）。英語は client_name_en、空なら日本語名で代替 */
-export async function workClients(db: D1Like, lang: Lang, n: number): Promise<string[]> {
-  const r = await rows<{ ja: string | null; en: string | null }>(db,
-    `SELECT (SELECT value FROM post_meta WHERE post_id=p.id AND key='client_name') ja,
-            (SELECT value FROM post_meta WHERE post_id=p.id AND key='client_name_en') en
-     FROM posts p WHERE p.type='works' AND p.status='publish' ORDER BY p.published_at DESC, p.id DESC`);
-  const seen = new Set<string>(), out: string[] = [];
-  for (const x of r) {
-    const ja = parse(x.ja ?? '""').trim(), en = parse(x.en ?? '""').trim();
-    const name = (lang === "en" && en) || ja;
-    if (!name || seen.has(name)) continue;
-    seen.add(name); out.push(name);
-    if (out.length >= n) break;
-  }
-  return out;
-}

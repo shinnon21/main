@@ -66,14 +66,6 @@
 .news-list{background:transparent;box-shadow:none;border-radius:0;padding:0;border-top:1.5px solid var(--ink)}
 .news-item{padding:26px 0;font-size:16px}
 
-/* ===== 関わった組織（実績データから生成。静かな1帯） ===== */
-.trust{background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:60px 0}
-.trust .lbl{font-family:var(--font-en);font-size:12px;font-weight:800;letter-spacing:.26em;text-transform:lowercase;color:var(--crimson);margin-bottom:24px}
-.trust-row{display:flex;flex-wrap:wrap;gap:14px 0}
-.trust-row li{font-size:clamp(15px,1.5vw,19px);font-weight:700;color:var(--ink);line-height:1.6;padding:2px 28px 2px 0;margin-right:28px;border-right:1px solid var(--line)}
-.trust-row li:last-child{border-right:none;margin-right:0}
-.trust-note{margin-top:22px;font-size:13px;color:var(--gray)}
-
 /* ===== プロフィール／お問い合わせ ===== */
 .prof{box-shadow:none;border:1px solid var(--line);border-radius:var(--r-lg)}
 @media (min-width:601px){
