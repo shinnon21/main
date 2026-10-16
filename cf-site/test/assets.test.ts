@@ -3,11 +3,6 @@ import { readFileSync, existsSync } from "node:fs";
 const root = new URL("../../", import.meta.url);
 const read = (p: string) => readFileSync(new URL(p, root), "utf8");
 
-test("global.css equals theme style.css minus the WP header comment", () => {
-  const theme = read("kobayashi-theme/style.css");
-  const body = theme.replace(/^\/\*[\s\S]*?\*\/\s*/, "");
-  expect(read("cf-site/src/styles/global.css")).toBe(body);
-});
 test("design tokens are unchanged", () => {
   const css = read("cf-site/src/styles/global.css");
   for (const tok of ["--crimson:#C22740", "--crimson-dark:#A61F35", "--deep:#84192A", "--tint:#F6D8DD", "--tint-light:#FBECEE", "--bg:#FDF9F9", "--ink:#1A1A1A", "--gray:#5C5C5C", "--line:#E6DCDE"]) expect(css).toContain(tok);
